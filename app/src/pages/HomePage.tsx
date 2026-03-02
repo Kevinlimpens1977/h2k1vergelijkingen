@@ -57,7 +57,7 @@ export default function HomePage() {
                 <div className="y-roadmap">
                     {CHAPTER_8_FLOW.map((step, idx) => {
                         const unlocked = devMode || (progress ? isStepUnlocked(step.id, progress) : false);
-                        const completed = progress ? isStepCompleted(step.id, progress) : false;
+                        const completed = unlocked && (progress ? isStepCompleted(step.id, progress) : false);
                         const active = unlocked && !completed;
 
                         return (
