@@ -1,0 +1,81 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './hooks/useAuth';
+import { DevModeProvider } from './context/DevModeContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import RequireUnlocked from './components/RequireUnlocked';
+import Chapter8Entry from './components/Chapter8Entry';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import HomePage from './pages/HomePage';
+import ParagraphPage from './pages/ParagraphPage';
+import SummaryPage from './pages/SummaryPage';
+import PracticePage from './pages/PracticePage';
+import PracticePage8_2 from './pages/PracticePage8_2';
+import BalanceGamePage from './pages/BalanceGamePage';
+import Intro8_1 from './features/section8-1-intro/routes/Intro8_1';
+import SpeedTest8_1 from './features/section8-1-intro/routes/SpeedTest8_1';
+import BalansBlitz8_2 from './pages/BalansBlitz8_2';
+import TermtrisPage from './features/termtris-8-3/TermtrisPage';
+
+/** Redirect away from auth pages if already logged in */
+function GuestRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (user) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <DevModeProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+            <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
+            <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+
+            {/* Chapter 8 entry — redirects to first incomplete step */}
+            <Route path="/hoofdstuk-8" element={<ProtectedRoute><Chapter8Entry /></ProtectedRoute>} />
+
+            {/* Paragraph pages (generic) */}
+            <Route path="/paragraph/:id" element={<ProtectedRoute><ParagraphPage /></ProtectedRoute>} />
+            <Route path="/summary" element={<ProtectedRoute><SummaryPage /></ProtectedRoute>} />
+
+            {/* §8.1 Intro — always unlocked (step 1) */}
+            <Route path="/8-1/intro" element={<ProtectedRoute><Intro8_1 /></ProtectedRoute>} />
+            <Route path="/8-1/speed-test" element={<ProtectedRoute><SpeedTest8_1 /></ProtectedRoute>} />
+
+            {/* §8.1 Practice — requires intro passed */}
+            <Route path="/practice/8_1" element={
+              <ProtectedRoute><RequireUnlocked stepId="8_1"><PracticePage /></RequireUnlocked></ProtectedRoute>
+            } />
+
+            {/* Balans Minigame — requires §8.1 completed */}
+            <Route path="/balance-game" element={
+              <ProtectedRoute><RequireUnlocked stepId="balance"><BalanceGamePage /></RequireUnlocked></ProtectedRoute>
+            } />
+
+            {/* §8.2 Practice — requires balance game completed */}
+            <Route path="/practice/8_2" element={
+              <ProtectedRoute><RequireUnlocked stepId="8_2"><PracticePage8_2 /></RequireUnlocked></ProtectedRoute>
+            } />
+
+            {/* §8.2 Balans Blitz — requires §8.2 practice completed */}
+            <Route path="/8-2/blitz" element={
+              <ProtectedRoute><RequireUnlocked stepId="8_2_blitz"><BalansBlitz8_2 /></RequireUnlocked></ProtectedRoute>
+            } />
+
+            {/* §8.3 Termtris — requires §8.2 Blitz passed */}
+            <Route path="/8-3/termtris" element={
+              <ProtectedRoute><RequireUnlocked stepId="8_3"><TermtrisPage /></RequireUnlocked></ProtectedRoute>
+            } />
+            <Route path="/8-3" element={<Navigate to="/8-3/termtris" replace />} />
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthProvider>
+      </DevModeProvider>
+    </BrowserRouter>
+  );
+}

@@ -1,0 +1,420 @@
+/* ══════════════════════════════════════════════════════
+   SHARED COMPONENTS — Youth Gamified Design System
+   ══════════════════════════════════════════════════════ */
+
+/* ── CARD / PANEL ────────────────────────────────────── */
+
+.y-card {
+    background: var(--y-panel);
+    border-radius: var(--y-radius);
+    border: 1px solid var(--y-outline);
+    box-shadow: var(--y-shadow);
+    padding: 1.25rem;
+    transition: box-shadow var(--y-speed) var(--y-ease),
+        transform var(--y-speed) var(--y-ease);
+}
+
+.y-card:hover {
+    box-shadow: var(--y-shadow-lg);
+}
+
+.y-card--accent {
+    border-top: 3px solid var(--y-primary);
+}
+
+.y-card--cyan {
+    border-top-color: var(--y-cyan);
+}
+
+.y-card--pink {
+    border-top-color: var(--y-pink);
+}
+
+.y-card--lime {
+    border-top-color: var(--y-lime);
+}
+
+.y-card--amber {
+    border-top-color: var(--y-amber);
+}
+
+/* ── BUTTON — PRIMARY ────────────────────────────────── */
+
+.y-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.7rem 1.5rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: transform var(--y-speed) var(--y-ease),
+        box-shadow var(--y-speed) var(--y-ease);
+    min-height: 44px;
+    /* accessibility */
+}
+
+.y-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.y-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.y-btn--primary {
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    color: var(--y-text-inv);
+    box-shadow: 0 4px 16px var(--y-primary-glow);
+}
+
+.y-btn--primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px var(--y-primary-glow);
+}
+
+.y-btn--secondary {
+    background: var(--y-panel);
+    color: var(--y-primary);
+    border: 2px solid var(--y-outline);
+}
+
+.y-btn--secondary:hover:not(:disabled) {
+    border-color: var(--y-primary);
+    background: rgba(108, 92, 231, 0.04);
+}
+
+.y-btn--ghost {
+    background: none;
+    color: var(--y-muted);
+    border: 1px solid transparent;
+}
+
+.y-btn--ghost:hover:not(:disabled) {
+    color: var(--y-primary);
+    background: rgba(108, 92, 231, 0.04);
+}
+
+.y-btn--success {
+    background: linear-gradient(135deg, var(--y-success), #55efc4);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0, 184, 148, 0.2);
+}
+
+.y-btn--danger {
+    background: linear-gradient(135deg, var(--y-danger), #fab1a0);
+    color: #fff;
+}
+
+.y-btn--lg {
+    padding: 0.85rem 2.5rem;
+    font-size: 1.1rem;
+    border-radius: var(--y-radius);
+}
+
+.y-btn--full {
+    width: 100%;
+}
+
+/* ── BADGE ───────────────────────────────────────────── */
+
+.y-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+}
+
+.y-badge--locked {
+    background: rgba(100, 116, 139, 0.08);
+    color: var(--y-muted);
+}
+
+.y-badge--active {
+    background: rgba(108, 92, 231, 0.1);
+    color: var(--y-primary);
+}
+
+.y-badge--done {
+    background: rgba(0, 184, 148, 0.1);
+    color: var(--y-success);
+}
+
+.y-badge--warning {
+    background: rgba(253, 203, 110, 0.15);
+    color: #e17055;
+}
+
+/* ── PROGRESS BAR (XP VIBE) ──────────────────────────── */
+
+.y-progress {
+    height: 8px;
+    background: rgba(108, 92, 231, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.y-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--y-primary), var(--y-cyan));
+    border-radius: 4px;
+    transition: width 0.4s var(--y-ease);
+}
+
+/* ── TOAST (ACHIEVEMENT) ─────────────────────────────── */
+
+.y-toast {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120%);
+    padding: 0.65rem 1.5rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 0.9rem;
+    font-weight: 700;
+    z-index: 9999;
+    pointer-events: none;
+    animation: y-toast-in 0.3s var(--y-ease) forwards;
+    box-shadow: var(--y-shadow-lg);
+}
+
+.y-toast--success {
+    background: linear-gradient(135deg, var(--y-success), #55efc4);
+    color: #fff;
+}
+
+.y-toast--info {
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    color: #fff;
+}
+
+.y-toast--warning {
+    background: linear-gradient(135deg, var(--y-warning), #ffeaa7);
+    color: var(--y-text);
+}
+
+@keyframes y-toast-in {
+    0% {
+        transform: translateX(-50%) translateY(-120%);
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ── ROADMAP (MISSION SELECT) ────────────────────────── */
+
+.y-roadmap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.y-roadmap-step {
+    position: relative;
+}
+
+.y-roadmap-connector {
+    width: 3px;
+    height: 16px;
+    margin: 0 auto;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--y-outline), rgba(108, 92, 231, 0.08));
+}
+
+.y-roadmap-connector--done {
+    background: linear-gradient(180deg, var(--y-success), rgba(0, 184, 148, 0.15));
+}
+
+.y-roadmap-inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--y-radius);
+    background: var(--y-panel);
+    border: 1px solid var(--y-outline);
+    box-shadow: var(--y-shadow);
+    transition: all var(--y-speed) var(--y-ease);
+}
+
+/* active (next to do) */
+.y-roadmap-step--active .y-roadmap-inner {
+    border-color: var(--y-primary);
+    border-width: 2px;
+    box-shadow: 0 4px 20px var(--y-primary-glow);
+}
+
+/* completed */
+.y-roadmap-step--done .y-roadmap-inner {
+    border-color: rgba(0, 184, 148, 0.2);
+    background: rgba(0, 184, 148, 0.02);
+}
+
+/* locked */
+.y-roadmap-step--locked .y-roadmap-inner {
+    opacity: 0.55;
+}
+
+.y-roadmap-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+/* icon bubble colors */
+.y-roadmap-step:nth-child(1) .y-roadmap-icon {
+    background: rgba(108, 92, 231, 0.1);
+}
+
+.y-roadmap-step:nth-child(2) .y-roadmap-icon {
+    background: rgba(9, 132, 227, 0.1);
+}
+
+.y-roadmap-step:nth-child(3) .y-roadmap-icon {
+    background: rgba(0, 206, 201, 0.1);
+}
+
+.y-roadmap-step:nth-child(4) .y-roadmap-icon {
+    background: rgba(253, 121, 168, 0.1);
+}
+
+.y-roadmap-info {
+    flex: 1;
+}
+
+.y-roadmap-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--y-text);
+}
+
+.y-roadmap-sub {
+    font-size: 0.78rem;
+    color: var(--y-muted);
+    margin-top: 0.1rem;
+}
+
+.y-roadmap-action {
+    min-width: 110px;
+    text-align: right;
+}
+
+.y-roadmap-btn {
+    padding: 0.5rem 1.2rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    color: var(--y-text-inv);
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    box-shadow: 0 3px 12px var(--y-primary-glow);
+    transition: transform var(--y-speed) var(--y-ease),
+        box-shadow var(--y-speed) var(--y-ease);
+    min-height: 40px;
+}
+
+.y-roadmap-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 18px var(--y-primary-glow);
+}
+
+.y-roadmap-btn:active {
+    transform: scale(0.97);
+}
+
+/* ── LOGOUT ──────────────────────────────────────────── */
+
+.y-btn-logout {
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid rgba(225, 112, 85, 0.2);
+    background: rgba(225, 112, 85, 0.06);
+    color: var(--y-danger);
+    transition: background var(--y-speed) var(--y-ease);
+}
+
+.y-btn-logout:hover {
+    background: rgba(225, 112, 85, 0.12);
+}
+
+/* ── MISC UTILITIES ──────────────────────────────────── */
+
+.y-main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── KEYFRAMES ───────────────────────────────────────── */
+
+@keyframes y-pop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.06);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes y-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes y-glow-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 var(--y-primary-glow);
+    }
+
+    50% {
+        box-shadow: 0 0 0 6px var(--y-primary-glow);
+    }
+}
+
+/* focus ring */
+:focus-visible {
+    outline: none;
+    box-shadow: var(--y-glow);
+}

@@ -1,0 +1,627 @@
+/* ══════════════════════════════════════════════════════
+   Balans Minigame v3 — Token-Driven Layout System
+   3-Row Safe-Area Grid: Equation → Stage → Controls
+   Sizes scale with clamp() for 1366×768 → 1920×1080+
+   ══════════════════════════════════════════════════════ */
+
+/* ── LAYOUT TOKENS (single source of truth) ──────────── */
+
+.balance-main {
+    /* Spacing tokens */
+    --bm-top-safe: 0.5rem;
+    --bm-eq-height: clamp(56px, 7vh, 80px);
+    --bm-stage-gap: clamp(24px, 3.5vh, 44px);
+    --bm-stage-min-height: clamp(260px, 42vh, 460px);
+    --bm-bottom-safe: clamp(12px, 1.5vh, 20px);
+
+    /* Element sizing tokens */
+    --bm-tile-size: clamp(40px, 4.5vw, 56px);
+    --bm-marble-size: clamp(22px, 2.5vw, 32px);
+    --bm-font-scale: clamp(1.6rem, 3vw, 2.8rem);
+    --bm-chain-height: clamp(28px, 4vh, 48px);
+    --bm-beam-height: clamp(8px, 0.8vh, 12px);
+    --bm-fulcrum-scale: clamp(0.8, 0.8 + 0.4 * ((100vw - 1024px) / 896), 1.2);
+
+    /* Layout */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--bm-top-safe) 1.5rem var(--bm-bottom-safe);
+    gap: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── outer game layout (main + optional sidebar) ─────── */
+
+.bal-game-layout {
+    display: flex;
+    gap: 1.5rem;
+    width: 100%;
+    align-items: flex-start;
+    flex: 1;
+}
+
+/* ── 3-ROW SAFE-AREA GRID ────────────────────────────── */
+/*
+   Row A: Equation card       (auto height, centered)
+   Row B: Balance stage       (fills remaining, centered, contains all rotation)
+   Row C: Controls/feedback   (auto height, bottom)
+*/
+
+.bal-game-main {
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 0;
+    align-items: start;
+    justify-items: center;
+    width: 100%;
+    min-height: 0;
+    /* allow grid to shrink */
+}
+
+/* Row A — equation */
+.bal-row-equation {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-bottom: var(--bm-stage-gap);
+    z-index: 10;
+    /* always on top of beam */
+}
+
+/* Row B — balance stage */
+.bal-row-stage {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: var(--bm-stage-min-height);
+    position: relative;
+    /* Beam rotation NEVER escapes this row */
+    overflow: visible;
+}
+
+/* Row C — controls + feedback */
+.bal-row-controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+.bal-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+}
+
+/* ── mode select cards ───────────────────────────────── */
+
+.bal-mode-card {
+    border: none;
+    font-family: inherit;
+}
+
+.bal-mode-card:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--y-shadow-lg);
+}
+
+.bal-mode-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.bal-mode-emoji {
+    font-size: 2.5rem;
+}
+
+.bal-mode-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--y-text);
+}
+
+.bal-mode-sub {
+    font-size: 0.85rem;
+    color: var(--y-muted);
+}
+
+.bal-mode-details {
+    display: flex;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    color: var(--y-muted);
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--y-outline);
+}
+
+/* ── DEV chip ────────────────────────────────────────── */
+
+.bal-dev-chip {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #e17055, #d63031);
+    color: #fff;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════════════════════
+   ROW A — EQUATION CARD
+   ══════════════════════════════════════════════════════ */
+
+.bal-eq-card {
+    width: 100%;
+    max-width: 900px;
+    min-height: var(--bm-eq-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.5rem;
+    background: var(--y-panel);
+    border: 2px solid var(--y-outline);
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: var(--y-shadow);
+    transition: border-color 0.25s;
+    position: relative;
+    z-index: 10;
+}
+
+.bal-eq-card--warn {
+    border-color: var(--y-danger);
+    background: rgba(225, 112, 85, 0.03);
+}
+
+.bal-eq-text {
+    font-size: var(--bm-font-scale);
+    font-weight: 800;
+    color: var(--y-text);
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+}
+
+/* ══════════════════════════════════════════════════════
+   ROW B — REAL BALANCE SCALE
+   Beam tilts inside this bounded area.
+   ══════════════════════════════════════════════════════ */
+
+.bal-scale-container {
+    --tilt: 0deg;
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Extra top padding absorbs the upward swing of the tilted beam */
+    padding-top: clamp(10px, 1.5vh, 20px);
+}
+
+/* The entire beam group rotates around the beam center */
+.bal-beam-group {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 96%;
+    max-width: 1100px;
+    position: relative;
+    transform: rotate(var(--tilt));
+    transition: transform 0.4s cubic-bezier(0.34, 1.35, 0.64, 1);
+    transform-origin: center calc(var(--bm-beam-height) / 2);
+}
+
+/* Visible horizontal beam bar */
+.bal-beam {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--bm-beam-height);
+    background: linear-gradient(180deg, #7a8fa3, #9aabb8);
+    border-radius: calc(var(--bm-beam-height) / 2);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    z-index: 2;
+}
+
+/* Each arm: chain + pan hanging below beam */
+.bal-arm {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 3;
+    /* Counter-rotate so pans stay level (like gravity) */
+    transform: rotate(calc(-1 * var(--tilt)));
+    transition: transform 0.4s cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+
+/* Chain/rope connecting beam to pan */
+.bal-chain {
+    width: 3px;
+    height: var(--bm-chain-height);
+    background: repeating-linear-gradient(180deg,
+            #7a8fa3 0px,
+            #7a8fa3 5px,
+            transparent 5px,
+            transparent 9px);
+    border-radius: 2px;
+}
+
+/* Pan container */
+.bal-pan {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 220px;
+    max-width: 480px;
+    width: 100%;
+}
+
+/* Tray lip at top of pan */
+.bal-pan-tray {
+    width: 92%;
+    height: calc(var(--bm-beam-height) * 0.7);
+    background: linear-gradient(180deg, #8a9db0, #a8b8c6);
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Pan contents area — the "bowl" */
+.bal-pan-contents {
+    width: 92%;
+    background: var(--y-panel);
+    border: 2px solid var(--y-outline);
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    padding: clamp(0.6rem, 1.5vh, 1.2rem) clamp(0.5rem, 1vw, 1rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+    min-height: clamp(70px, 10vh, 120px);
+}
+
+.bal-boxes-row {
+    display: flex;
+    gap: clamp(0.3rem, 0.5vw, 0.5rem);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.bal-marbles-grid {
+    display: flex;
+    gap: clamp(0.25rem, 0.4vw, 0.45rem);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.bal-empty {
+    font-size: 1rem;
+    color: var(--y-muted);
+    opacity: 0.5;
+    text-align: center;
+}
+
+/* Fulcrum: post + triangle */
+.bal-fulcrum {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -6px;
+    z-index: 5;
+    transform: scale(var(--bm-fulcrum-scale));
+    transform-origin: top center;
+}
+
+.bal-fulcrum-post {
+    width: 8px;
+    height: 18px;
+    background: #7a8fa3;
+    border-radius: 0 0 4px 4px;
+}
+
+.bal-fulcrum-tri {
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* ══════════════════════════════════════════════════════
+   TILES & MARBLES — token-driven sizing
+   ══════════════════════════════════════════════════════ */
+
+.bal-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bm-tile-size);
+    height: var(--bm-tile-size);
+    border-radius: calc(var(--bm-tile-size) * 0.2);
+    font-size: calc(var(--bm-tile-size) * 0.3);
+    font-weight: 800;
+    border: 2.5px solid;
+    transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.bal-box--clickable {
+    cursor: pointer;
+}
+
+.bal-box--clickable:hover:not(:disabled) {
+    transform: scale(1.18);
+    z-index: 2;
+}
+
+.bal-box--clickable:active:not(:disabled) {
+    transform: scale(0.92);
+}
+
+.bal-marble {
+    width: var(--bm-marble-size);
+    height: var(--bm-marble-size);
+    border-radius: 50%;
+    border: 2px solid;
+    transition: transform 0.12s;
+    cursor: default;
+}
+
+.bal-marble--clickable {
+    cursor: pointer;
+}
+
+.bal-marble--clickable:hover:not(:disabled) {
+    transform: scale(1.3);
+    z-index: 2;
+}
+
+.bal-marble--clickable:active:not(:disabled) {
+    transform: scale(0.88);
+}
+
+/* ══════════════════════════════════════════════════════
+   ROW C — STATUS, FEEDBACK, CONTROLS
+   ══════════════════════════════════════════════════════ */
+
+.bal-status {
+    padding: 0.7rem 1.5rem;
+    border-radius: 12px;
+    font-size: clamp(0.95rem, 1.2vw, 1.2rem);
+    font-weight: 700;
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
+    animation: bal-fadeIn 0.2s ease;
+}
+
+.bal-status--balanced {
+    background: rgba(0, 184, 148, 0.06);
+    border: 1.5px solid rgba(0, 184, 148, 0.18);
+    color: var(--y-success);
+}
+
+.bal-status--unbalanced {
+    background: rgba(253, 203, 110, 0.06);
+    border: 1.5px solid rgba(253, 203, 110, 0.22);
+    color: #e17055;
+}
+
+.bal-instruction {
+    font-size: clamp(1rem, 1.3vw, 1.3rem);
+    color: var(--y-muted);
+    text-align: center;
+    max-width: 700px;
+    line-height: 1.6;
+}
+
+/* ── feedback ────────────────────────────────────────── */
+
+.bal-feedback {
+    padding: 0.6rem 1.25rem;
+    border-radius: 12px;
+    font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+    font-weight: 700;
+    text-align: center;
+    max-width: 700px;
+    width: 100%;
+    animation: bal-fadeIn 0.2s ease;
+}
+
+.bal-feedback--success {
+    background: rgba(0, 184, 148, 0.06);
+    border: 1.5px solid rgba(0, 184, 148, 0.18);
+    color: var(--y-success);
+}
+
+.bal-feedback--info {
+    background: rgba(108, 92, 231, 0.04);
+    border: 1.5px solid var(--y-outline);
+    color: var(--y-primary);
+}
+
+.bal-feedback--warn {
+    background: rgba(225, 112, 85, 0.04);
+    border: 1.5px solid rgba(225, 112, 85, 0.18);
+    color: var(--y-danger);
+}
+
+.bal-feedback--hint {
+    background: rgba(253, 203, 110, 0.06);
+    border: 1.5px solid rgba(253, 203, 110, 0.22);
+    color: #e17055;
+}
+
+/* ── solved card ─────────────────────────────────────── */
+
+.bal-solved-card {
+    text-align: center;
+    padding: 1.5rem 2rem;
+    background: var(--y-panel);
+    border: 2px solid rgba(0, 184, 148, 0.18);
+    border-radius: 16px;
+    box-shadow: var(--y-shadow);
+    animation: bal-fadeIn 0.3s ease;
+    max-width: 440px;
+    width: 100%;
+}
+
+.bal-solved-value {
+    font-size: clamp(1.4rem, 2vw, 2rem);
+    font-weight: 800;
+    color: var(--y-success);
+    margin-bottom: 0.25rem;
+}
+
+/* ── actions ─────────────────────────────────────────── */
+
+.bal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-width: 700px;
+    width: 100%;
+}
+
+.bal-action-group {
+    text-align: center;
+}
+
+.bal-action-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--y-muted);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.bal-action-row {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ── leaderboard rows ────────────────────────────────── */
+
+.bal-lb-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.bal-lb-row--you {
+    border-top: 1px dashed var(--y-outline);
+    margin-top: 0.35rem;
+    padding-top: 0.5rem;
+}
+
+.bal-lb-medal {
+    width: 1.5rem;
+    text-align: center;
+    font-weight: 800;
+}
+
+.bal-lb-name {
+    flex: 1;
+    font-weight: 600;
+    color: var(--y-text);
+}
+
+.bal-lb-score {
+    font-weight: 700;
+    color: var(--y-primary);
+}
+
+/* ── toasts ──────────────────────────────────────────── */
+
+.bal-toasts {
+    position: fixed;
+    top: 3.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.bal-toast {
+    padding: 0.5rem 1.2rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    color: #fff;
+    box-shadow: 0 4px 16px var(--y-primary-glow);
+    animation: bal-toastIn 0.3s ease forwards;
+    white-space: nowrap;
+}
+
+/* ── practice complete overlay ───────────────────────── */
+
+.bal-complete-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(240, 244, 255, 0.85);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: bal-fadeIn 0.3s ease;
+}
+
+/* ── animations ──────────────────────────────────────── */
+
+@keyframes bal-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bal-toastIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── responsive ──────────────────────────────────────── */
+
+@media (max-width: 700px) {
+    .bal-game-layout {
+        flex-direction: column;
+    }
+
+    .bal-sidebar {
+        width: 100%;
+    }
+}

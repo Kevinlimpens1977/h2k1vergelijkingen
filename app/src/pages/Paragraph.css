@@ -1,0 +1,201 @@
+.par-page {
+    min-height: 100vh;
+    background: var(--y-bg);
+    color: var(--y-text);
+}
+
+.par-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--y-panel);
+    border-bottom: 2px solid var(--y-outline);
+    box-shadow: 0 2px 12px rgba(30, 41, 59, 0.06);
+}
+
+.par-back {
+    background: none;
+    border: 1.5px solid var(--y-outline);
+    border-radius: var(--y-radius-sm);
+    color: var(--y-muted);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    min-height: 40px;
+}
+
+.par-back:hover {
+    border-color: var(--y-primary);
+    color: var(--y-primary);
+}
+
+.par-header-title h1 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--y-text);
+}
+
+.par-header-sub {
+    font-weight: 400;
+    color: var(--y-muted);
+    margin-left: 0.5rem;
+}
+
+.par-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+.par-badge--done {
+    background: rgba(0, 184, 148, 0.1);
+    color: var(--y-success);
+    border: 1px solid rgba(0, 184, 148, 0.2);
+}
+
+.par-loading,
+.par-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    color: var(--y-muted);
+    font-size: 1.1rem;
+}
+
+.par-main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+.par-section {
+    margin-bottom: 2rem;
+}
+
+.par-section-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--y-muted);
+    margin-bottom: 0.75rem;
+}
+
+.par-slide-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--y-panel);
+    border: 1.5px solid var(--y-outline);
+    border-radius: var(--y-radius-sm);
+    color: var(--y-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: var(--y-shadow);
+}
+
+.par-slide-link:hover {
+    border-color: var(--y-primary);
+    box-shadow: var(--y-shadow-lg);
+}
+
+/* route selector */
+.par-route-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.par-route-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1.25rem 0.75rem;
+    background: var(--y-panel);
+    border: 2px solid var(--y-outline);
+    border-radius: var(--y-radius);
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    color: var(--y-text);
+    box-shadow: var(--y-shadow);
+}
+
+.par-route-card:hover:not(:disabled) {
+    border-color: var(--y-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--y-shadow-lg);
+}
+
+.par-route-card--active {
+    border-color: var(--y-primary);
+    background: rgba(108, 92, 231, 0.04);
+}
+
+.par-route-card:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.par-route-card-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--y-text);
+}
+
+.par-route-card-desc {
+    font-size: 0.75rem;
+    color: var(--y-muted);
+}
+
+.par-placeholder {
+    color: var(--y-muted);
+    font-size: 0.95rem;
+    padding: 1rem;
+    background: var(--y-panel2);
+    border-radius: var(--y-radius-sm);
+    border: 1px dashed var(--y-outline);
+}
+
+.par-complete-btn {
+    display: block;
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, var(--y-success), #55efc4);
+    border: none;
+    border-radius: var(--y-radius-sm);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: 1rem;
+    min-height: 44px;
+    box-shadow: 0 4px 16px rgba(0, 184, 148, 0.2);
+}
+
+.par-complete-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 184, 148, 0.3);
+}
+
+.par-complete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .par-route-grid {
+        grid-template-columns: 1fr;
+    }
+}

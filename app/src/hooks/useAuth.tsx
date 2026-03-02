@@ -1,0 +1,154 @@
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import {
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut,
+    type User,
+} from 'firebase/auth';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
+
+/* ── helpers ─────────────────────────────────────────── */
+
+function toEmail(studentNumber: string): string {
+    return `${studentNumber.trim().toLowerCase()}@mw2k.local`;
+}
+
+/* ── types ───────────────────────────────────────────── */
+
+export interface UserProfile {
+    uid: string;
+    role: 'student' | 'teacher' | 'admin';
+    firstName: string;
+    studentNumber: string;
+    classId: string | null;
+}
+
+interface AuthContextValue {
+    user: User | null;
+    profile: UserProfile | null;
+    loading: boolean;
+    signup: (firstName: string, studentNumber: string, pin: string) => Promise<void>;
+    login: (studentNumber: string, pin: string) => Promise<void>;
+    logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+/* ── provider ────────────────────────────────────────── */
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+    const [user, setUser] = useState<User | null>(null);
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    /* listen to auth state */
+    useEffect(() => {
+        const unsub = onAuthStateChanged(auth, async (fbUser) => {
+            setUser(fbUser);
+            if (fbUser) {
+                try {
+                    const snap = await getDoc(doc(db, 'users', fbUser.uid));
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        setProfile({
+                            uid: fbUser.uid,
+                            role: data.role ?? 'student',
+                            firstName: data.firstName ?? '',
+                            studentNumber: data.studentNumber ?? '',
+                            classId: data.classId ?? null,
+                        });
+                    } else {
+                        // Doc doesn't exist yet (race condition) — use minimal profile
+                        setProfile({
+                            uid: fbUser.uid,
+                            role: 'student',
+                            firstName: fbUser.displayName ?? '',
+                            studentNumber: fbUser.email?.split('@')[0] ?? '',
+                            classId: null,
+                        });
+                    }
+                } catch (err) {
+                    console.warn('Could not read user profile from Firestore:', err);
+                    // Fallback: use auth data so the app doesn't hang
+                    setProfile({
+                        uid: fbUser.uid,
+                        role: 'student',
+                        firstName: fbUser.displayName ?? '',
+                        studentNumber: fbUser.email?.split('@')[0] ?? '',
+                        classId: null,
+                    });
+                }
+            } else {
+                setProfile(null);
+            }
+            setLoading(false);
+        });
+        return unsub;
+    }, []);
+
+    /* signup */
+    async function signup(firstName: string, studentNumber: string, pin: string) {
+        const email = toEmail(studentNumber);
+        const cred = await createUserWithEmailAndPassword(auth, email, pin);
+
+        await setDoc(doc(db, 'users', cred.user.uid), {
+            role: 'student',
+            firstName: firstName.trim(),
+            studentNumber: studentNumber.trim(),
+            classId: null,
+            createdAt: serverTimestamp(),
+            lastLoginAt: serverTimestamp(),
+        });
+
+        setProfile({
+            uid: cred.user.uid,
+            role: 'student',
+            firstName: firstName.trim(),
+            studentNumber: studentNumber.trim(),
+            classId: null,
+        });
+    }
+
+    /* login */
+    async function login(studentNumber: string, pin: string) {
+        const email = toEmail(studentNumber);
+        const cred = await signInWithEmailAndPassword(auth, email, pin);
+
+        // update lastLoginAt
+        await setDoc(doc(db, 'users', cred.user.uid), { lastLoginAt: serverTimestamp() }, { merge: true });
+
+        const snap = await getDoc(doc(db, 'users', cred.user.uid));
+        if (snap.exists()) {
+            const data = snap.data();
+            setProfile({
+                uid: cred.user.uid,
+                role: data.role ?? 'student',
+                firstName: data.firstName ?? '',
+                studentNumber: data.studentNumber ?? '',
+                classId: data.classId ?? null,
+            });
+        }
+    }
+
+    /* logout */
+    async function logout() {
+        await signOut(auth);
+        setProfile(null);
+    }
+
+    return (
+        <AuthContext.Provider value={{ user, profile, loading, signup, login, logout }}>
+            {children}
+        </AuthContext.Provider>
+    );
+}
+
+/* ── hook ─────────────────────────────────────────────── */
+
+export function useAuth(): AuthContextValue {
+    const ctx = useContext(AuthContext);
+    if (!ctx) throw new Error('useAuth must be used within <AuthProvider>');
+    return ctx;
+}

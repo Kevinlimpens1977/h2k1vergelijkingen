@@ -1,0 +1,200 @@
+/*
+ * ══════════════════════════════════════════════════════════
+ * THEME NOTES — Youth Gamified Design System
+ * ══════════════════════════════════════════════════════════
+ *
+ * VIBE: "School-friendly arcade / Duolingo meets esports"
+ * - Light base with soft gradient blobs
+ * - White/near-white panels with colored top borders
+ * - Vibrant but controlled accents (cyan / purple / pink / lime)
+ * - Rounded corners (16–24px), generous spacing
+ * - Micro-animations on hover/tap
+ *
+ * TO TWEAK COLORS:
+ * - Change --y-primary / --y-primary2 for main accent gradient
+ * - Change --y-bg for base page background
+ * - Change --y-accent-* for secondary highlight colors
+ * - All pages reference these tokens; one change updates everywhere
+ *
+ * ══════════════════════════════════════════════════════════
+ */
+
+:root {
+    /* ── backgrounds ─────────────────────────────────── */
+    --y-bg: #f0f4ff;
+    /* soft blue-white */
+    --y-bg2: #e8edf8;
+    /* slightly deeper for sections */
+    --y-panel: #ffffff;
+    --y-panel2: #f7f9ff;
+    /* subtle off-white for nested panels */
+
+    /* ── text ────────────────────────────────────────── */
+    --y-text: #1e293b;
+    /* dark slate — readable on light */
+    --y-muted: #64748b;
+    /* secondary text */
+    --y-text-inv: #ffffff;
+    /* text on colored bg */
+
+    /* ── primary accent (gradient pair) ──────────────── */
+    --y-primary: #6c5ce7;
+    /* vivid purple */
+    --y-primary2: #a855f7;
+    /* lighter purple */
+    --y-primary-glow: rgba(108, 92, 231, 0.2);
+
+    /* ── secondary accents ───────────────────────────── */
+    --y-cyan: #00cec9;
+    --y-pink: #fd79a8;
+    --y-lime: #00b894;
+    --y-amber: #fdcb6e;
+    --y-blue: #0984e3;
+
+    /* ── semantic ────────────────────────────────────── */
+    --y-success: #00b894;
+    --y-warning: #fdcb6e;
+    --y-danger: #e17055;
+
+    /* ── surface helpers ─────────────────────────────── */
+    --y-outline: rgba(108, 92, 231, 0.15);
+    --y-shadow: 0 4px 24px rgba(30, 41, 59, 0.08);
+    --y-shadow-lg: 0 8px 40px rgba(30, 41, 59, 0.12);
+    --y-glow: 0 0 0 3px var(--y-primary-glow);
+    --y-radius: 16px;
+    --y-radius-sm: 10px;
+    --y-radius-lg: 24px;
+
+    /* ── transitions ─────────────────────────────────── */
+    --y-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --y-speed: 180ms;
+}
+
+/* ── base ────────────────────────────────────────────── */
+
+body {
+    background: var(--y-bg);
+    color: var(--y-text);
+}
+
+/* ── gradient blob background (reusable) ─────────────── */
+
+.y-page {
+    min-height: 100vh;
+    background: var(--y-bg);
+    position: relative;
+    overflow-x: hidden;
+}
+
+.y-page::before,
+.y-page::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(100px);
+    opacity: 0.25;
+    z-index: 0;
+}
+
+.y-page::before {
+    width: 500px;
+    height: 500px;
+    background: var(--y-primary);
+    top: -200px;
+    right: -150px;
+}
+
+.y-page::after {
+    width: 400px;
+    height: 400px;
+    background: var(--y-cyan);
+    bottom: -150px;
+    left: -100px;
+}
+
+/* ── topbar ──────────────────────────────────────────── */
+
+.y-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: var(--y-panel);
+    border-bottom: 2px solid var(--y-outline);
+    box-shadow: 0 2px 12px rgba(30, 41, 59, 0.06);
+    position: relative;
+    z-index: 10;
+}
+
+.y-topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--y-text);
+}
+
+.y-topbar-logo-icon {
+    font-size: 1.4rem;
+}
+
+.y-topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.y-topbar-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--y-text);
+}
+
+.y-topbar-badge {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    color: var(--y-text-inv);
+}
+
+.y-topbar-number {
+    font-size: 0.75rem;
+    color: var(--y-muted);
+}
+
+/* ── section header ──────────────────────────────────── */
+
+.y-section-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--y-muted);
+    margin-bottom: 0.75rem;
+}
+
+/* ── heading banner ──────────────────────────────────── */
+
+.y-banner {
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.y-banner h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--y-text);
+    margin: 0 0 0.25rem;
+}
+
+.y-banner p {
+    font-size: 1rem;
+    color: var(--y-muted);
+    margin: 0;
+}

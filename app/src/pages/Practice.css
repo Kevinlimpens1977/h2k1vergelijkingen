@@ -1,0 +1,737 @@
+/* ── Practice Page — §8.1 (Youth Theme) ────────────── */
+
+.practice-page {
+    min-height: 100vh;
+    background: var(--y-bg);
+    color: var(--y-text);
+}
+
+.practice-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--y-panel);
+    border-bottom: 2px solid var(--y-outline);
+    box-shadow: 0 2px 12px rgba(30, 41, 59, 0.06);
+}
+
+.practice-back {
+    background: none;
+    border: 1.5px solid var(--y-outline);
+    border-radius: var(--y-radius-sm);
+    color: var(--y-muted);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    min-height: 40px;
+}
+
+.practice-back:hover {
+    border-color: var(--y-primary);
+    color: var(--y-primary);
+}
+
+.practice-header-info {
+    flex: 1;
+}
+
+.practice-header-info h1 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--y-text);
+}
+
+.practice-header-info span {
+    font-size: 0.8rem;
+    color: var(--y-muted);
+}
+
+.practice-progress-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--y-muted);
+}
+
+.practice-progress-track {
+    width: 120px;
+    height: 8px;
+    background: rgba(108, 92, 231, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.practice-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--y-primary), var(--y-cyan));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+
+/* ── main content ────────────────────────────────────── */
+
+.practice-main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+}
+
+/* ── exercise card ───────────────────────────────────── */
+
+.practice-card {
+    background: var(--y-panel);
+    border: 1px solid var(--y-outline);
+    border-radius: var(--y-radius);
+    padding: 2rem;
+    box-shadow: var(--y-shadow);
+    animation: practice-fadeIn 0.35s ease;
+}
+
+@keyframes practice-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.practice-card-type {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--y-primary);
+    margin-bottom: 0.75rem;
+}
+
+.practice-prompt {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--y-text);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.02em;
+    text-align: center;
+    padding: 1rem 0;
+    background: var(--y-panel2);
+    border-radius: var(--y-radius-sm);
+    border: 1px solid var(--y-outline);
+}
+
+.practice-prompt span {
+    color: var(--y-text);
+}
+
+/* ── balance prompt ──────────────────────────────────── */
+
+.practice-prompt--balance {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.practice-balance-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--y-muted);
+    text-align: center;
+}
+
+/* ── stepper indicator ──────────────────────────────── */
+
+.practice-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 1.25rem 0;
+}
+
+.practice-stepper-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: var(--y-panel2);
+    color: var(--y-muted);
+    border: 2px solid var(--y-outline);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.practice-stepper-dot--active {
+    background: rgba(108, 92, 231, 0.1);
+    border-color: var(--y-primary);
+    color: var(--y-primary);
+}
+
+.practice-stepper-dot--done {
+    background: rgba(0, 184, 148, 0.1);
+    border-color: var(--y-success);
+    color: var(--y-success);
+}
+
+.practice-stepper-line {
+    width: 48px;
+    height: 2px;
+    background: var(--y-outline);
+    transition: background 0.3s ease;
+}
+
+.practice-stepper-line--active {
+    background: linear-gradient(90deg, var(--y-primary), var(--y-cyan));
+}
+
+/* ── step section ───────────────────────────────────── */
+
+.practice-step-section {
+    animation: practice-fadeIn 0.3s ease;
+}
+
+.practice-step-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--y-text);
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.practice-step-recap {
+    padding: 0.6rem 0.85rem;
+    background: rgba(108, 92, 231, 0.04);
+    border: 1px solid var(--y-outline);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--y-muted);
+    margin-bottom: 0.75rem;
+}
+
+.practice-step-recap strong {
+    color: var(--y-text);
+}
+
+/* ── secondary prompt ────────────────────────────────── */
+
+.practice-prompt--secondary {
+    padding: 0.6rem 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.practice-prompt--secondary .practice-balance-label {
+    font-size: 0.75rem;
+    color: var(--y-muted);
+    margin-bottom: 0;
+}
+
+.practice-prompt--secondary>span {
+    font-size: 1rem;
+    color: var(--y-muted);
+    font-weight: 500;
+}
+
+/* ── hero equation card ──────────────────────────────── */
+
+.practice-hero-equation {
+    text-align: center;
+    padding: 1.25rem 1.5rem;
+    background: rgba(108, 92, 231, 0.04);
+    border: 2px solid rgba(108, 92, 231, 0.15);
+    border-radius: 14px;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 0 20px rgba(108, 92, 231, 0.04);
+    animation: practice-fadeIn 0.35s ease;
+}
+
+.practice-hero-equation-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--y-primary);
+    margin-bottom: 0.5rem;
+}
+
+.practice-hero-equation-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--y-text);
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+}
+
+.practice-hero-equation-sub {
+    font-size: 0.75rem;
+    color: var(--y-muted);
+    font-style: italic;
+}
+
+/* ── done-phase compact steps ───────────────────────── */
+
+.practice-done-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+}
+
+.practice-done-step {
+    padding: 0.45rem 0.75rem;
+    background: var(--y-panel2);
+    border: 1px solid var(--y-outline);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--y-muted);
+    line-height: 1.5;
+}
+
+/* ── balance solution display ───────────────────────── */
+
+.practice-balance-solution {
+    text-align: center;
+    padding: 1.25rem;
+    background: rgba(0, 184, 148, 0.04);
+    border: 1px solid rgba(0, 184, 148, 0.15);
+    border-radius: 12px;
+    margin-top: 0.75rem;
+}
+
+.practice-balance-solution-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--y-success);
+    margin-bottom: 0.5rem;
+}
+
+.practice-balance-check {
+    font-size: 0.8rem;
+    color: var(--y-muted);
+}
+
+/* ── input area ──────────────────────────────────────── */
+
+.practice-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.practice-input-label {
+    font-size: 0.85rem;
+    color: var(--y-muted);
+    font-weight: 600;
+}
+
+.practice-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: var(--y-panel2);
+    border: 2px solid var(--y-outline);
+    border-radius: var(--y-radius-sm);
+    color: var(--y-text);
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.practice-input:focus {
+    border-color: var(--y-primary);
+    box-shadow: var(--y-glow);
+}
+
+.practice-input::placeholder {
+    color: var(--y-muted);
+    opacity: 0.5;
+}
+
+.practice-input--correct {
+    border-color: var(--y-success);
+    background: rgba(0, 184, 148, 0.04);
+}
+
+.practice-input--incorrect {
+    border-color: var(--y-danger);
+    background: rgba(225, 112, 85, 0.04);
+}
+
+/* ── buttons ─────────────────────────────────────────── */
+
+.practice-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.practice-btn {
+    flex: 1;
+    padding: 0.875rem 1.25rem;
+    border: none;
+    border-radius: var(--y-radius-sm);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    min-height: 44px;
+}
+
+.practice-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.practice-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.practice-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.practice-btn--check {
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    color: #fff;
+    box-shadow: 0 4px 16px var(--y-primary-glow);
+}
+
+.practice-btn--check:hover:not(:disabled) {
+    box-shadow: 0 6px 24px var(--y-primary-glow);
+}
+
+.practice-btn--next {
+    background: linear-gradient(135deg, var(--y-success), #55efc4);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0, 184, 148, 0.2);
+}
+
+.practice-btn--next:hover:not(:disabled) {
+    box-shadow: 0 6px 24px rgba(0, 184, 148, 0.3);
+}
+
+.practice-btn--retry {
+    background: rgba(253, 203, 110, 0.1);
+    border: 1.5px solid rgba(253, 203, 110, 0.25);
+    color: #e17055;
+}
+
+.practice-btn--retry:hover:not(:disabled) {
+    background: rgba(253, 203, 110, 0.18);
+}
+
+/* ── feedback ────────────────────────────────────────── */
+
+.practice-feedback {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 0.95rem;
+    font-weight: 600;
+    animation: practice-fadeIn 0.3s ease;
+}
+
+.practice-feedback--correct {
+    background: rgba(0, 184, 148, 0.06);
+    border: 1px solid rgba(0, 184, 148, 0.2);
+    color: var(--y-success);
+}
+
+.practice-feedback--incorrect {
+    background: rgba(225, 112, 85, 0.06);
+    border: 1px solid rgba(225, 112, 85, 0.2);
+    color: var(--y-danger);
+}
+
+.practice-feedback--hint {
+    background: rgba(253, 203, 110, 0.06);
+    border: 1px solid rgba(253, 203, 110, 0.2);
+    color: #e17055;
+}
+
+.practice-feedback-icon {
+    font-size: 1.1rem;
+    margin-right: 0.5rem;
+}
+
+.practice-worked-answer {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--y-panel2);
+    border-radius: 8px;
+    border: 1px solid var(--y-outline);
+    font-size: 0.9rem;
+    color: var(--y-muted);
+}
+
+.practice-worked-answer strong {
+    color: var(--y-text);
+}
+
+/* ── session complete ────────────────────────────────── */
+
+.practice-complete {
+    text-align: center;
+    animation: practice-fadeIn 0.4s ease;
+}
+
+.practice-complete-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+.practice-complete h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--y-text);
+    margin-bottom: 0.5rem;
+}
+
+.practice-complete-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1.5rem 0;
+}
+
+.practice-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.practice-stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--y-primary);
+}
+
+.practice-stat-value--green {
+    color: var(--y-success);
+}
+
+.practice-stat-label {
+    font-size: 0.75rem;
+    color: var(--y-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.practice-complete-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.practice-btn--home {
+    background: var(--y-panel);
+    border: 1.5px solid var(--y-outline);
+    color: var(--y-muted);
+}
+
+.practice-btn--home:hover:not(:disabled) {
+    border-color: var(--y-primary);
+    color: var(--y-primary);
+}
+
+.practice-btn--again {
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    color: #fff;
+    box-shadow: 0 4px 16px var(--y-primary-glow);
+}
+
+/* ── retry counter ───────────────────────────────────── */
+
+.practice-retries {
+    font-size: 0.75rem;
+    color: var(--y-muted);
+    text-align: right;
+    margin-top: 0.35rem;
+}
+
+/* ── YN / CAN_COMBINE ────────────────────────────────── */
+
+.practice-prompt--yn {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
+}
+
+.practice-yn-question {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--y-muted);
+    text-align: center;
+}
+
+.practice-yn-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.practice-btn--ja {
+    background: rgba(0, 184, 148, 0.06);
+    border: 2px solid rgba(0, 184, 148, 0.2);
+    color: var(--y-success);
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 1rem;
+}
+
+.practice-btn--ja:hover:not(:disabled) {
+    background: rgba(0, 184, 148, 0.12);
+    border-color: var(--y-success);
+    box-shadow: 0 4px 16px rgba(0, 184, 148, 0.15);
+}
+
+.practice-btn--nee {
+    background: rgba(225, 112, 85, 0.06);
+    border: 2px solid rgba(225, 112, 85, 0.15);
+    color: var(--y-danger);
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 1rem;
+}
+
+.practice-btn--nee:hover:not(:disabled) {
+    background: rgba(225, 112, 85, 0.12);
+    border-color: var(--y-danger);
+    box-shadow: 0 4px 16px rgba(225, 112, 85, 0.12);
+}
+
+/* ── MC ──────────────────────────────────────────────── */
+
+.practice-prompt--mc {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
+}
+
+.practice-mc-question {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--y-muted);
+    text-align: center;
+}
+
+.practice-mc-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.practice-mc-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: var(--y-panel);
+    border: 2px solid var(--y-outline);
+    border-radius: var(--y-radius-sm);
+    color: var(--y-text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    text-align: left;
+}
+
+.practice-mc-option--idle:hover:not(:disabled) {
+    border-color: var(--y-primary);
+    box-shadow: 0 3px 12px var(--y-primary-glow);
+    transform: translateY(-2px);
+}
+
+.practice-mc-option--correct {
+    border-color: var(--y-success);
+    background: rgba(0, 184, 148, 0.06);
+    color: var(--y-success);
+}
+
+.practice-mc-option--wrong {
+    border-color: var(--y-danger);
+    background: rgba(225, 112, 85, 0.04);
+    color: var(--y-danger);
+}
+
+.practice-mc-option:disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+
+.practice-mc-letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--y-panel2);
+    color: var(--y-muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.practice-mc-option--correct .practice-mc-letter {
+    background: rgba(0, 184, 148, 0.12);
+    color: var(--y-success);
+}
+
+.practice-mc-option--wrong .practice-mc-letter {
+    background: rgba(225, 112, 85, 0.1);
+    color: var(--y-danger);
+}
+
+.practice-mc-text {
+    flex: 1;
+    line-height: 1.4;
+}
+
+/* ── responsive ──────────────────────────────────────── */
+
+@media (max-width: 600px) {
+    .practice-main {
+        padding: 1.5rem 1rem;
+    }
+
+    .practice-prompt {
+        font-size: 1.35rem;
+    }
+
+    .practice-input {
+        font-size: 1.1rem;
+    }
+
+    .practice-actions {
+        flex-direction: column;
+    }
+
+    .practice-yn-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .practice-mc-options {
+        grid-template-columns: 1fr;
+    }
+
+    .practice-complete-stats {
+        gap: 1rem;
+    }
+}

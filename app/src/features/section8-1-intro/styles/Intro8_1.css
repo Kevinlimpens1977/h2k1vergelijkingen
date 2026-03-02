@@ -1,0 +1,370 @@
+/* ── §8.1 Intro — Termen Quest (Youth Theme) ────────── */
+
+.intro-page {
+    min-height: 100vh;
+    background: var(--y-bg);
+    color: var(--y-text);
+    display: flex;
+    flex-direction: column;
+}
+
+.intro-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: var(--y-muted);
+    font-size: 1.1rem;
+}
+
+/* ── header ──────────────────────────────────────────── */
+
+.intro-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--y-panel);
+    border-bottom: 2px solid var(--y-outline);
+    box-shadow: 0 2px 12px rgba(30, 41, 59, 0.06);
+}
+
+.intro-back {
+    background: var(--y-panel2);
+    border: 1.5px solid var(--y-outline);
+    color: var(--y-muted);
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: border-color 0.2s;
+    min-height: 36px;
+}
+
+.intro-back:hover {
+    border-color: var(--y-primary);
+    color: var(--y-primary);
+}
+
+.intro-header-info h1 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--y-text);
+}
+
+.intro-header-info span {
+    font-size: 0.8rem;
+    color: var(--y-muted);
+}
+
+.intro-stats {
+    margin-left: auto;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.intro-streak {
+    color: #e17055;
+    font-weight: 700;
+}
+
+.intro-xp {
+    color: var(--y-success);
+    font-weight: 700;
+}
+
+/* ── progress bar ────────────────────────────────────── */
+
+.intro-progress-bar {
+    height: 6px;
+    background: rgba(108, 92, 231, 0.06);
+}
+
+.intro-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--y-primary), var(--y-cyan));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.intro-progress-label {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--y-muted);
+    padding: 0.25rem 0;
+}
+
+/* ── main ────────────────────────────────────────────── */
+
+.intro-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.intro-task-card {
+    max-width: 560px;
+    width: 100%;
+    background: var(--y-panel);
+    border: 1px solid var(--y-outline);
+    border-radius: var(--y-radius);
+    padding: 2rem;
+    box-shadow: var(--y-shadow);
+}
+
+/* ── prompt ──────────────────────────────────────────── */
+
+.intro-prompt {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--y-text);
+}
+
+.intro-prompt-equation {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--y-text);
+    margin-bottom: 0.25rem;
+}
+
+/* ── input task ──────────────────────────────────────── */
+
+.intro-input-group {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.intro-input {
+    background: var(--y-panel2);
+    border: 2px solid var(--y-outline);
+    border-radius: var(--y-radius-sm);
+    color: var(--y-text);
+    font-size: 1.2rem;
+    padding: 0.75rem 1.25rem;
+    width: 200px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.intro-input:focus {
+    border-color: var(--y-primary);
+    box-shadow: var(--y-glow);
+}
+
+.intro-input:disabled {
+    opacity: 0.6;
+}
+
+/* ── MC / drag-match options ─────────────────────────── */
+
+.intro-mc-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.intro-mc-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid var(--y-outline);
+    background: var(--y-panel);
+    color: var(--y-text);
+    min-width: 80px;
+    text-align: center;
+    transition: all 0.15s;
+    min-height: 44px;
+}
+
+.intro-mc-btn:hover:not(:disabled) {
+    border-color: var(--y-primary);
+    background: rgba(108, 92, 231, 0.04);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 12px var(--y-primary-glow);
+}
+
+.intro-mc-btn--selected {
+    border-color: var(--y-primary);
+    background: rgba(108, 92, 231, 0.06);
+    color: var(--y-primary);
+}
+
+.intro-mc-btn--correct {
+    border-color: var(--y-success) !important;
+    background: rgba(0, 184, 148, 0.06) !important;
+    color: var(--y-success) !important;
+}
+
+.intro-mc-btn--wrong {
+    border-color: var(--y-danger) !important;
+    background: rgba(225, 112, 85, 0.06) !important;
+    color: var(--y-danger) !important;
+}
+
+.intro-mc-btn:disabled {
+    cursor: default;
+}
+
+/* ── combine-like-terms ──────────────────────────────── */
+
+.intro-combine {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.intro-combine-cards {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.intro-combine-card {
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: rgba(108, 92, 231, 0.08);
+    border: 2px solid rgba(108, 92, 231, 0.2);
+    color: var(--y-primary);
+}
+
+/* ── feedback ────────────────────────────────────────── */
+
+.intro-feedback {
+    text-align: center;
+    padding: 0.75rem 1rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    animation: introFadeIn 0.25s ease;
+}
+
+@keyframes introFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.intro-feedback--correct {
+    background: rgba(0, 184, 148, 0.06);
+    border: 1px solid rgba(0, 184, 148, 0.15);
+    color: var(--y-success);
+}
+
+.intro-feedback--wrong {
+    background: rgba(225, 112, 85, 0.06);
+    border: 1px solid rgba(225, 112, 85, 0.15);
+    color: var(--y-danger);
+}
+
+.intro-hint {
+    font-size: 0.82rem;
+    color: var(--y-muted);
+    margin-top: 0.5rem;
+    font-weight: 400;
+}
+
+/* ── action buttons ──────────────────────────────────── */
+
+.intro-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.intro-btn-primary {
+    padding: 0.75rem 2rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    border: none;
+    color: white;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px var(--y-primary-glow);
+    min-height: 44px;
+}
+
+.intro-btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px var(--y-primary-glow);
+}
+
+.intro-btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ── complete card ───────────────────────────────────── */
+
+.intro-complete-card {
+    max-width: 480px;
+    width: 100%;
+    margin: auto;
+    text-align: center;
+    padding: 2.5rem 2rem;
+    background: var(--y-panel);
+    border: 2px solid rgba(0, 184, 148, 0.15);
+    border-radius: var(--y-radius-lg);
+    box-shadow: var(--y-shadow-lg);
+    animation: introFadeIn 0.4s ease;
+}
+
+.intro-complete-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+}
+
+.intro-complete-card h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 0.75rem;
+    color: var(--y-success);
+}
+
+.intro-complete-card p {
+    color: var(--y-muted);
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+}
+
+/* ── responsive ──────────────────────────────────────── */
+
+@media (max-width: 600px) {
+    .intro-task-card {
+        padding: 1.25rem;
+    }
+
+    .intro-prompt-equation {
+        font-size: 1.25rem;
+    }
+
+    .intro-mc-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+}
