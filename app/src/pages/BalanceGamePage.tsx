@@ -85,7 +85,7 @@ export default function BalanceGamePage() {
     const [challengeStreak, setChallengeStreak] = useState(0);
     const [timeLeft, setTimeLeft] = useState(CHALLENGE_DURATION);
     const [challengePuzzlesSolved, setChallengePuzzlesSolved] = useState(0);
-    const [challengeBest, setChallengeBest] = useState(0);
+    const [challengeBest] = useState(0);
     const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
     const toastIdRef = useRef(0);
 
