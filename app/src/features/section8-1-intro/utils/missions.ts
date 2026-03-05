@@ -45,11 +45,11 @@ export interface BossQuestion {
 }
 
 export const BOSS_BANK: BossQuestion[] = [
-    { prompt: '🔥 BOSS: n + n + n + n = ?', options: ['4n', 'n⁴', '4+n', 'n×4'], correctIndex: 0 },
-    { prompt: '🔥 BOSS: 10a − 5a + 2a = ?', options: ['7a', '3a', '17a', '7'], correctIndex: 0 },
-    { prompt: '🔥 BOSS: 6n = 42 → n = ?', options: ['36', '7', '48', '252'], correctIndex: 1 },
-    { prompt: '🔥 BOSS: 3b + 3b + 3b = ?', options: ['9b', '3b³', '9+b', '27b'], correctIndex: 0 },
-    { prompt: '🔥 BOSS: 12x − 12x = ?', options: ['24x', '0', '12', '1'], correctIndex: 1 },
+    { prompt: '🔥 Super-punten: n + n + n + n = ?', options: ['4n', 'n⁴', '4+n', 'n×4'], correctIndex: 0 },
+    { prompt: '🔥 Super-punten: 10a − 5a + 2a = ?', options: ['7a', '3a', '17a', '7'], correctIndex: 0 },
+    { prompt: '🔥 Super-punten: 6n = 42 → n = ?', options: ['36', '7', '48', '252'], correctIndex: 1 },
+    { prompt: '🔥 Super-punten: 3b + 3b + 3b = ?', options: ['9b', '3b³', '9+b', '27b'], correctIndex: 0 },
+    { prompt: '🔥 Super-punten: 12x − 12x = ?', options: ['24x', '0', '12', '1'], correctIndex: 1 },
 ];
 
 /** Timestamps (seconds remaining) at which boss rounds trigger. */

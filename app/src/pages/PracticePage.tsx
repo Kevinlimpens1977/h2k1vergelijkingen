@@ -14,6 +14,7 @@ import {
 import { logAttempt, appendCompletedExercise } from '../services/attempts';
 import type { RouteChoice } from '../services/progress';
 import { formatMathDisplay } from '../utils/formatMathDisplay';
+import { algebraEquals } from '../utils/algebraEquals';
 import './Practice.css';
 
 const MAX_RETRIES_COMBINE = 1; // Step 2 of CAN_COMBINE
@@ -184,7 +185,7 @@ export default function PracticePage() {
 
         const normalized = normalizeAnswer(answer);
         const correctNorm = normalizeAnswer(current.combinedAnswer);
-        const isCorrect = normalized === correctNorm;
+        const isCorrect = normalized === correctNorm || algebraEquals(answer, current.combinedAnswer);
         const durationMs = Date.now() - startTimeRef.current;
 
         if (isCorrect) {

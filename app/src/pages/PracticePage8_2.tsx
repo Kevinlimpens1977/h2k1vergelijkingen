@@ -17,6 +17,7 @@ import { logAttempt, appendCompletedExercise } from '../services/attempts';
 import { markSection8_2Completed } from '../services/chapter8Flow';
 import { formatMathDisplay } from '../utils/formatMathDisplay';
 import { splitEquationPrompt } from '../utils/formatPromptParts';
+import { algebraEquals } from '../utils/algebraEquals';
 import './Practice.css';
 
 type FeedbackState =
@@ -113,10 +114,10 @@ export default function PracticePage8_2() {
                 if (!trimmed) return;
                 studentAnswer = trimmed;
                 correctAnswer = current.answer;
-                isCorrect = normalize(trimmed) === normalize(current.answer);
+                isCorrect = normalize(trimmed) === normalize(current.answer) || algebraEquals(trimmed, current.answer);
                 // Also check accept array
                 if (!isCorrect && current.accept) {
-                    isCorrect = current.accept.some((a) => normalize(trimmed) === normalize(a));
+                    isCorrect = current.accept.some((a) => normalize(trimmed) === normalize(a) || algebraEquals(trimmed, a));
                 }
                 break;
             }

@@ -28,10 +28,11 @@ import {
     ensureIntroDoc,
 } from '../services/introProgressService';
 import {
-    subscribeClassLeaderboard,
-    updateLeaderboardScore,
+    BOARD_IDS,
+    subscribeLeaderboard,
+    updateScore,
     type LeaderboardEntry,
-} from '../../../services/leaderboardService';
+} from '../../../services/unifiedLeaderboardService';
 import { formatMathDisplay } from '../../../utils/formatMathDisplay';
 import '../styles/SpeedTest8_1.css';
 
@@ -123,7 +124,8 @@ export default function SpeedTest8_1() {
         })();
 
         // Subscribe to leaderboard
-        const unsub = subscribeClassLeaderboard(
+        const unsub = subscribeLeaderboard(
+            BOARD_IDS.SPEED_TEST,
             profile.classId, 10,
             (entries) => setLeaderboard(entries),
         );
@@ -332,7 +334,8 @@ export default function SpeedTest8_1() {
                     startedAt: startTimeRef.current,
                     endedAt: Date.now(),
                 });
-                await updateLeaderboardScore(
+                await updateScore(
+                    BOARD_IDS.SPEED_TEST,
                     profile.uid,
                     profile.firstName,
                     profile.classId,
@@ -536,8 +539,19 @@ export default function SpeedTest8_1() {
             {/* question */}
             <div className="st-main">
                 <div className={`st-question ${isBoss ? 'st-question--boss' : ''}`}>
-                    {isBoss && <div className="st-boss-label">BOSS</div>}
-                    <div className="st-prompt">{formatMathDisplay(question.prompt)}</div>
+                    {isBoss && <div className="st-boss-label">SUPER-PUNTEN</div>}
+                    <div className="st-prompt">
+                        {question.prompt.includes('→') ? (
+                            <>
+                                <div>{isBoss ? '🔥 ' : ''}{formatMathDisplay(question.prompt.split('→')[0].trim())}</div>
+                                <div style={{ fontSize: '0.85em', opacity: 0.85, marginTop: '0.3rem' }}>
+                                    {formatMathDisplay(question.prompt.split('→')[1].trim())}
+                                </div>
+                            </>
+                        ) : (
+                            <>{isBoss ? '🔥 ' : ''}{formatMathDisplay(question.prompt)}</>
+                        )}
+                    </div>
                     <div className="st-options">
                         {question.options.map((opt, i) => (
                             <button
@@ -570,7 +584,7 @@ export default function SpeedTest8_1() {
             {/* banners */}
             {showLevelUp && <div className="st-neon-banner st-neon-banner--levelup">⚡ LEVEL UP! +3</div>}
             {comboText && <div className="st-neon-banner st-neon-banner--combo">{comboText}</div>}
-            {showBossWin && <div className="st-neon-banner st-neon-banner--boss">BOSS GEKRAAKT! 💥</div>}
+            {showBossWin && <div className="st-neon-banner st-neon-banner--boss">SUPER-PUNTEN VERDIEND! 💥</div>}
             {missionBanner && <div className="st-neon-banner st-neon-banner--mission">🎯 {missionBanner}</div>}
             {showRivalBeat && <div className="st-neon-banner st-neon-banner--rival">🚀 Ingehaald!</div>}
             {enteredTop3 && !showRivalBeat && !showBossWin && !showLevelUp && (

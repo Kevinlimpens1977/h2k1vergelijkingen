@@ -354,6 +354,26 @@
 
 /* ── responsive ──────────────────────────────────────── */
 
+/* ── leaderboard sidebar ────────────────────────────── */
+
+.intro-sidebar-wrap {
+    position: fixed;
+    top: 80px;
+    right: 1rem;
+    z-index: 5;
+    width: 200px;
+}
+
+@media (max-width: 900px) {
+    .intro-sidebar-wrap {
+        position: static;
+        width: 100%;
+        max-width: 560px;
+        margin: 0 auto 0.75rem;
+        padding: 0 1.5rem;
+    }
+}
+
 @media (max-width: 600px) {
     .intro-task-card {
         padding: 1.25rem;

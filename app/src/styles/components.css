@@ -345,6 +345,95 @@
     transform: scale(0.97);
 }
 
+/* ── Top 3 podiums ──────────────────────────────────── */
+
+.y-roadmap-podiums {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.y-podium {
+    flex: 1;
+    min-width: 140px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(100, 140, 255, 0.1);
+    border-radius: 10px;
+    padding: 0.4rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.y-podium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(100, 140, 255, 0.08);
+}
+
+.y-podium-header {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.3rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--y-muted, #94a3b8);
+}
+
+.y-podium-icon {
+    font-size: 0.85rem;
+}
+
+.y-podium-label {
+    flex: 1;
+}
+
+.y-podium-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.y-podium-row {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.4rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease;
+}
+
+.y-podium-row:hover {
+    transform: scale(1.02);
+}
+
+.y-podium-medal {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.y-podium-name {
+    flex: 1;
+    font-size: 0.72rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.y-podium-score {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--y-text, #1e293b);
+    background: rgba(255, 255, 255, 0.5);
+    padding: 0.1rem 0.4rem;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
 /* ── LOGOUT ──────────────────────────────────────────── */
 
 .y-btn-logout {

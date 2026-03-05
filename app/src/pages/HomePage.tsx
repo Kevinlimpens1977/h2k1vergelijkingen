@@ -9,7 +9,70 @@ import {
     isStepUnlocked,
     isStepCompleted,
     type Chapter8Progress,
+    type FlowStepId,
 } from '../services/chapter8Flow';
+import {
+    BOARD_IDS,
+    getLeaderboard,
+    type BoardId,
+    type LeaderboardEntry,
+} from '../services/unifiedLeaderboardService';
+
+/* ── medal config ─────────────────────────────────────── */
+const MEDALS = ['🥇', '🥈', '🥉'] as const;
+const MEDAL_COLORS = [
+    { bg: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05))', border: 'rgba(255,215,0,0.35)', text: '#c8a600' },
+    { bg: 'linear-gradient(135deg, rgba(192,192,192,0.15), rgba(192,192,192,0.05))', border: 'rgba(192,192,192,0.35)', text: '#808080' },
+    { bg: 'linear-gradient(135deg, rgba(205,127,50,0.15), rgba(205,127,50,0.05))', border: 'rgba(205,127,50,0.35)', text: '#8b5e3c' },
+] as const;
+
+/* ── step → board mapping ─────────────────────────────── */
+const STEP_BOARDS: Partial<Record<FlowStepId, { boardId: BoardId; icon: string; label: string }[]>> = {
+    '8_1_intro': [
+        { boardId: BOARD_IDS.TERMEN_QUEST, icon: '🎮', label: 'Termen Quest' },
+        { boardId: BOARD_IDS.SPEED_TEST, icon: '⚡', label: 'Speed Test' },
+    ],
+    'balance': [
+        { boardId: BOARD_IDS.BALANCE_CHALLENGE, icon: '⚖️', label: 'Balans' },
+    ],
+    '8_2_blitz': [
+        { boardId: BOARD_IDS.BALANS_BLITZ, icon: '⚡', label: 'Blitz' },
+    ],
+    '8_3': [
+        { boardId: BOARD_IDS.TERMTRIS, icon: '🧱', label: 'Termtris' },
+    ],
+};
+
+/* ── Top3 mini podium ─────────────────────────────────── */
+function Top3Podium({ label, icon, entries }: { label: string; icon: string; entries: LeaderboardEntry[] }) {
+    if (entries.length === 0) return null;
+    return (
+        <div className="y-podium">
+            <div className="y-podium-header">
+                <span className="y-podium-icon">{icon}</span>
+                <span className="y-podium-label">{label}</span>
+            </div>
+            <div className="y-podium-list">
+                {entries.slice(0, 3).map((entry, i) => (
+                    <div
+                        key={entry.uid}
+                        className="y-podium-row"
+                        style={{
+                            background: MEDAL_COLORS[i].bg,
+                            borderColor: MEDAL_COLORS[i].border,
+                        }}
+                    >
+                        <span className="y-podium-medal">{MEDALS[i]}</span>
+                        <span className="y-podium-name" style={{ color: MEDAL_COLORS[i].text }}>
+                            {entry.firstName || 'Anoniem'}
+                        </span>
+                        <span className="y-podium-score">{entry.bestScore}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export default function HomePage() {
     const { profile } = useAuth();
@@ -17,9 +80,30 @@ export default function HomePage() {
     const navigate = useNavigate();
     const [progress, setProgress] = useState<Chapter8Progress | null>(null);
 
+    // Top 3 per board
+    const [topScores, setTopScores] = useState<Partial<Record<BoardId, LeaderboardEntry[]>>>({});
+
     useEffect(() => {
         if (!profile) return;
         getChapter8Progress(profile.uid).then(setProgress).catch(console.warn);
+
+        // Load top 3 for each board
+        if (profile.classId) {
+            const boards = Object.values(BOARD_IDS);
+            Promise.all(
+                boards.map((boardId) =>
+                    getLeaderboard(boardId, profile.classId, 3)
+                        .then((entries) => ({ boardId, entries }))
+                        .catch(() => ({ boardId, entries: [] as LeaderboardEntry[] }))
+                ),
+            ).then((results) => {
+                const map: Partial<Record<BoardId, LeaderboardEntry[]>> = {};
+                for (const { boardId, entries } of results) {
+                    map[boardId] = entries;
+                }
+                setTopScores(map);
+            });
+        }
     }, [profile]);
 
     // Count completed steps for XP-like display
@@ -59,6 +143,7 @@ export default function HomePage() {
                         const unlocked = devMode || (progress ? isStepUnlocked(step.id, progress) : false);
                         const completed = unlocked && (progress ? isStepCompleted(step.id, progress) : false);
                         const active = unlocked && !completed;
+                        const boards = STEP_BOARDS[step.id];
 
                         return (
                             <div
@@ -79,7 +164,22 @@ export default function HomePage() {
                                     <div className="y-roadmap-info">
                                         <div className="y-roadmap-title">{step.title}</div>
                                         <div className="y-roadmap-sub">{step.subtitle}</div>
+
+                                        {/* Top 3 podiums per game */}
+                                        {boards && boards.length > 0 && (
+                                            <div className="y-roadmap-podiums">
+                                                {boards.map(({ boardId, icon, label }) => (
+                                                    <Top3Podium
+                                                        key={boardId}
+                                                        label={label}
+                                                        icon={icon}
+                                                        entries={topScores[boardId] ?? []}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
+
                                     <div className="y-roadmap-action">
                                         {completed ? (
                                             <button

@@ -33,10 +33,12 @@ import { generateRound, type BalanceRound, type Difficulty } from '../services/b
 import { logAttempt, appendCompletedExercise } from '../services/attempts';
 import { markBalanceGameCompleted } from '../services/chapter8Flow';
 import {
-    subscribeBalanceLeaderboard,
-    updateBalanceScore,
-    type BalanceLBEntry,
-} from '../services/balanceLeaderboardService';
+    BOARD_IDS,
+    subscribeLeaderboard,
+    updateScore,
+    type LeaderboardEntry,
+} from '../services/unifiedLeaderboardService';
+import Top3Sidebar from '../components/Top3Sidebar';
 import { formatMathDisplay } from '../utils/formatMathDisplay';
 import './BalanceGame.css';
 
@@ -90,7 +92,7 @@ export default function BalanceGamePage() {
     const toastIdRef = useRef(0);
 
     // ── leaderboard ─────────────────────────────────────
-    const [leaderboard, setLeaderboard] = useState<BalanceLBEntry[]>([]);
+    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 
     const startTimeRef = useRef<number>(Date.now());
     const initialEqRef = useRef<string>(deriveEquationString(round.initialState, round.varName));
@@ -114,7 +116,8 @@ export default function BalanceGamePage() {
             setMode('challengeEnd');
             // save score
             if (profile) {
-                updateBalanceScore(
+                updateScore(
+                    BOARD_IDS.BALANCE_CHALLENGE,
                     profile.uid,
                     profile.firstName || '',
                     profile.classId ?? null,
@@ -127,11 +130,10 @@ export default function BalanceGamePage() {
         return () => clearInterval(t);
     }, [mode, timeLeft, profile, challengeScore]);
 
-    // ── leaderboard subscription ────────────────────────
     useEffect(() => {
         if (mode !== 'challenge' && mode !== 'challengeEnd') return;
         if (!profile?.classId) return;
-        const unsub = subscribeBalanceLeaderboard(profile.classId, 5, setLeaderboard);
+        const unsub = subscribeLeaderboard(BOARD_IDS.BALANCE_CHALLENGE, profile.classId, 5, setLeaderboard);
         return unsub;
     }, [mode, profile?.classId]);
 
@@ -557,26 +559,15 @@ export default function BalanceGamePage() {
 
                         {/* Leaderboard */}
                         {leaderboard.length > 0 && (
-                            <div style={{ margin: '1rem 0' }}>
-                                <div className="y-section-label">Klas Top 5</div>
-                                {leaderboard.slice(0, 5).map((e, i) => (
-                                    <div key={e.uid} style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        padding: '0.4rem 0.5rem',
-                                        borderRadius: '8px',
-                                        background: e.uid === profile?.uid ? 'rgba(108, 92, 231, 0.06)' : 'transparent',
-                                        fontWeight: e.uid === profile?.uid ? 800 : 500,
-                                        fontSize: '0.85rem',
-                                    }}>
-                                        <span style={{ width: '1.5rem', textAlign: 'center', fontWeight: 800 }}>
-                                            {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
-                                        </span>
-                                        <span style={{ flex: 1, textAlign: 'left' }}>{e.firstName}</span>
-                                        <span style={{ color: 'var(--y-primary)', fontWeight: 700 }}>{e.bestScore}</span>
-                                    </div>
-                                ))}
+                            <div style={{ margin: '1rem 0', textAlign: 'left' }}>
+                                <Top3Sidebar
+                                    boardId={BOARD_IDS.BALANCE_CHALLENGE}
+                                    classId={profile?.classId ?? null}
+                                    currentUid={profile?.uid}
+                                    currentScore={challengeScore}
+                                    variant="full"
+                                    entries={leaderboard}
+                                />
                             </div>
                         )}
 
@@ -867,27 +858,14 @@ export default function BalanceGamePage() {
                     {/* Sidebar: leaderboard (challenge only) */}
                     {mode === 'challenge' && leaderboard.length > 0 && (
                         <div className="bal-sidebar">
-                            <div className="y-card" style={{ padding: '1rem', borderTop: '3px solid var(--y-cyan)' }}>
-                                <div className="y-section-label">Klas Top 3</div>
-                                {leaderboard.slice(0, 3).map((e, i) => (
-                                    <div key={e.uid} className="bal-lb-row" style={{
-                                        background: e.uid === profile?.uid ? 'rgba(108, 92, 231, 0.06)' : undefined,
-                                    }}>
-                                        <span className="bal-lb-medal">
-                                            {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
-                                        </span>
-                                        <span className="bal-lb-name">{e.firstName}</span>
-                                        <span className="bal-lb-score">{e.bestScore}</span>
-                                    </div>
-                                ))}
-                                {myRank > 3 && (
-                                    <div className="bal-lb-row bal-lb-row--you">
-                                        <span className="bal-lb-medal">#{myRank}</span>
-                                        <span className="bal-lb-name">Jij</span>
-                                        <span className="bal-lb-score">{challengeScore}</span>
-                                    </div>
-                                )}
-                            </div>
+                            <Top3Sidebar
+                                boardId={BOARD_IDS.BALANCE_CHALLENGE}
+                                classId={profile?.classId ?? null}
+                                currentUid={profile?.uid}
+                                currentScore={challengeScore}
+                                variant="compact"
+                                entries={leaderboard}
+                            />
                         </div>
                     )}
                 </div>{/* /bal-game-layout */}

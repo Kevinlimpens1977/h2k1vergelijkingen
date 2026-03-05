@@ -1,0 +1,138 @@
+/*
+ * Top3Sidebar — Leaderboard component styles
+ * Matches the Youth Gamified Design System (y-* tokens).
+ */
+
+/* ── wrapper ──────────────────────────────────────────── */
+
+.lb-sidebar {
+    flex-shrink: 0;
+}
+
+.lb-sidebar--compact {
+    width: 200px;
+}
+
+.lb-sidebar--full,
+.lb-sidebar--preview {
+    width: 100%;
+}
+
+/* ── card ─────────────────────────────────────────────── */
+
+.lb-sidebar-card {
+    background: var(--y-panel);
+    border-radius: var(--y-radius-sm);
+    border: 1px solid var(--y-outline);
+    border-top: 3px solid var(--y-amber);
+    box-shadow: var(--y-shadow);
+    padding: 0.75rem;
+    overflow: hidden;
+}
+
+.lb-sidebar--full .lb-sidebar-card {
+    padding: 1rem;
+}
+
+/* ── title ────────────────────────────────────────────── */
+
+.lb-sidebar-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--y-muted);
+    margin-bottom: 0.5rem;
+}
+
+.lb-sidebar--full .lb-sidebar-title,
+.lb-sidebar--preview .lb-sidebar-title {
+    font-size: 0.78rem;
+    margin-bottom: 0.75rem;
+}
+
+/* ── row ──────────────────────────────────────────────── */
+
+.lb-sidebar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.4rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    transition: background var(--y-speed) var(--y-ease);
+}
+
+.lb-sidebar--full .lb-sidebar-row,
+.lb-sidebar--preview .lb-sidebar-row {
+    gap: 0.5rem;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+}
+
+.lb-sidebar-row--me {
+    background: rgba(108, 92, 231, 0.06);
+    font-weight: 800;
+}
+
+.lb-sidebar-row--below {
+    border-top: 1px dashed var(--y-outline);
+    margin-top: 0.25rem;
+    padding-top: 0.35rem;
+}
+
+/* ── rank ─────────────────────────────────────────────── */
+
+.lb-sidebar-rank {
+    width: 1.2rem;
+    text-align: center;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.lb-sidebar--full .lb-sidebar-rank,
+.lb-sidebar--preview .lb-sidebar-rank {
+    width: 1.5rem;
+}
+
+/* ── name ─────────────────────────────────────────────── */
+
+.lb-sidebar-name {
+    flex: 1;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── score ────────────────────────────────────────────── */
+
+.lb-sidebar-score {
+    font-weight: 700;
+    color: var(--y-primary);
+    flex-shrink: 0;
+}
+
+.lb-sidebar-unit {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--y-muted);
+}
+
+/* ── animations ──────────────────────────────────────── */
+
+@keyframes lb-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+.lb-sidebar-row--me {
+    animation: lb-pulse 2s ease-in-out infinite;
+}

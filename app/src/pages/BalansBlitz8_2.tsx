@@ -16,10 +16,12 @@ import { useDevMode } from '../context/DevModeContext';
 import { BALANS_BLITZ_8_2, type BlitzQ } from '../content/ch8/balansBlitz_8_2_bank';
 import { markSection8_2BlitzPassed } from '../services/chapter8Flow';
 import {
-    subscribeBlitzLeaderboard,
-    updateBlitzScore,
-    type BlitzLBEntry,
-} from '../services/blitzLeaderboardService';
+    BOARD_IDS,
+    subscribeLeaderboard,
+    updateScore,
+    type LeaderboardEntry,
+} from '../services/unifiedLeaderboardService';
+import Top3Sidebar from '../components/Top3Sidebar';
 import { formatMathDisplay } from '../utils/formatMathDisplay';
 import { splitEquationPrompt } from '../utils/formatPromptParts';
 import './Practice.css';
@@ -53,7 +55,7 @@ export default function BalansBlitz8_2() {
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
     // Leaderboard
-    const [leaderboard, setLeaderboard] = useState<BlitzLBEntry[]>([]);
+    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
     const [enteredTop3, setEnteredTop3] = useState(false);
     const unsubRef = useRef<(() => void) | null>(null);
 
@@ -64,7 +66,7 @@ export default function BalansBlitz8_2() {
     /* ── leaderboard subscription ─────────────────────── */
     useEffect(() => {
         if (!profile?.classId) return;
-        const unsub = subscribeBlitzLeaderboard(profile.classId, 10, setLeaderboard);
+        const unsub = subscribeLeaderboard(BOARD_IDS.BALANS_BLITZ, profile.classId, 10, setLeaderboard);
         unsubRef.current = unsub;
         return () => unsub();
     }, [profile?.classId]);
@@ -106,7 +108,8 @@ export default function BalansBlitz8_2() {
 
         // Save score
         try {
-            await updateBlitzScore(
+            await updateScore(
+                BOARD_IDS.BALANS_BLITZ,
                 profile.uid,
                 profile.firstName || '',
                 profile.classId ?? null,
@@ -209,8 +212,6 @@ export default function BalansBlitz8_2() {
         checkAnswer(question.options[idx].op === question.correctOp);
     };
 
-    /* ── my rank ──────────────────────────────────────── */
-    const myRank = profile ? leaderboard.findIndex((e) => e.uid === profile.uid) + 1 : 0;
 
     /* ═══════════════════════════════════════════════════
        READY SCREEN
@@ -250,21 +251,14 @@ export default function BalansBlitz8_2() {
 
                     {/* Top 3 preview */}
                     {leaderboard.length > 0 && (
-                        <div className="y-card" style={{ padding: '1rem', borderTop: '3px solid var(--y-amber)', marginBottom: '1rem' }}>
-                            <div className="y-section-label">Klas Top 3</div>
-                            {leaderboard.slice(0, 3).map((e, i) => (
-                                <div key={e.uid} style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    padding: '0.35rem 0.5rem', borderRadius: '8px', fontSize: '0.85rem',
-                                    background: e.uid === profile?.uid ? 'rgba(108,92,231,0.06)' : undefined,
-                                }}>
-                                    <span style={{ width: '1.5rem', textAlign: 'center', fontWeight: 800 }}>
-                                        {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
-                                    </span>
-                                    <span style={{ flex: 1, fontWeight: 600 }}>{e.firstName}</span>
-                                    <span style={{ fontWeight: 700, color: 'var(--y-primary)' }}>{e.bestScore}</span>
-                                </div>
-                            ))}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <Top3Sidebar
+                                boardId={BOARD_IDS.BALANS_BLITZ}
+                                classId={profile?.classId ?? null}
+                                currentUid={profile?.uid}
+                                variant="preview"
+                                entries={leaderboard}
+                            />
                         </div>
                     )}
 
@@ -326,21 +320,14 @@ export default function BalansBlitz8_2() {
                         {/* Leaderboard */}
                         {leaderboard.length > 0 && (
                             <div style={{ margin: '1rem 0', textAlign: 'left' }}>
-                                <div className="y-section-label">Klas Top 10</div>
-                                {leaderboard.slice(0, 10).map((e, i) => (
-                                    <div key={e.uid} style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                        padding: '0.4rem 0.5rem', borderRadius: '8px', fontSize: '0.85rem',
-                                        background: e.uid === profile?.uid ? 'rgba(108,92,231,0.06)' : 'transparent',
-                                        fontWeight: e.uid === profile?.uid ? 800 : 500,
-                                    }}>
-                                        <span style={{ width: '1.5rem', textAlign: 'center', fontWeight: 800 }}>
-                                            {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
-                                        </span>
-                                        <span style={{ flex: 1, textAlign: 'left' }}>{e.firstName}</span>
-                                        <span style={{ color: 'var(--y-primary)', fontWeight: 700 }}>{e.bestScore}</span>
-                                    </div>
-                                ))}
+                                <Top3Sidebar
+                                    boardId={BOARD_IDS.BALANS_BLITZ}
+                                    classId={profile?.classId ?? null}
+                                    currentUid={profile?.uid}
+                                    currentScore={score}
+                                    variant="full"
+                                    entries={leaderboard}
+                                />
                             </div>
                         )}
 
@@ -517,35 +504,14 @@ export default function BalansBlitz8_2() {
 
                 {/* Sidebar: compact Top 3 */}
                 {leaderboard.length > 0 && (
-                    <div style={{ width: 200, flexShrink: 0 }}>
-                        <div className="y-card" style={{ padding: '0.75rem', borderTop: '3px solid var(--y-amber)' }}>
-                            <div className="y-section-label" style={{ fontSize: '0.7rem' }}>Top 3</div>
-                            {leaderboard.slice(0, 3).map((e, i) => (
-                                <div key={e.uid} style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.35rem',
-                                    padding: '0.25rem 0.4rem', borderRadius: '6px', fontSize: '0.78rem',
-                                    background: e.uid === profile?.uid ? 'rgba(108,92,231,0.06)' : undefined,
-                                }}>
-                                    <span style={{ width: '1.2rem', textAlign: 'center', fontWeight: 800 }}>
-                                        {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
-                                    </span>
-                                    <span style={{ flex: 1, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.firstName}</span>
-                                    <span style={{ fontWeight: 700, color: 'var(--y-primary)' }}>{e.bestScore}</span>
-                                </div>
-                            ))}
-                            {myRank > 3 && (
-                                <div style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.35rem',
-                                    padding: '0.25rem 0.4rem', borderRadius: '6px', fontSize: '0.78rem',
-                                    borderTop: '1px dashed var(--y-outline)', marginTop: '0.25rem', paddingTop: '0.35rem',
-                                }}>
-                                    <span style={{ width: '1.2rem', textAlign: 'center', fontWeight: 800 }}>#{myRank}</span>
-                                    <span style={{ flex: 1, fontWeight: 600 }}>Jij</span>
-                                    <span style={{ fontWeight: 700, color: 'var(--y-primary)' }}>{score}</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    <Top3Sidebar
+                        boardId={BOARD_IDS.BALANS_BLITZ}
+                        classId={profile?.classId ?? null}
+                        currentUid={profile?.uid}
+                        currentScore={score}
+                        variant="compact"
+                        entries={leaderboard}
+                    />
                 )}
             </div>
         </div>

@@ -9,6 +9,9 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 
+/* ── default class (all students share one leaderboard) ─ */
+const DEFAULT_CLASS_ID = 'klas2k';
+
 /* ── helpers ─────────────────────────────────────────── */
 
 function toEmail(studentNumber: string): string {
@@ -57,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             role: data.role ?? 'student',
                             firstName: data.firstName ?? '',
                             studentNumber: data.studentNumber ?? '',
-                            classId: data.classId ?? null,
+                            classId: data.classId ?? DEFAULT_CLASS_ID,
                         });
                     } else {
                         // Doc doesn't exist yet (race condition) — use minimal profile
@@ -66,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             role: 'student',
                             firstName: fbUser.displayName ?? '',
                             studentNumber: fbUser.email?.split('@')[0] ?? '',
-                            classId: null,
+                            classId: DEFAULT_CLASS_ID,
                         });
                     }
                 } catch (err) {
@@ -77,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         role: 'student',
                         firstName: fbUser.displayName ?? '',
                         studentNumber: fbUser.email?.split('@')[0] ?? '',
-                        classId: null,
+                        classId: DEFAULT_CLASS_ID,
                     });
                 }
             } else {
@@ -97,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             role: 'student',
             firstName: firstName.trim(),
             studentNumber: studentNumber.trim(),
-            classId: null,
+            classId: DEFAULT_CLASS_ID,
             createdAt: serverTimestamp(),
             lastLoginAt: serverTimestamp(),
         });
@@ -107,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             role: 'student',
             firstName: firstName.trim(),
             studentNumber: studentNumber.trim(),
-            classId: null,
+            classId: DEFAULT_CLASS_ID,
         });
     }
 
@@ -127,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 role: data.role ?? 'student',
                 firstName: data.firstName ?? '',
                 studentNumber: data.studentNumber ?? '',
-                classId: data.classId ?? null,
+                classId: data.classId ?? DEFAULT_CLASS_ID,
             });
         }
     }

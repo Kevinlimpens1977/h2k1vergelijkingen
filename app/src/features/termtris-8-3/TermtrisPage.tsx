@@ -38,15 +38,16 @@ import {
     type PieceType,
 } from './utils/fieldLogic';
 import {
-    subscribeTermtrisLeaderboard,
-    updateTermtrisScore,
-    type TermtrisLBEntry,
-} from './services/termtrisLeaderboardService';
+    BOARD_IDS,
+    subscribeLeaderboard,
+    updateScore,
+    type LeaderboardEntry,
+} from '../../services/unifiedLeaderboardService';
 import { markSection8_3Completed } from '../../services/chapter8Flow';
 import Field from './components/Field';
 import QuestionCard from './components/QuestionCard';
 import HUD from './components/HUD';
-import LeaderboardMini from './components/LeaderboardMini';
+import Top3Sidebar from '../../components/Top3Sidebar';
 import '../../pages/Practice.css';
 
 const TIMER_SECONDS = 600; // 10 minutes
@@ -88,7 +89,7 @@ export default function TermtrisPage() {
     const [linesCleared, setLinesCleared] = useState(0);
 
     // Leaderboard
-    const [leaderboard, setLeaderboard] = useState<TermtrisLBEntry[]>([]);
+    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
     const [enteredTop3, setEnteredTop3] = useState(false);
 
     // Refs
@@ -108,7 +109,7 @@ export default function TermtrisPage() {
     /* ── leaderboard subscription ─────────────────────── */
     useEffect(() => {
         if (!profile?.classId) return;
-        const unsub = subscribeTermtrisLeaderboard(profile.classId, 10, setLeaderboard);
+        const unsub = subscribeLeaderboard(BOARD_IDS.TERMTRIS, profile.classId, 10, setLeaderboard);
         return () => unsub();
     }, [profile?.classId]);
 
@@ -260,7 +261,8 @@ export default function TermtrisPage() {
         if (!profile) return;
 
         try {
-            await updateTermtrisScore(
+            await updateScore(
+                BOARD_IDS.TERMTRIS,
                 profile.uid,
                 profile.firstName || '',
                 profile.classId ?? null,
@@ -422,7 +424,13 @@ export default function TermtrisPage() {
 
                     {leaderboard.length > 0 && (
                         <div style={{ marginBottom: '1rem' }}>
-                            <LeaderboardMini entries={leaderboard} currentUid={profile?.uid} mode="compact" />
+                            <Top3Sidebar
+                                boardId={BOARD_IDS.TERMTRIS}
+                                classId={profile?.classId ?? null}
+                                currentUid={profile?.uid}
+                                variant="preview"
+                                entries={leaderboard}
+                            />
                         </div>
                     )}
 
@@ -474,7 +482,14 @@ export default function TermtrisPage() {
 
                         {leaderboard.length > 0 && (
                             <div style={{ margin: '1rem 0', textAlign: 'left' }}>
-                                <LeaderboardMini entries={leaderboard} currentUid={profile?.uid} currentScore={score} mode="full" />
+                                <Top3Sidebar
+                                    boardId={BOARD_IDS.TERMTRIS}
+                                    classId={profile?.classId ?? null}
+                                    currentUid={profile?.uid}
+                                    currentScore={score}
+                                    variant="full"
+                                    entries={leaderboard}
+                                />
                             </div>
                         )}
 
@@ -596,11 +611,13 @@ export default function TermtrisPage() {
 
                     {/* Mini leaderboard */}
                     {leaderboard.length > 0 && (
-                        <LeaderboardMini
-                            entries={leaderboard}
+                        <Top3Sidebar
+                            boardId={BOARD_IDS.TERMTRIS}
+                            classId={profile?.classId ?? null}
                             currentUid={profile?.uid}
                             currentScore={score}
-                            mode="compact"
+                            variant="compact"
+                            entries={leaderboard}
                         />
                     )}
                 </div>

@@ -14,10 +14,10 @@ export const SPEED_BANK: SpeedQuestion[] = [
     { prompt: 'n + n = ?', options: ['2n', 'n²', 'n+2', 'nn'], correctIndex: 0 },
     { prompt: '3n = ?', options: ['n+3', 'n+n+n', 'n³', '3+n'], correctIndex: 1 },
     { prompt: 'a + a + a + a = ?', options: ['a⁴', '4a', '4+a', 'a+4'], correctIndex: 1 },
-    { prompt: '5×b = ?', options: ['5b', 'b5', '5+b', 'b⁵'], correctIndex: 0 },
+    { prompt: '5×b is hetzelfde als…', options: ['5b', 'b5', '5+b', 'b⁵'], correctIndex: 0 },
     { prompt: '2×n is hetzelfde als…', options: ['n+n', 'n²', '2+n', 'n−n'], correctIndex: 0 },
     { prompt: 'p + p + p = ?', options: ['p³', '3p', '3+p', 'ppp'], correctIndex: 1 },
-    { prompt: '7×a = ?', options: ['a+7', '7a', 'a⁷', '7+a'], correctIndex: 1 },
+    { prompt: '7×a is hetzelfde als…', options: ['a+7', '7a', 'a⁷', '7+a'], correctIndex: 1 },
 
     // Combine like terms
     { prompt: '10a − 2a = ?', options: ['8a', '8', '12a', '8a²'], correctIndex: 0 },

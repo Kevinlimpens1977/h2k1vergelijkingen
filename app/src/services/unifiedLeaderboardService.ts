@@ -1,8 +1,15 @@
 /**
- * Leaderboard service for §8.1 Speed Test ("Termen Tikkie").
+ * Unified Leaderboard Service
  *
- * Firestore path: /leaderboard/speedtest_8_1/scores/{uid}
- * Realtime: onSnapshot for live class top-N during gameplay.
+ * Single generic service replacing per-game leaderboard services.
+ * Firestore path: /leaderboard/{boardId}/scores/{uid}
+ *
+ * Supported boards:
+ *   - termen_quest_8_1  (§8.1 Termen Quest)
+ *   - speedtest_8_1     (§8.1 Speed Test / Termen Tikkie)
+ *   - balance_challenge  (Balans Minigame)
+ *   - balansblitz_8_2   (§8.2 Balans Blitz)
+ *   - termtris_8_3      (§8.3 Termtris)
  */
 
 import {
@@ -15,10 +22,23 @@ import {
     orderBy,
     limit,
     onSnapshot,
+    getDocs,
     serverTimestamp,
     type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+
+/* ── board IDs ───────────────────────────────────────── */
+
+export const BOARD_IDS = {
+    TERMEN_QUEST: 'termen_quest_8_1',
+    SPEED_TEST: 'speedtest_8_1',
+    BALANCE_CHALLENGE: 'balance_challenge',
+    BALANS_BLITZ: 'balansblitz_8_2',
+    TERMTRIS: 'termtris_8_3',
+} as const;
+
+export type BoardId = typeof BOARD_IDS[keyof typeof BOARD_IDS];
 
 /* ── types ───────────────────────────────────────────── */
 
@@ -35,35 +55,36 @@ export interface LeaderboardEntry {
 
 /* ── refs ─────────────────────────────────────────────── */
 
-function scoresCol() {
-    return collection(db, 'leaderboard', 'speedtest_8_1', 'scores');
+function scoresCol(boardId: BoardId) {
+    return collection(db, 'leaderboard', boardId, 'scores');
 }
 
-function scoreDoc(uid: string) {
-    return doc(db, 'leaderboard', 'speedtest_8_1', 'scores', uid);
+function scoreDoc(boardId: BoardId, uid: string) {
+    return doc(db, 'leaderboard', boardId, 'scores', uid);
 }
 
 /* ── read (one-shot) ─────────────────────────────────── */
 
-export async function getClassLeaderboard(
+export async function getLeaderboard(
+    boardId: BoardId,
     classId: string | null,
     max = 10,
 ): Promise<LeaderboardEntry[]> {
     if (!classId) return [];
     const q = query(
-        scoresCol(),
+        scoresCol(boardId),
         where('classId', '==', classId),
         orderBy('bestScore', 'desc'),
         limit(max),
     );
-    const { getDocs } = await import('firebase/firestore');
     const snap = await getDocs(q);
     return snap.docs.map((d) => d.data() as LeaderboardEntry);
 }
 
 /* ── realtime listener ───────────────────────────────── */
 
-export function subscribeClassLeaderboard(
+export function subscribeLeaderboard(
+    boardId: BoardId,
     classId: string | null,
     max: number,
     callback: (entries: LeaderboardEntry[]) => void,
@@ -73,7 +94,7 @@ export function subscribeClassLeaderboard(
         return () => { };
     }
     const q = query(
-        scoresCol(),
+        scoresCol(boardId),
         where('classId', '==', classId),
         orderBy('bestScore', 'desc'),
         limit(max),
@@ -82,41 +103,41 @@ export function subscribeClassLeaderboard(
         const entries = snap.docs.map((d) => d.data() as LeaderboardEntry);
         callback(entries);
     }, (err) => {
-        console.warn('Leaderboard snapshot error:', err);
+        console.warn(`Leaderboard [${boardId}] snapshot error:`, err);
     });
 }
 
 /* ── write ───────────────────────────────────────────── */
 
-export async function updateLeaderboardScore(
+export async function updateScore(
+    boardId: BoardId,
     uid: string,
     firstName: string,
     classId: string | null,
     score: number,
 ): Promise<void> {
-    const ref = scoreDoc(uid);
-    const snap = await getDoc(ref);
+    const ref = scoreDoc(boardId, uid);
 
-    if (!snap.exists()) {
-        await setDoc(ref, {
-            uid,
-            firstName,
-            classId,
-            bestScore: score,
-            lastScore: score,
-            attempts: 1,
-            bestScoreAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-        });
-        return;
+    // Try to read existing doc for bestScore comparison.
+    // If read fails (permissions), fall back to blind upsert.
+    let existingBest = -1;
+    try {
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+            existingBest = (snap.data() as LeaderboardEntry).bestScore ?? 0;
+        }
+    } catch {
+        // Read not allowed — do blind upsert (bestScore may overwrite lower)
+        existingBest = -1;
     }
 
-    const current = snap.data() as LeaderboardEntry;
-    const isNewBest = score > (current.bestScore ?? 0);
+    const isNewBest = existingBest < 0 || score > existingBest;
 
     await setDoc(ref, {
+        uid,
+        firstName,
+        classId,
         lastScore: score,
-        attempts: (current.attempts ?? 0) + 1,
         updatedAt: serverTimestamp(),
         ...(isNewBest ? {
             bestScore: score,
