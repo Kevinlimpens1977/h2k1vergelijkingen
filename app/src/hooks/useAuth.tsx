@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
+import { migrateUserScores } from '../services/unifiedLeaderboardService';
 
 /* ── default class (all students share one leaderboard) ─ */
 const DEFAULT_CLASS_ID = 'klas2k';
@@ -119,8 +120,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const email = toEmail(studentNumber);
         const cred = await signInWithEmailAndPassword(auth, email, pin);
 
-        // update lastLoginAt
-        await setDoc(doc(db, 'users', cred.user.uid), { lastLoginAt: serverTimestamp() }, { merge: true });
+        // update lastLoginAt + ensure classId is set (migrate old accounts)
+        await setDoc(doc(db, 'users', cred.user.uid), {
+            lastLoginAt: serverTimestamp(),
+            classId: DEFAULT_CLASS_ID,
+        }, { merge: true });
 
         const snap = await getDoc(doc(db, 'users', cred.user.uid));
         if (snap.exists()) {
@@ -133,6 +137,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 classId: data.classId ?? DEFAULT_CLASS_ID,
             });
         }
+
+        // Migrate any old leaderboard scores to correct classId (fire & forget)
+        migrateUserScores(cred.user.uid, DEFAULT_CLASS_ID).catch(() => { });
     }
 
     /* logout */

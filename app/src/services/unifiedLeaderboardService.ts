@@ -147,3 +147,27 @@ export async function updateScore(
         } : {}),
     }, { merge: true });
 }
+
+/**
+ * Migrate all existing scores for a user to the given classId.
+ * Called once on login to fix old scores that had classId: null.
+ */
+export async function migrateUserScores(uid: string, classId: string): Promise<void> {
+    const boards = Object.values(BOARD_IDS);
+    await Promise.all(
+        boards.map(async (boardId) => {
+            try {
+                const ref = scoreDoc(boardId, uid);
+                const snap = await getDoc(ref);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (!data.classId || data.classId !== classId) {
+                        await setDoc(ref, { classId }, { merge: true });
+                    }
+                }
+            } catch {
+                // Silently skip — score may not exist for this board
+            }
+        }),
+    );
+}
