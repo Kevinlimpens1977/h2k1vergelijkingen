@@ -19,8 +19,6 @@ import {
     collection,
     query,
     where,
-    orderBy,
-    limit,
     onSnapshot,
     getDocs,
     serverTimestamp,
@@ -71,14 +69,16 @@ export async function getLeaderboard(
     max = 10,
 ): Promise<LeaderboardEntry[]> {
     if (!classId) return [];
+    // Single-field where (auto-indexed) — sort & slice client-side
     const q = query(
         scoresCol(boardId),
         where('classId', '==', classId),
-        orderBy('bestScore', 'desc'),
-        limit(max),
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => d.data() as LeaderboardEntry);
+    return snap.docs
+        .map((d) => d.data() as LeaderboardEntry)
+        .sort((a, b) => b.bestScore - a.bestScore)
+        .slice(0, max);
 }
 
 /* ── realtime listener ───────────────────────────────── */
@@ -93,14 +93,16 @@ export function subscribeLeaderboard(
         callback([]);
         return () => { };
     }
+    // Single-field where (auto-indexed) — sort & slice client-side
     const q = query(
         scoresCol(boardId),
         where('classId', '==', classId),
-        orderBy('bestScore', 'desc'),
-        limit(max),
     );
     return onSnapshot(q, (snap) => {
-        const entries = snap.docs.map((d) => d.data() as LeaderboardEntry);
+        const entries = snap.docs
+            .map((d) => d.data() as LeaderboardEntry)
+            .sort((a, b) => b.bestScore - a.bestScore)
+            .slice(0, max);
         callback(entries);
     }, (err) => {
         console.warn(`Leaderboard [${boardId}] snapshot error:`, err);
