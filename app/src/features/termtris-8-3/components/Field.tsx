@@ -18,7 +18,7 @@ interface FieldProps {
     flashRows?: number[];
 }
 
-const CELL = 24;
+const CELL = 28;
 const GAP = 1;
 
 /** Get the offsets for a piece type at rotation 0, for the preview. */
@@ -60,10 +60,10 @@ export default function Field({ field, activePiece, nextPieceType, flashRows = [
                     gridTemplateRows: `repeat(${ROWS}, ${CELL}px)`,
                     gap: GAP,
                     padding: GAP + 2,
-                    background: 'rgba(30, 41, 59, 0.06)',
+                    background: 'rgba(10, 10, 31, 0.8)',
                     borderRadius: 12,
-                    border: '2px solid rgba(108, 92, 231, 0.15)',
-                    boxShadow: '0 4px 24px rgba(30, 41, 59, 0.08)',
+                    border: '2px solid rgba(108, 92, 231, 0.25)',
+                    boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(108, 92, 231, 0.05)',
                 }}
             >
                 {displayGrid.map((row, r) =>
@@ -72,7 +72,7 @@ export default function Field({ field, activePiece, nextPieceType, flashRows = [
                         const color = cell.value > 0 ? PIECE_CSS_COLORS[cell.value] || '#6c5ce7' : undefined;
 
                         let bg = 'rgba(108, 92, 231, 0.03)';
-                        let border = '1px solid rgba(108, 92, 231, 0.04)';
+                        let border = '1px solid rgba(108, 92, 231, 0.05)';
                         let shadow = 'none';
 
                         if (cell.value > 0) {
@@ -92,7 +92,7 @@ export default function Field({ field, activePiece, nextPieceType, flashRows = [
                                     border,
                                     boxShadow: shadow,
                                     transition: 'all 0.08s ease',
-                                    animation: isFlashing ? 'termtris-flash 0.4s ease' : undefined,
+                                    animation: isFlashing ? 'tt-flash 0.4s ease' : undefined,
                                 }}
                             />
                         );
@@ -113,19 +113,19 @@ export default function Field({ field, activePiece, nextPieceType, flashRows = [
                         fontWeight: 700,
                         textTransform: 'uppercase' as const,
                         letterSpacing: '0.08em',
-                        color: 'var(--y-muted)',
+                        color: 'rgba(226, 232, 240, 0.4)',
                     }}>
                         Volgende
                     </span>
                     <div style={{
-                        background: 'var(--y-panel)',
-                        border: '1.5px solid var(--y-outline)',
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: '1.5px solid rgba(108, 92, 231, 0.2)',
                         borderRadius: 10,
                         padding: 8,
-                        boxShadow: '0 2px 8px rgba(30,41,59,0.06)',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                         display: 'grid',
-                        gridTemplateColumns: `repeat(4, 18px)`,
-                        gridTemplateRows: `repeat(2, 18px)`,
+                        gridTemplateColumns: `repeat(4, 22px)`,
+                        gridTemplateRows: `repeat(2, 22px)`,
                         gap: 1,
                     }}>
                         {Array.from({ length: 2 }, (_, r) =>
@@ -138,8 +138,8 @@ export default function Field({ field, activePiece, nextPieceType, flashRows = [
                                     <div
                                         key={`next-${r}-${c}`}
                                         style={{
-                                            width: 18,
-                                            height: 18,
+                                            width: 22,
+                                            height: 22,
                                             borderRadius: 3,
                                             background: isBlock ? color : 'transparent',
                                             border: isBlock ? '1px solid rgba(255,255,255,0.3)' : 'none',

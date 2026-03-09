@@ -1,13 +1,15 @@
 /**
- * TERMTRIS §8.3 Question Bank
+ * TERMTRIS §8.3 Question Bank  (v2 — Procedurally enriched)
  *
- * Questions derived from exercises 15–19 in §8.3 (balancing equations with
- * variables on BOTH sides).  All equations use the balance method.
+ * Topics: solving linear equations with variables on BOTH sides
+ * using the balance method.
  *
- * Book references:
- *   opgave 15, 16 → blz 53
- *   opgave 17     → blz 54
- *   opgave 18, 19 → blz 55
+ * Question Types:
+ *   'input'  → student types the answer
+ *   'mc'     → student picks the correct option (shuffled at runtime)
+ *
+ * Difficulty: klas 2 havo/vwo, §8.3 level, varied variable names,
+ * multi-step reasoning, and plausible distractors.
  */
 
 export type TermtrisQ =
@@ -29,316 +31,504 @@ export type TermtrisQ =
     };
 
 export const TERMTRIS_8_3_BANK: TermtrisQ[] = [
+
     /* ═══════════════════════════════════════════════════════
-       OPGAVE 15  (blz 53) — 4g + 3 = 2g + 17
+       BLOK 1 — Vergelijkingen direct oplossen (input)
        ═══════════════════════════════════════════════════════ */
     {
-        id: 't15a',
-        type: 'mc',
-        prompt: '4g + 3 = 2g + 17\nWelke vergelijking hoort bij balans ❶?',
-        options: ['4g + 3 = 2g + 17', '4g = 2g + 17', '2g + 3 = 17'],
-        correctIndex: 0,
-        bookRef: { page: 53, exercise: 'opgave 15', label: 'Balans ❶' },
+        id: 'v01',
+        type: 'input',
+        prompt: '5x + 3 = 2x + 18\nx = ?',
+        answer: '5',
     },
     {
-        id: 't15b',
+        id: 'v02',
         type: 'input',
-        prompt: '4g + 3 = 2g + 17\nHoeveel kazen zijn er aan beide kanten weggehaald bij stap 1?',
+        prompt: '7a + 2 = 3a + 22\na = ?',
+        answer: '5',
+    },
+    {
+        id: 'v03',
+        type: 'input',
+        prompt: '6b + 1 = 2b + 21\nb = ?',
+        answer: '5',
+    },
+    {
+        id: 'v04',
+        type: 'input',
+        prompt: '3p + 14 = 8p + 4\np = ?',
         answer: '2',
-        accept: ['2 kazen', '2g'],
-        bookRef: { page: 53, exercise: 'opgave 15', label: 'Stap 1' },
     },
     {
-        id: 't15c',
-        type: 'mc',
-        prompt: '4g + 3 = 2g + 17\nNa het weghalen van 2 kazen (2g) aan beide kanten, wat wordt de vergelijking?',
-        options: ['2g + 3 = 17', '4g + 3 = 17', '2g = 14'],
-        correctIndex: 0,
-        bookRef: { page: 53, exercise: 'opgave 15', label: 'Balans ❷' },
-    },
-    {
-        id: 't15d',
-        type: 'mc',
-        prompt: '2g + 3 = 17\nWelke stap is eerlijk?',
-        options: ['−3 aan beide kanten', '−3 alleen links', '+3 aan beide kanten'],
-        correctIndex: 0,
-        bookRef: { page: 53, exercise: 'opgave 15', label: 'Stap 2' },
-    },
-    {
-        id: 't15e',
-        type: 'mc',
-        prompt: '2g + 3 = 17\nNa −3 aan beide kanten wordt de vergelijking…',
-        options: ['2g = 14', '2g = 20', 'g = 7'],
-        correctIndex: 0,
-        bookRef: { page: 53, exercise: 'opgave 15', label: 'Balans ❸' },
-    },
-    {
-        id: 't15f',
+        id: 'v05',
         type: 'input',
-        prompt: '2g = 14\ng = ?',
-        answer: '7',
-        bookRef: { page: 53, exercise: 'opgave 15', label: 'Eindantwoord' },
-    },
-
-    /* ═══════════════════════════════════════════════════════
-       OPGAVE 16  (blz 53) — 2a + 10 = 5a + 4
-       ═══════════════════════════════════════════════════════ */
-    {
-        id: 't16a',
-        type: 'mc',
-        prompt: '2a + 10 = 5a + 4\nWelke vergelijking hoort bij balans ❶?',
-        options: ['2a + 10 = 5a + 4', '2a + 10 = 5a', 'a + 10 = 5a + 4'],
-        correctIndex: 0,
-        bookRef: { page: 53, exercise: 'opgave 16', label: 'Balans ❶' },
+        prompt: '9n − 5 = 4n + 20\nn = ?',
+        answer: '5',
     },
     {
-        id: 't16b',
-        type: 'mc',
-        prompt: '2a + 10 = 5a + 4\nWelke stap is eerlijk om zakjes weg te halen?',
-        options: ['−2a aan beide kanten', '−5a aan beide kanten', '−2a alleen links'],
-        correctIndex: 0,
-        bookRef: { page: 53, exercise: 'opgave 16', label: 'Stap 1' },
-    },
-    {
-        id: 't16c',
-        type: 'mc',
-        prompt: '2a + 10 = 5a + 4\nNa −2a aan beide kanten wordt de vergelijking…',
-        options: ['10 = 3a + 4', '10 = 5a + 4', '2a + 10 = 4'],
-        correctIndex: 0,
-        bookRef: { page: 53, exercise: 'opgave 16', label: 'Balans ❷' },
-    },
-    {
-        id: 't16d',
-        type: 'mc',
-        prompt: '10 = 3a + 4\nWelke stap is eerlijk?',
-        options: ['−4 aan beide kanten', '−10 aan beide kanten', '÷3 aan beide kanten'],
-        correctIndex: 0,
-        bookRef: { page: 53, exercise: 'opgave 16', label: 'Stap 2' },
-    },
-    {
-        id: 't16e',
-        type: 'mc',
-        prompt: '10 = 3a + 4\nNa −4 aan beide kanten wordt de vergelijking…',
-        options: ['6 = 3a', '14 = 3a', '10 = 3a'],
-        correctIndex: 0,
-        bookRef: { page: 53, exercise: 'opgave 16', label: 'Balans ❸' },
-    },
-    {
-        id: 't16f',
+        id: 'v06',
         type: 'input',
-        prompt: '6 = 3a\na = ?',
-        answer: '2',
-        bookRef: { page: 53, exercise: 'opgave 16', label: 'Eindantwoord' },
-    },
-
-    /* ═══════════════════════════════════════════════════════
-       OPGAVE 17  (blz 54) — Kladblaadje, vergelijkingen invullen
-       bij de balansen van opgave 16  (2a + 10 = 5a + 4)
-       ═══════════════════════════════════════════════════════ */
-    {
-        id: 't17a',
-        type: 'mc',
-        prompt: 'Schrijf de vergelijking bij balans ❶ (opgave 16).',
-        options: ['2a + 10 = 5a + 4', '2a = 5a + 4', '10 = 3a + 4'],
-        correctIndex: 0,
-        bookRef: { page: 54, exercise: 'opgave 17', label: 'Balans ❶' },
+        prompt: '2x + 30 = 7x + 5\nx = ?',
+        answer: '5',
     },
     {
-        id: 't17b',
-        type: 'mc',
-        prompt: 'Schrijf de vergelijking bij balans ❷ (na −2a aan beide kanten).',
-        options: ['10 = 3a + 4', '2a + 10 = 4', '10 = 5a'],
-        correctIndex: 0,
-        bookRef: { page: 54, exercise: 'opgave 17', label: 'Balans ❷' },
-    },
-    {
-        id: 't17c',
-        type: 'mc',
-        prompt: 'Schrijf de vergelijking bij balans ❸ (na −4 aan beide kanten).',
-        options: ['6 = 3a', '10 = 3a', '4 = 3a'],
-        correctIndex: 0,
-        bookRef: { page: 54, exercise: 'opgave 17', label: 'Balans ❸' },
-    },
-    {
-        id: 't17d',
+        id: 'v07',
         type: 'input',
-        prompt: 'Controleer het antwoord a = 2 door in te vullen:\n2·2 + 10 = 5·2 + 4\nWat is de uitkomst links?',
-        answer: '14',
-        bookRef: { page: 54, exercise: 'opgave 17', label: 'Controle links' },
-    },
-    {
-        id: 't17e',
-        type: 'input',
-        prompt: 'Controleer het antwoord a = 2 door in te vullen:\n2·2 + 10 = 5·2 + 4\nWat is de uitkomst rechts?',
-        answer: '14',
-        bookRef: { page: 54, exercise: 'opgave 17', label: 'Controle rechts' },
-    },
-
-    /* ═══════════════════════════════════════════════════════
-       OPGAVE 18  (blz 55) — Twee balansen
-       Balans A: 5a + 4 = a + 20
-       Balans B: 4a + 18 = 6a + 4
-       ═══════════════════════════════════════════════════════ */
-    // — Balans A —
-    {
-        id: 't18a1',
-        type: 'mc',
-        prompt: 'Balans A: 5a + 4 = a + 20\nWelke stap is eerlijk om zakjes weg te halen?',
-        options: ['−a aan beide kanten', '−5a aan beide kanten', '−4 aan beide kanten'],
-        correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 18', label: 'Balans A – Stap 1' },
-    },
-    {
-        id: 't18a2',
-        type: 'mc',
-        prompt: 'Balans A: 5a + 4 = a + 20\nNa −a aan beide kanten wordt de vergelijking…',
-        options: ['4a + 4 = 20', '5a = 20', '4a + 4 = a + 20'],
-        correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 18', label: 'Balans A – Stap 1 resultaat' },
-    },
-    {
-        id: 't18a3',
-        type: 'mc',
-        prompt: '4a + 4 = 20\nWelke stap is eerlijk?',
-        options: ['−4 aan beide kanten', '÷4 aan beide kanten', '+4 aan beide kanten'],
-        correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 18', label: 'Balans A – Stap 2' },
-    },
-    {
-        id: 't18a4',
-        type: 'mc',
-        prompt: '4a + 4 = 20\nNa −4 aan beide kanten wordt de vergelijking…',
-        options: ['4a = 16', '4a = 24', 'a = 4'],
-        correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 18', label: 'Balans A – Stap 2 resultaat' },
-    },
-    {
-        id: 't18a5',
-        type: 'input',
-        prompt: '4a = 16\na = ?',
+        prompt: '8a + 3 = 5a + 15\na = ?',
         answer: '4',
-        bookRef: { page: 55, exercise: 'opgave 18', label: 'Balans A – Eindantwoord' },
-    },
-
-    // — Balans B —
-    {
-        id: 't18b1',
-        type: 'mc',
-        prompt: 'Balans B: 4a + 18 = 6a + 4\nWelke stap is eerlijk om zakjes weg te halen?',
-        options: ['−4a aan beide kanten', '−6a aan beide kanten', '−18 aan beide kanten'],
-        correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 18', label: 'Balans B – Stap 1' },
     },
     {
-        id: 't18b2',
-        type: 'mc',
-        prompt: 'Balans B: 4a + 18 = 6a + 4\nNa −4a aan beide kanten wordt de vergelijking…',
-        options: ['18 = 2a + 4', '4a + 18 = 4', '18 = 6a'],
-        correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 18', label: 'Balans B – Stap 1 resultaat' },
-    },
-    {
-        id: 't18b3',
-        type: 'mc',
-        prompt: '18 = 2a + 4\nWelke stap is eerlijk?',
-        options: ['−4 aan beide kanten', '÷2 aan beide kanten', '−18 aan beide kanten'],
-        correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 18', label: 'Balans B – Stap 2' },
-    },
-    {
-        id: 't18b4',
-        type: 'mc',
-        prompt: '18 = 2a + 4\nNa −4 aan beide kanten wordt de vergelijking…',
-        options: ['14 = 2a', '22 = 2a', '18 = 2a'],
-        correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 18', label: 'Balans B – Stap 2 resultaat' },
-    },
-    {
-        id: 't18b5',
+        id: 'v08',
         type: 'input',
-        prompt: '14 = 2a\na = ?',
-        answer: '7',
-        bookRef: { page: 55, exercise: 'opgave 18', label: 'Balans B – Eindantwoord' },
+        prompt: '4b + 9 = b + 24\nb = ?',
+        answer: '5',
+    },
+    {
+        id: 'v09',
+        type: 'input',
+        prompt: '6x + 2 = 4x + 12\nx = ?',
+        answer: '5',
+    },
+    {
+        id: 'v10',
+        type: 'input',
+        prompt: '10a − 6 = 7a + 9\na = ?',
+        answer: '5',
+    },
+    {
+        id: 'v11',
+        type: 'input',
+        prompt: '3x + 25 = 8x + 5\nx = ?',
+        answer: '4',
+    },
+    {
+        id: 'v12',
+        type: 'input',
+        prompt: '12p − 8 = 4p + 16\np = ?',
+        answer: '3',
+    },
+    {
+        id: 'v13',
+        type: 'input',
+        prompt: '5n + 7 = 2n + 25\nn = ?',
+        answer: '6',
+    },
+    {
+        id: 'v14',
+        type: 'input',
+        prompt: '11b − 3 = 5b + 15\nb = ?',
+        answer: '3',
+    },
+    {
+        id: 'v15',
+        type: 'input',
+        prompt: '4x + 20 = 6x + 8\nx = ?',
+        answer: '6',
+    },
+    {
+        id: 'v16',
+        type: 'input',
+        prompt: '7a + 4 = 3a + 28\na = ?',
+        answer: '6',
+    },
+    {
+        id: 'v17',
+        type: 'input',
+        prompt: '2n + 35 = 9n\nn = ?',
+        answer: '5',
+    },
+    {
+        id: 'v18',
+        type: 'input',
+        prompt: '15 = 3x + 6\nx = ?',
+        answer: '3',
+    },
+    {
+        id: 'v19',
+        type: 'input',
+        prompt: '8b − 2 = 3b + 18\nb = ?',
+        answer: '4',
+    },
+    {
+        id: 'v20',
+        type: 'input',
+        prompt: '6a + 10 = 10a − 2\na = ?',
+        answer: '3',
     },
 
     /* ═══════════════════════════════════════════════════════
-       OPGAVE 19  (blz 55) — Drie vergelijkingen oplossen
-       A: 3a + 2 = a + 12
-       B: 5a + 4 = 2a + 7
-       C: 28 = 5a + 3
+       BLOK 2 — Tussenresultaat na een stap (MC)
+       "Na ... aan beide kanten wordt de vergelijking..."
        ═══════════════════════════════════════════════════════ */
-    // — 19A —
     {
-        id: 't19a1',
+        id: 's01',
         type: 'mc',
-        prompt: '3a + 2 = a + 12\nWelke stap is eerlijk om letters weg te halen?',
-        options: ['−a aan beide kanten', '−3a aan beide kanten', '−2 aan beide kanten'],
+        prompt: '5x + 3 = 2x + 18\nNa −2x aan beide kanten…',
+        options: ['3x + 3 = 18', '5x + 3 = 18', '3x = 15'],
         correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 19', label: 'A – Stap 1' },
     },
     {
-        id: 't19a2',
+        id: 's02',
         type: 'mc',
-        prompt: '3a + 2 = a + 12\nNa −a aan beide kanten…',
-        options: ['2a + 2 = 12', '3a = 12', '2a + 2 = a + 12'],
+        prompt: '7a + 2 = 3a + 22\nNa −3a aan beide kanten…',
+        options: ['4a + 2 = 22', '7a = 22', '3a + 2 = 22'],
         correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 19', label: 'A – Stap 1 resultaat' },
     },
     {
-        id: 't19a3',
-        type: 'input',
-        prompt: '2a + 2 = 12\na = ?',
-        answer: '5',
-        bookRef: { page: 55, exercise: 'opgave 19', label: 'A – Eindantwoord' },
+        id: 's03',
+        type: 'mc',
+        prompt: '3p + 14 = 8p + 4\nNa −3p aan beide kanten…',
+        options: ['14 = 5p + 4', '3p + 14 = 4', '14 = 8p'],
+        correctIndex: 0,
+    },
+    {
+        id: 's04',
+        type: 'mc',
+        prompt: '9n − 5 = 4n + 20\nNa −4n aan beide kanten…',
+        options: ['5n − 5 = 20', '9n = 20', '5n + 5 = 20'],
+        correctIndex: 0,
+    },
+    {
+        id: 's05',
+        type: 'mc',
+        prompt: '4b + 9 = b + 24\nNa −b aan beide kanten…',
+        options: ['3b + 9 = 24', '4b = 24', '3b + 24 = 9'],
+        correctIndex: 0,
+    },
+    {
+        id: 's06',
+        type: 'mc',
+        prompt: '8a + 3 = 5a + 15\nNa −5a aan beide kanten…',
+        options: ['3a + 3 = 15', '8a = 15', '3a + 15 = 3'],
+        correctIndex: 0,
+    },
+    {
+        id: 's07',
+        type: 'mc',
+        prompt: '6x + 2 = 4x + 12\nNa −4x aan beide kanten…',
+        options: ['2x + 2 = 12', '6x = 12', '2x + 12 = 2'],
+        correctIndex: 0,
+    },
+    {
+        id: 's08',
+        type: 'mc',
+        prompt: '10a − 6 = 7a + 9\nNa −7a aan beide kanten…',
+        options: ['3a − 6 = 9', '10a = 9', '3a + 6 = 9'],
+        correctIndex: 0,
+    },
+    {
+        id: 's09',
+        type: 'mc',
+        prompt: '3x + 25 = 8x + 5\nNa −3x aan beide kanten…',
+        options: ['25 = 5x + 5', '3x = 5', '25 = 8x'],
+        correctIndex: 0,
+    },
+    {
+        id: 's10',
+        type: 'mc',
+        prompt: '12p − 8 = 4p + 16\nNa −4p aan beide kanten…',
+        options: ['8p − 8 = 16', '12p = 16', '8p + 8 = 16'],
+        correctIndex: 0,
     },
 
-    // — 19B —
+    /* ═══════════════════════════════════════════════════════
+       BLOK 3 — Welke stap is correct? (MC)
+       Subtielere afleiders
+       ═══════════════════════════════════════════════════════ */
     {
-        id: 't19b1',
+        id: 'k01',
         type: 'mc',
-        prompt: '5a + 4 = 2a + 7\nWelke stap is eerlijk om letters weg te halen?',
-        options: ['−2a aan beide kanten', '−5a aan beide kanten', '−4 aan beide kanten'],
+        prompt: '5x + 3 = 2x + 18\nWelke eerste stap is correct?',
+        options: ['−2x aan beide kanten', '−5x aan beide kanten', '−3 alleen links'],
         correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 19', label: 'B – Stap 1' },
     },
     {
-        id: 't19b2',
+        id: 'k02',
         type: 'mc',
-        prompt: '5a + 4 = 2a + 7\nNa −2a aan beide kanten…',
-        options: ['3a + 4 = 7', '5a = 7', '3a + 4 = 2a + 7'],
+        prompt: '3p + 14 = 8p + 4\nWelke eerste stap is correct?',
+        options: ['−3p aan beide kanten', '−14 aan beide kanten', '−8p alleen rechts'],
         correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 19', label: 'B – Stap 1 resultaat' },
     },
     {
-        id: 't19b3',
-        type: 'input',
-        prompt: '3a + 4 = 7\na = ?',
-        answer: '1',
-        bookRef: { page: 55, exercise: 'opgave 19', label: 'B – Eindantwoord' },
+        id: 'k03',
+        type: 'mc',
+        prompt: '3x + 3 = 18\nWat is de volgende stap?',
+        options: ['−3 aan beide kanten', '÷3 aan beide kanten', '−18 aan beide kanten'],
+        correctIndex: 0,
+    },
+    {
+        id: 'k04',
+        type: 'mc',
+        prompt: '4a + 2 = 22\nWat is de volgende stap?',
+        options: ['−2 aan beide kanten', '÷4 aan beide kanten', '−22 aan beide kanten'],
+        correctIndex: 0,
+    },
+    {
+        id: 'k05',
+        type: 'mc',
+        prompt: '5n − 5 = 20\nWat is de volgende stap?',
+        options: ['+5 aan beide kanten', '−5 aan beide kanten', '÷5 aan beide kanten'],
+        correctIndex: 0,
+    },
+    {
+        id: 'k06',
+        type: 'mc',
+        prompt: '25 = 5x + 5\nWat is de volgende stap?',
+        options: ['−5 aan beide kanten', '÷5 aan beide kanten', '−25 aan beide kanten'],
+        correctIndex: 0,
+    },
+    {
+        id: 'k07',
+        type: 'mc',
+        prompt: '6a + 10 = 10a − 2\nWelke eerste stap is correct?',
+        options: ['−6a aan beide kanten', '−10 aan beide kanten', '+2 alleen rechts'],
+        correctIndex: 0,
+    },
+    {
+        id: 'k08',
+        type: 'mc',
+        prompt: '8p − 8 = 16\nWat is de volgende stap?',
+        options: ['+8 aan beide kanten', '−8 aan beide kanten', '÷8 aan beide kanten'],
+        correctIndex: 0,
     },
 
-    // — 19C —
+    /* ═══════════════════════════════════════════════════════
+       BLOK 4 — Controle: klopt het antwoord? (MC)
+       ═══════════════════════════════════════════════════════ */
     {
-        id: 't19c1',
+        id: 'c01',
         type: 'mc',
-        prompt: '28 = 5a + 3\nWelke stap is eerlijk?',
-        options: ['−3 aan beide kanten', '−28 aan beide kanten', '÷5 aan beide kanten'],
+        prompt: '5x + 3 = 2x + 18\nKlopt x = 5? Reken na.',
+        options: ['Ja, want 28 = 28', 'Nee, want 25 ≠ 28', 'Nee, want 28 ≠ 20'],
         correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 19', label: 'C – Stap 1' },
     },
     {
-        id: 't19c2',
+        id: 'c02',
         type: 'mc',
-        prompt: '28 = 5a + 3\nNa −3 aan beide kanten…',
-        options: ['25 = 5a', '31 = 5a', '28 = 5a'],
+        prompt: '7a + 2 = 3a + 22\nKlopt a = 5? Reken na.',
+        options: ['Ja, want 37 = 37', 'Nee, want 35 ≠ 37', 'Nee, want 37 ≠ 42'],
         correctIndex: 0,
-        bookRef: { page: 55, exercise: 'opgave 19', label: 'C – Stap 1 resultaat' },
     },
     {
-        id: 't19c3',
+        id: 'c03',
+        type: 'mc',
+        prompt: '3p + 14 = 8p + 4\nKlopt p = 2? Reken na.',
+        options: ['Ja, want 20 = 20', 'Nee, want 20 ≠ 22', 'Nee, want 18 ≠ 20'],
+        correctIndex: 0,
+    },
+    {
+        id: 'c04',
+        type: 'mc',
+        prompt: '8a + 3 = 5a + 15\nKlopt a = 4? Reken na.',
+        options: ['Ja, want 35 = 35', 'Nee, want 32 ≠ 35', 'Nee, want 35 ≠ 40'],
+        correctIndex: 0,
+    },
+    {
+        id: 'c05',
+        type: 'mc',
+        prompt: '6a + 10 = 10a − 2\nKlopt a = 3? Reken na.',
+        options: ['Ja, want 28 = 28', 'Nee, want 28 ≠ 30', 'Nee, want 26 ≠ 28'],
+        correctIndex: 0,
+    },
+    {
+        id: 'c06',
+        type: 'mc',
+        prompt: '4b + 9 = b + 24\nKlopt b = 5? Reken na.',
+        options: ['Ja, want 29 = 29', 'Nee, want 29 ≠ 30', 'Nee, want 25 ≠ 29'],
+        correctIndex: 0,
+    },
+
+    /* ═══════════════════════════════════════════════════════
+       BLOK 5 — Invullen: wat is de uitkomst? (input)
+       ═══════════════════════════════════════════════════════ */
+    {
+        id: 'i01',
         type: 'input',
-        prompt: '25 = 5a\na = ?',
+        prompt: 'Vul x = 5 in bij 5x + 3.\nWat is de uitkomst?',
+        answer: '28',
+    },
+    {
+        id: 'i02',
+        type: 'input',
+        prompt: 'Vul a = 4 in bij 8a + 3.\nWat is de uitkomst?',
+        answer: '35',
+    },
+    {
+        id: 'i03',
+        type: 'input',
+        prompt: 'Vul p = 2 in bij 3p + 14.\nWat is de uitkomst?',
+        answer: '20',
+    },
+    {
+        id: 'i04',
+        type: 'input',
+        prompt: 'Vul n = 5 in bij 9n − 5.\nWat is de uitkomst?',
+        answer: '40',
+    },
+    {
+        id: 'i05',
+        type: 'input',
+        prompt: 'Vul b = 5 in bij 4b + 9.\nWat is de uitkomst?',
+        answer: '29',
+    },
+    {
+        id: 'i06',
+        type: 'input',
+        prompt: 'Vul a = 3 in bij 10a − 2.\nWat is de uitkomst?',
+        answer: '28',
+    },
+    {
+        id: 'i07',
+        type: 'input',
+        prompt: 'Vul x = 4 in bij 3x + 25.\nWat is de uitkomst?',
+        answer: '37',
+    },
+    {
+        id: 'i08',
+        type: 'input',
+        prompt: 'Vul a = 6 in bij 7a + 4.\nWat is de uitkomst?',
+        answer: '46',
+    },
+
+    /* ═══════════════════════════════════════════════════════
+       BLOK 6 — Grotere getallen / extra uitdaging (input)
+       ═══════════════════════════════════════════════════════ */
+    {
+        id: 'h01',
+        type: 'input',
+        prompt: '9x + 4 = 3x + 40\nx = ?',
+        answer: '6',
+    },
+    {
+        id: 'h02',
+        type: 'input',
+        prompt: '2b + 50 = 12b\nb = ?',
         answer: '5',
-        bookRef: { page: 55, exercise: 'opgave 19', label: 'C – Eindantwoord' },
+    },
+    {
+        id: 'h03',
+        type: 'input',
+        prompt: '15a − 10 = 5a + 30\na = ?',
+        answer: '4',
+    },
+    {
+        id: 'h04',
+        type: 'input',
+        prompt: '4n + 33 = 7n + 12\nn = ?',
+        answer: '7',
+    },
+    {
+        id: 'h05',
+        type: 'input',
+        prompt: '11x − 8 = 6x + 17\nx = ?',
+        answer: '5',
+    },
+    {
+        id: 'h06',
+        type: 'input',
+        prompt: '3a + 45 = 8a + 10\na = ?',
+        answer: '7',
+    },
+    {
+        id: 'h07',
+        type: 'input',
+        prompt: '13p − 6 = 7p + 18\np = ?',
+        answer: '4',
+    },
+    {
+        id: 'h08',
+        type: 'input',
+        prompt: '6b + 21 = 9b\nb = ?',
+        answer: '7',
+    },
+    {
+        id: 'h09',
+        type: 'input',
+        prompt: '14x − 12 = 8x + 6\nx = ?',
+        answer: '3',
+    },
+    {
+        id: 'h10',
+        type: 'input',
+        prompt: '5n + 36 = 11n\nn = ?',
+        answer: '6',
+    },
+
+    /* ═══════════════════════════════════════════════════════
+       BLOK 7 — Twee stappen in één: wat is de uitkomst? (MC)
+       ═══════════════════════════════════════════════════════ */
+    {
+        id: 'm01',
+        type: 'mc',
+        prompt: '8a + 3 = 5a + 15\nNa −5a en dan −3 aan beide kanten…',
+        options: ['3a = 12', '3a = 18', '3a = 15'],
+        correctIndex: 0,
+    },
+    {
+        id: 'm02',
+        type: 'mc',
+        prompt: '6x + 2 = 4x + 12\nNa −4x en dan −2 aan beide kanten…',
+        options: ['2x = 10', '2x = 14', '2x = 12'],
+        correctIndex: 0,
+    },
+    {
+        id: 'm03',
+        type: 'mc',
+        prompt: '9n − 5 = 4n + 20\nNa −4n en dan +5 aan beide kanten…',
+        options: ['5n = 25', '5n = 15', '5n = 20'],
+        correctIndex: 0,
+    },
+    {
+        id: 'm04',
+        type: 'mc',
+        prompt: '7a + 2 = 3a + 22\nNa −3a en dan −2 aan beide kanten…',
+        options: ['4a = 20', '4a = 24', '4a = 22'],
+        correctIndex: 0,
+    },
+    {
+        id: 'm05',
+        type: 'mc',
+        prompt: '3p + 14 = 8p + 4\nNa −3p en dan −4 aan beide kanten…',
+        options: ['10 = 5p', '14 = 5p', '18 = 5p'],
+        correctIndex: 0,
+    },
+    {
+        id: 'm06',
+        type: 'mc',
+        prompt: '12p − 8 = 4p + 16\nNa −4p en dan +8 aan beide kanten…',
+        options: ['8p = 24', '8p = 8', '8p = 16'],
+        correctIndex: 0,
+    },
+
+    /* ═══════════════════════════════════════════════════════
+       BLOK 8 — Omgekeerde vraag: welke vergelijking geeft deze x? (MC)
+       ═══════════════════════════════════════════════════════ */
+    {
+        id: 'r01',
+        type: 'mc',
+        prompt: 'Bij welke vergelijking is x = 3?',
+        options: ['4x + 5 = 2x + 11', '4x + 5 = 2x + 9', '4x + 5 = 2x + 15'],
+        correctIndex: 0,
+    },
+    {
+        id: 'r02',
+        type: 'mc',
+        prompt: 'Bij welke vergelijking is a = 4?',
+        options: ['3a + 8 = a + 16', '3a + 8 = a + 14', '3a + 8 = a + 20'],
+        correctIndex: 0,
+    },
+    {
+        id: 'r03',
+        type: 'mc',
+        prompt: 'Bij welke vergelijking is n = 6?',
+        options: ['2n + 15 = 5n − 3', '2n + 15 = 5n + 3', '2n + 15 = 5n − 9'],
+        correctIndex: 0,
+    },
+    {
+        id: 'r04',
+        type: 'mc',
+        prompt: 'Bij welke vergelijking is b = 2?',
+        options: ['7b + 1 = 3b + 9', '7b + 1 = 3b + 7', '7b + 1 = 3b + 11'],
+        correctIndex: 0,
     },
 ];

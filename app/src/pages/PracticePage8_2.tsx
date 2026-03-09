@@ -119,6 +119,10 @@ export default function PracticePage8_2() {
                 if (!isCorrect && current.accept) {
                     isCorrect = current.accept.some((a) => normalize(trimmed) === normalize(a) || algebraEquals(trimmed, a));
                 }
+                // Smart number extraction fallback
+                if (!isCorrect) {
+                    isCorrect = numericMatch(trimmed, current.answer);
+                }
                 break;
             }
             case 'multiInput': {
@@ -215,6 +219,41 @@ export default function PracticePage8_2() {
         return s.replace(/\s+/g, '').toLowerCase();
     }
 
+    /**
+     * Smart number extraction for flexible student input.
+     * If the expected answer is a pure number, try to extract that number
+     * from the student's text (e.g. "ook 5 knikkers" → "5", "vijf" → "5").
+     */
+    const DUTCH_NUMBERS: Record<string, string> = {
+        nul: '0', een: '1', één: '1', twee: '2', drie: '3', vier: '4',
+        vijf: '5', zes: '6', zeven: '7', acht: '8', negen: '9', tien: '10',
+        elf: '11', twaalf: '12', dertien: '13', veertien: '14', vijftien: '15',
+        zestien: '16', zeventien: '17', achttien: '18', negentien: '19', twintig: '20',
+        dertig: '30', veertig: '40', vijftig: '50', zestig: '60',
+        zeventig: '70', tachtig: '80', negentig: '90',
+        honderd: '100', tweehonderd: '200', driehonderd: '300',
+        vierhonderd: '400', vijfhonderd: '500', zeshonderd: '600',
+        achthonderd: '800', duizend: '1000', vijftienhonderd: '1500',
+    };
+
+    function numericMatch(input: string, expected: string): boolean {
+        // Only apply when expected answer is a pure number
+        if (!/^-?\d+$/.test(expected.trim())) return false;
+
+        const lower = input.toLowerCase().trim();
+
+        // 1) Try to find the exact number in the input string
+        const digits = lower.match(/-?\d+/g);
+        if (digits && digits.length === 1 && digits[0] === expected.trim()) return true;
+
+        // 2) Check Dutch number words
+        for (const [word, num] of Object.entries(DUTCH_NUMBERS)) {
+            if (lower.includes(word) && num === expected.trim()) return true;
+        }
+
+        return false;
+    }
+
     /* ═══════════════════════════════════════════════════
        SESSION DONE
        ═══════════════════════════════════════════════════ */
@@ -250,7 +289,165 @@ export default function PracticePage8_2() {
         );
     }
 
+    /* ── Dev-mode skip navigation ─────────────────────── */
+    const devSkip = (dir: -1 | 1) => {
+        const next = currentIdx + dir;
+        if (next < 0 || next >= items.length) return;
+        setCurrentIdx(next);
+        setFeedback({ type: 'none' });
+        setHintsUsed(0);
+        setSelectedOption(null);
+        setInputValue('');
+        setMultiValues({});
+    };
+
+    const DevNav = () => devMode ? (
+        <div style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.75rem',
+            padding: '0.5rem 1rem',
+            background: 'linear-gradient(135deg, #2d3436, #636e72)',
+            borderTop: '2px solid #e17055',
+            zIndex: 9999,
+            fontSize: '0.8rem',
+            color: '#fff',
+        }}>
+            <span style={{ fontWeight: 800, color: '#e17055', fontSize: '0.7rem' }}>DEV</span>
+            <button
+                onClick={() => devSkip(-1)}
+                disabled={currentIdx === 0}
+                style={{
+                    padding: '0.25rem 0.6rem', borderRadius: '6px',
+                    border: 'none', background: currentIdx === 0 ? '#555' : '#6c5ce7',
+                    color: '#fff', fontWeight: 700, cursor: currentIdx === 0 ? 'not-allowed' : 'pointer',
+                    fontSize: '0.8rem',
+                }}
+            >◀ Vorige</button>
+            <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                {currentIdx + 1}/{items.length}
+            </span>
+            <button
+                onClick={() => devSkip(1)}
+                disabled={currentIdx >= items.length - 1}
+                style={{
+                    padding: '0.25rem 0.6rem', borderRadius: '6px',
+                    border: 'none', background: currentIdx >= items.length - 1 ? '#555' : '#6c5ce7',
+                    color: '#fff', fontWeight: 700, cursor: currentIdx >= items.length - 1 ? 'not-allowed' : 'pointer',
+                    fontSize: '0.8rem',
+                }}
+            >Volgende ▶</button>
+            <span style={{ fontSize: '0.65rem', color: '#b2bec3', marginLeft: '0.5rem' }}>
+                {current?.id} ({current?.type})
+            </span>
+        </div>
+    ) : null;
+
     if (!current) return null;
+
+    /* ═══════════════════════════════════════════════════
+       THEORY SLIDE
+       ═══════════════════════════════════════════════════ */
+    if (current.type === 'theory') {
+        return (
+            <div className="y-page">
+                <header className="y-topbar">
+                    <div className="y-topbar-logo">
+                        <span className="y-topbar-logo-icon">📖</span>
+                        <span>§8.2 De balans — Theorie</span>
+                    </div>
+                    <div className="y-topbar-user" style={{ gap: '0.5rem' }}>
+                        {devMode && <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '0.15rem 0.5rem', borderRadius: '6px', background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff' }}>DEV</span>}
+                        <span className="y-topbar-number">
+                            {currentIdx + 1}/{items.length}
+                        </span>
+                        <button onClick={() => navigate('/')} className="y-btn--ghost y-btn" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem' }}>
+                            ✕ Stop
+                        </button>
+                    </div>
+                </header>
+
+                <div className="y-progress" style={{ borderRadius: 0, height: 5 }}>
+                    <div className="y-progress-fill" style={{ width: `${progress * 100}%` }} />
+                </div>
+
+                <div className="y-main" style={{ maxWidth: 700, paddingTop: '1.5rem', paddingBottom: devMode ? '4rem' : undefined }}>
+                    {current.title && (
+                        <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+                            <span className="y-badge y-badge--active" style={{ fontSize: '0.8rem', background: 'rgba(0,184,148,0.1)', color: '#00b894', border: '1px solid rgba(0,184,148,0.2)' }}>
+                                {current.title}
+                            </span>
+                        </div>
+                    )}
+
+                    <div className="y-card" style={{
+                        padding: '1.5rem',
+                        borderTop: '3px solid #00b894',
+                        marginBottom: '1rem',
+                    }}>
+                        {current.bookRef && (
+                            <div style={{
+                                display: 'inline-block',
+                                marginBottom: '0.75rem',
+                                padding: '0.2rem 0.65rem',
+                                borderRadius: '20px',
+                                fontSize: '0.72rem',
+                                fontWeight: 600,
+                                color: 'var(--y-muted)',
+                                background: 'rgba(0,184,148,0.06)',
+                                border: '1px solid rgba(0,184,148,0.15)',
+                            }}>
+                                📖 Boek p. {current.bookRef.page}
+                                {current.bookRef.label && ` — ${current.bookRef.label}`}
+                            </div>
+                        )}
+
+                        <p style={{
+                            fontSize: '1.05rem',
+                            fontWeight: 600,
+                            color: 'var(--y-text)',
+                            lineHeight: 1.6,
+                            margin: '0 0 1rem',
+                        }}>
+                            {current.prompt}
+                        </p>
+
+                        {current.image && (
+                            <div style={{ textAlign: 'center' }}>
+                                <img
+                                    src={current.image}
+                                    alt={current.title || 'Theorie'}
+                                    style={{
+                                        maxWidth: '100%',
+                                        maxHeight: '400px',
+                                        borderRadius: '10px',
+                                        border: '1.5px solid var(--y-outline)',
+                                        objectFit: 'contain',
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
+                        <button
+                            className="y-btn y-btn--primary"
+                            onClick={handleNext}
+                            style={{ fontSize: '1rem', padding: '0.7rem 2rem' }}
+                        >
+                            ✅ Begrepen — Volgende →
+                        </button>
+                    </div>
+                </div>
+                <DevNav />
+            </div>
+        );
+    }
 
     /* ═══════════════════════════════════════════════════
        PRACTICE UI
@@ -282,7 +479,7 @@ export default function PracticePage8_2() {
                 <div className="y-progress-fill" style={{ width: `${progress * 100}%` }} />
             </div>
 
-            <div className="y-main" style={{ maxWidth: 700, paddingTop: '1.5rem' }}>
+            <div className="y-main" style={{ maxWidth: 700, paddingTop: '1.5rem', paddingBottom: devMode ? '4rem' : undefined }}>
                 {/* title badge */}
                 {current.title && (
                     <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
@@ -311,6 +508,25 @@ export default function PracticePage8_2() {
                             📖 Boek p. {current.bookRef.page}
                             {current.bookRef.exercise && ` – opgave ${current.bookRef.exercise}`}
                             {current.bookRef.label && ` (${current.bookRef.label})`}
+                        </div>
+                    )}
+                    {/* book illustration */}
+                    {current.image && (
+                        <div style={{
+                            textAlign: 'center',
+                            marginBottom: '0.75rem',
+                        }}>
+                            <img
+                                src={current.image}
+                                alt={current.title || 'Opgave afbeelding'}
+                                style={{
+                                    maxWidth: '100%',
+                                    maxHeight: '200px',
+                                    borderRadius: '10px',
+                                    border: '1.5px solid var(--y-outline)',
+                                    objectFit: 'contain',
+                                }}
+                            />
                         </div>
                     )}
                     {(() => {
@@ -536,6 +752,7 @@ export default function PracticePage8_2() {
                     )}
                 </div>
             </div>
+            <DevNav />
         </div>
     );
 }

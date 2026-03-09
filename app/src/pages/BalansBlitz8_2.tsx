@@ -24,7 +24,8 @@ import {
 import Top3Sidebar from '../components/Top3Sidebar';
 import { formatMathDisplay } from '../utils/formatMathDisplay';
 import { splitEquationPrompt } from '../utils/formatPromptParts';
-import './Practice.css';
+import { useAutoClickerGuard } from '../hooks/useAutoClickerGuard';
+import '../styles/BalansBlitz.css';
 
 const TIMER_SECONDS = 240; // 4 minutes
 const PASS_SCORE = 25;
@@ -185,12 +186,40 @@ export default function BalansBlitz8_2() {
         } catch { /* no confetti fallback */ }
     };
 
+    /* ── auto-clicker guard ───────────────────────────── */
+    const { registerClick, isBlocked, AutoClickerOverlay } = useAutoClickerGuard();
+
     /* ── MC submit ────────────────────────────────────── */
     const handleMcPick = (idx: number) => {
-        if (feedback || question.type !== 'mc') return;
+        if (feedback || question.type !== 'mc' || isBlocked) return;
+        if (!registerClick()) return;
         setSelectedOption(idx);
         checkAnswer(idx === question.correctIndex);
     };
+
+    /* ── Smart number matching ─────────────────────────── */
+    const DUTCH_NUMBERS: Record<string, string> = {
+        nul: '0', een: '1', één: '1', twee: '2', drie: '3', vier: '4',
+        vijf: '5', zes: '6', zeven: '7', acht: '8', negen: '9', tien: '10',
+        elf: '11', twaalf: '12', dertien: '13', veertien: '14', vijftien: '15',
+        zestien: '16', zeventien: '17', achttien: '18', negentien: '19', twintig: '20',
+        dertig: '30', veertig: '40', vijftig: '50', zestig: '60',
+        zeventig: '70', tachtig: '80', negentig: '90',
+        honderd: '100', tweehonderd: '200', driehonderd: '300',
+        vierhonderd: '400', vijfhonderd: '500', zeshonderd: '600',
+        achthonderd: '800', duizend: '1000', vijftienhonderd: '1500',
+    };
+
+    function numericMatch(input: string, expected: string): boolean {
+        if (!/^-?\d+$/.test(expected.trim())) return false;
+        const lower = input.toLowerCase().trim();
+        const digits = lower.match(/-?\d+/g);
+        if (digits && digits.length === 1 && digits[0] === expected.trim()) return true;
+        for (const [word, num] of Object.entries(DUTCH_NUMBERS)) {
+            if (lower.includes(word) && num === expected.trim()) return true;
+        }
+        return false;
+    }
 
     /* ── Input submit ─────────────────────────────────── */
     const handleInputSubmit = () => {
@@ -201,6 +230,9 @@ export default function BalansBlitz8_2() {
         let correct = norm(trimmed) === norm(question.answer);
         if (!correct && question.accept) {
             correct = question.accept.some((a) => norm(trimmed) === norm(a));
+        }
+        if (!correct) {
+            correct = numericMatch(trimmed, question.answer);
         }
         checkAnswer(correct);
     };
@@ -218,30 +250,27 @@ export default function BalansBlitz8_2() {
        ═══════════════════════════════════════════════════ */
     if (phase === 'ready') {
         return (
-            <div className="y-page">
-                <header className="y-topbar">
-                    <div className="y-topbar-logo">
-                        <span className="y-topbar-logo-icon">⚡</span>
+            <div className="bb-page">
+                <header className="bb-topbar">
+                    <div className="bb-topbar-title">
+                        <span className="bb-icon">⚡</span>
                         <span>Balans Blitz</span>
                     </div>
-                    <div className="y-topbar-user">
+                    <div className="bb-topbar-stats">
                         {devMode && <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '0.15rem 0.5rem', borderRadius: '6px', background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff' }}>DEV</span>}
-                        <button onClick={() => navigate('/')} className="y-btn--ghost y-btn" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem' }}>← Terug</button>
+                        <button onClick={() => navigate('/')} className="bb-btn bb-btn--ghost">← Terug</button>
                     </div>
                 </header>
 
-                <div className="y-banner">
-                    <h1>⚡ Balans Blitz — §8.2</h1>
+                <div className="bb-ready">
+                    <div className="bb-ready-icon">⚡</div>
+                    <h1>Balans Blitz — §8.2</h1>
                     <p>Beantwoord zoveel mogelijk vragen in 4 minuten!</p>
-                </div>
 
-                <div className="y-main" style={{ maxWidth: 500 }}>
-                    <div className="y-card" style={{ padding: '1.25rem', borderTop: '3px solid var(--y-cyan)', marginBottom: '1rem' }}>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--y-muted)', marginBottom: '0.75rem' }}>
-                            <strong>Spelregels</strong>
-                        </div>
-                        <ul style={{ fontSize: '0.85rem', color: 'var(--y-text)', lineHeight: 1.8, paddingLeft: '1.25rem', margin: 0 }}>
-                            <li>⏱ 4 minuten</li>
+                    <div className="bb-rules">
+                        <div className="bb-rules-title">Spelregels</div>
+                        <ul>
+                            <li>⏱ 4 minuten — race tegen de klok</li>
                             <li>⚡ Snel goed: +3 (≤4s), +2 (≤8s), +1 (later)</li>
                             <li>❌ Fout: −1 punt</li>
                             <li>🔥 Streak: 5 op rij = +5 bonus</li>
@@ -251,7 +280,7 @@ export default function BalansBlitz8_2() {
 
                     {/* Top 3 preview */}
                     {leaderboard.length > 0 && (
-                        <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ marginBottom: '1.5rem' }}>
                             <Top3Sidebar
                                 boardId={BOARD_IDS.BALANS_BLITZ}
                                 classId={profile?.classId ?? null}
@@ -262,11 +291,9 @@ export default function BalansBlitz8_2() {
                         </div>
                     )}
 
-                    <div style={{ textAlign: 'center' }}>
-                        <button className="y-btn y-btn--primary" onClick={startGame} style={{ fontSize: '1.1rem', padding: '0.75rem 2rem' }}>
-                            ⚡ Start Blitz!
-                        </button>
-                    </div>
+                    <button className="bb-start-btn" onClick={startGame}>
+                        ⚡ Start Blitz!
+                    </button>
                 </div>
             </div>
         );
@@ -278,42 +305,42 @@ export default function BalansBlitz8_2() {
     if (phase === 'ended') {
         const passed = score >= PASS_SCORE;
         return (
-            <div className="y-page">
-                <header className="y-topbar">
-                    <div className="y-topbar-logo">
-                        <span className="y-topbar-logo-icon">⚡</span>
+            <div className="bb-page">
+                <header className="bb-topbar">
+                    <div className="bb-topbar-title">
+                        <span className="bb-icon">⚡</span>
                         <span>Balans Blitz — Klaar!</span>
                     </div>
                 </header>
 
-                <div className="y-main" style={{ maxWidth: 500, paddingTop: '2rem' }}>
-                    <div className="y-card" style={{ textAlign: 'center', padding: '2rem', borderTop: `3px solid ${passed ? 'var(--y-success)' : 'var(--y-danger)'}` }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>{passed ? '🏆' : '💪'}</div>
-                        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: passed ? 'var(--y-success)' : 'var(--y-text)', margin: '0 0 0.25rem' }}>
+                <div className="bb-result">
+                    <div className={`bb-result-card ${passed ? 'bb-result-card--pass' : 'bb-result-card--fail'}`}>
+                        <div className="bb-result-icon">{passed ? '🏆' : '💪'}</div>
+                        <h2 style={{ color: passed ? '#00b894' : '#e2e8f0' }}>
                             {passed ? 'Gehaald!' : 'Niet gehaald'}
                         </h2>
                         {!passed && (
-                            <p style={{ color: 'var(--y-muted)', fontSize: '0.85rem', margin: '0 0 1rem' }}>
+                            <p style={{ color: 'rgba(226,232,240,0.6)', fontSize: '0.88rem', margin: '0 0 1rem' }}>
                                 Je hebt {PASS_SCORE - score} punten meer nodig. Probeer het nog eens!
                             </p>
                         )}
 
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', margin: '1.5rem 0' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--y-primary)' }}>{score}</div>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--y-muted)', textTransform: 'uppercase' }}>Score</div>
+                        <div className="bb-stats">
+                            <div className="bb-stat">
+                                <div className="bb-stat-value" style={{ color: '#a78bfa' }}>{score}</div>
+                                <div className="bb-stat-label">Score</div>
                             </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--y-success)' }}>{correctCount}</div>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--y-muted)', textTransform: 'uppercase' }}>Goed</div>
+                            <div className="bb-stat">
+                                <div className="bb-stat-value" style={{ color: '#00b894' }}>{correctCount}</div>
+                                <div className="bb-stat-label">Goed</div>
                             </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#e17055' }}>{wrongCount}</div>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--y-muted)', textTransform: 'uppercase' }}>Fout</div>
+                            <div className="bb-stat">
+                                <div className="bb-stat-value" style={{ color: '#f43f5e' }}>{wrongCount}</div>
+                                <div className="bb-stat-label">Fout</div>
                             </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--y-cyan)' }}>🔥{bestStreak}</div>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--y-muted)', textTransform: 'uppercase' }}>Streak</div>
+                            <div className="bb-stat">
+                                <div className="bb-stat-value" style={{ color: '#f97316' }}>🔥{bestStreak}</div>
+                                <div className="bb-stat-label">Streak</div>
                             </div>
                         </div>
 
@@ -331,11 +358,11 @@ export default function BalansBlitz8_2() {
                             </div>
                         )}
 
-                        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginTop: '1.5rem' }}>
-                            <button className="y-btn y-btn--secondary" onClick={() => navigate('/')}>
+                        <div className="bb-actions">
+                            <button className="bb-btn bb-btn--ghost" onClick={() => navigate('/')}>
                                 ← Leerpad
                             </button>
-                            <button className="y-btn y-btn--primary" onClick={startGame}>
+                            <button className="bb-btn bb-btn--primary" onClick={startGame}>
                                 🔄 Nog een ronde
                             </button>
                         </div>
@@ -349,29 +376,25 @@ export default function BalansBlitz8_2() {
        PLAYING SCREEN
        ═══════════════════════════════════════════════════ */
     return (
-        <div className="y-page">
-            <header className="y-topbar">
-                <div className="y-topbar-logo">
-                    <span className="y-topbar-logo-icon">⚡</span>
+        <div className="bb-page">
+            <header className="bb-topbar">
+                <div className="bb-topbar-title">
+                    <span className="bb-icon">⚡</span>
                     <span>Balans Blitz</span>
                 </div>
-                <div className="y-topbar-user" style={{ gap: '0.5rem' }}>
+                <div className="bb-topbar-stats">
                     {devMode && <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '0.15rem 0.5rem', borderRadius: '6px', background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff' }}>DEV</span>}
 
-                    <span style={{
-                        fontWeight: 800, fontSize: '0.9rem',
-                        color: timeLeft <= 30 ? 'var(--y-danger)' : 'var(--y-text)',
-                        fontVariantNumeric: 'tabular-nums',
-                    }}>
+                    <span className={`bb-timer ${timeLeft <= 30 ? 'bb-timer--danger' : ''}`}>
                         ⏱ {formatTime(timeLeft)}
                     </span>
 
-                    <span style={{ fontWeight: 800, color: 'var(--y-primary)', fontSize: '0.9rem' }}>
+                    <span className="bb-score">
                         {score} pts
                     </span>
 
                     {streak > 0 && (
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e17055' }}>
+                        <span className="bb-streak">
                             🔥{streak}
                         </span>
                     )}
@@ -379,45 +402,39 @@ export default function BalansBlitz8_2() {
             </header>
 
             {/* Timer progress */}
-            <div className="y-progress" style={{ borderRadius: 0, height: 5 }}>
-                <div className="y-progress-fill" style={{
+            <div className="bb-progress">
+                <div className={`bb-progress-fill ${timeLeft <= 30 ? 'bb-progress-fill--danger' : ''}`} style={{
                     width: `${(timeLeft / TIMER_SECONDS) * 100}%`,
-                    background: timeLeft <= 30 ? 'var(--y-danger)' : undefined,
-                    transition: 'width 1s linear',
                 }} />
             </div>
 
-            <div style={{ display: 'flex', gap: '1.5rem', maxWidth: 900, margin: '0 auto', padding: '1.5rem 1.5rem', width: '100%' }}>
+            <div className="bb-main">
                 {/* Main question area */}
-                <div style={{ flex: 1 }}>
+                <div className="bb-content">
                     {/* Feedback flash */}
                     {feedback && (
-                        <div style={{
-                            textAlign: 'center', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.75rem',
-                            color: feedback === 'correct' ? 'var(--y-success)' : '#e17055',
-                            animation: 'bal-fadeIn 0.2s ease',
-                        }}>
+                        <div className={`bb-feedback ${feedback === 'correct' ? 'bb-feedback--correct' : 'bb-feedback--wrong'}`}>
                             {feedback === 'correct' ? `✅ +${lastPoints}` : `❌ ${lastPoints}`}
                         </div>
                     )}
 
                     {/* Question card */}
-                    <div className="y-card" style={{ padding: '1.25rem 1.5rem', borderTop: '3px solid var(--y-cyan)', marginBottom: '1rem' }}>
+                    <div className="bb-question-card">
                         {(() => {
                             const parts = splitEquationPrompt(question.prompt);
                             if (parts.equation) {
                                 return (
                                     <>
-                                        <div style={{ marginBottom: '0.35rem', padding: '0.5rem 1rem', background: 'rgba(0,206,209,0.06)', borderRadius: '10px', fontWeight: 700, fontSize: '1.15rem', textAlign: 'center', color: 'var(--y-primary)' }}>
+                                        <div className="bb-equation-box">
                                             {formatMathDisplay(parts.equation)}
                                         </div>
                                         {parts.question && (
-                                            <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--y-text)', margin: '0.25rem 0 0', textAlign: 'center' }}>
+                                            <p className="bb-question-text">
                                                 {parts.question}
                                             </p>
                                         )}
                                         {parts.rest && (
-                                            <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--y-text)', lineHeight: 1.5, margin: '0.25rem 0 0' }}>
+                                            <p className="bb-question-text" style={{ margin: '0.25rem 0 0' }}>
                                                 {formatMathDisplay(parts.rest)}
                                             </p>
                                         )}
@@ -425,13 +442,13 @@ export default function BalansBlitz8_2() {
                                 );
                             }
                             return (
-                                <p style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--y-text)', lineHeight: 1.5, margin: 0 }}>
+                                <p className="bb-question-text" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
                                     {formatMathDisplay(question.prompt)}
                                 </p>
                             );
                         })()}
                         {question.type === 'balanceStep' && (
-                            <div style={{ marginTop: '0.75rem', padding: '0.5rem 1rem', background: 'rgba(108,92,231,0.06)', borderRadius: '10px', fontWeight: 700, fontSize: '1.1rem', textAlign: 'center', color: 'var(--y-primary)' }}>
+                            <div className="bb-step-equation">
                                 {formatMathDisplay(question.equation)}
                             </div>
                         )}
@@ -439,17 +456,16 @@ export default function BalansBlitz8_2() {
 
                     {/* MC options */}
                     {question.type === 'mc' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <div className="bb-options">
                             {question.options.map((opt, i) => (
                                 <button
                                     key={i}
-                                    className={`y-btn ${selectedOption === i
-                                        ? (feedback === 'correct' ? 'y-btn--success' : feedback === 'wrong' ? 'y-btn--danger' : 'y-btn--primary')
-                                        : 'y-btn--secondary'
+                                    className={`bb-option ${selectedOption === i
+                                        ? (feedback === 'correct' ? 'bb-option--correct' : feedback === 'wrong' ? 'bb-option--wrong' : '')
+                                        : ''
                                         }`}
                                     onClick={() => handleMcPick(i)}
                                     disabled={!!feedback}
-                                    style={{ textAlign: 'left', padding: '0.7rem 1.25rem', fontSize: '1rem' }}
                                 >
                                     {opt}
                                 </button>
@@ -459,8 +475,9 @@ export default function BalansBlitz8_2() {
 
                     {/* Input */}
                     {question.type === 'input' && (
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div className="bb-input-row">
                             <input
+                                className="bb-input"
                                 type="text"
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
@@ -468,13 +485,11 @@ export default function BalansBlitz8_2() {
                                 placeholder="Typ je antwoord…"
                                 disabled={!!feedback}
                                 autoFocus
-                                style={{ flex: 1, fontSize: '1.1rem', padding: '0.7rem 1rem', borderRadius: '12px', border: '2px solid var(--y-outline)', fontWeight: 600 }}
                             />
                             <button
-                                className="y-btn y-btn--primary"
+                                className="bb-submit-btn"
                                 onClick={handleInputSubmit}
                                 disabled={!!feedback || !inputValue.trim()}
-                                style={{ padding: '0.7rem 1.25rem' }}
                             >
                                 ↵
                             </button>
@@ -483,17 +498,16 @@ export default function BalansBlitz8_2() {
 
                     {/* BalanceStep */}
                     {question.type === 'balanceStep' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <div className="bb-options">
                             {question.options.map((opt, i) => (
                                 <button
                                     key={i}
-                                    className={`y-btn ${selectedOption === i
-                                        ? (feedback === 'correct' ? 'y-btn--success' : feedback === 'wrong' ? 'y-btn--danger' : 'y-btn--primary')
-                                        : 'y-btn--secondary'
+                                    className={`bb-option ${selectedOption === i
+                                        ? (feedback === 'correct' ? 'bb-option--correct' : feedback === 'wrong' ? 'bb-option--wrong' : '')
+                                        : ''
                                         }`}
                                     onClick={() => handleStepPick(i)}
                                     disabled={!!feedback}
-                                    style={{ textAlign: 'left', padding: '0.7rem 1.25rem', fontSize: '1rem' }}
                                 >
                                     {opt.label}
                                 </button>
@@ -513,6 +527,9 @@ export default function BalansBlitz8_2() {
                         entries={leaderboard}
                     />
                 )}
+
+                {/* Auto-clicker detection overlay */}
+                <AutoClickerOverlay />
             </div>
         </div>
     );

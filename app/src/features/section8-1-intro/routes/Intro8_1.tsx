@@ -29,6 +29,7 @@ import {
     type LeaderboardEntry,
 } from '../../../services/unifiedLeaderboardService';
 import Top3Sidebar from '../../../components/Top3Sidebar';
+import { useAutoClickerGuard } from '../../../hooks/useAutoClickerGuard';
 import '../styles/Intro8_1.css';
 
 type TaskFeedback = 'none' | 'correct' | 'wrong';
@@ -55,6 +56,9 @@ export default function Intro8_1() {
     const [enteredTop3, setEnteredTop3] = useState(false);
     const xpRef = useRef(0);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    /* ── auto-clicker guard ───────────────────────────── */
+    const { registerClick, isBlocked, AutoClickerOverlay } = useAutoClickerGuard();
 
     const level = INTRO_LEVELS[levelIdx];
     const task = overrideTask ?? level?.tasks[taskIdx];
@@ -95,7 +99,8 @@ export default function Intro8_1() {
     const strip = (s: string) => s.replace(/\s+/g, '').toLowerCase();
 
     const checkAnswer = useCallback((overrideAnswer?: string, overrideOption?: number) => {
-        if (feedback !== 'none' || !task) return;
+        if (feedback !== 'none' || !task || isBlocked) return;
+        if (!registerClick()) return;
 
         const ans = overrideAnswer ?? answer;
         const opt = overrideOption ?? selectedOption;
@@ -493,6 +498,9 @@ export default function Intro8_1() {
                     )}
                 </div>
             </div>
+
+            {/* Auto-clicker detection overlay */}
+            <AutoClickerOverlay />
         </div>
     );
 }

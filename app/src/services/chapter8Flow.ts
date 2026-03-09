@@ -26,7 +26,7 @@ import { db } from '../lib/firebase';
 
 /* ── flow config ─────────────────────────────────────── */
 
-export type FlowStepId = '8_1_intro' | '8_1' | 'balance' | '8_2' | '8_2_blitz' | '8_3';
+export type FlowStepId = '8_1_intro' | '8_1' | 'balance' | '8_2' | 'fruit_challenge' | '8_2_blitz' | '8_3';
 
 export interface FlowStep {
     id: FlowStepId;
@@ -39,10 +39,11 @@ export interface FlowStep {
 export const CHAPTER_8_FLOW: FlowStep[] = [
     { id: '8_1_intro', title: '§8.1 Intro', subtitle: 'Termen Quest + Speed Test', route: '/8-1/intro', icon: '🎮' },
     { id: '8_1', title: '§8.1 Oefenen', subtitle: 'Gelijksoortige termen', route: '/paragraph/8_1', icon: '📝' },
-    { id: 'balance', title: 'Balans Minigame', subtitle: 'Leer de balansmethode', route: '/balance-game?difficulty=D', icon: '⚖️' },
     { id: '8_2', title: '§8.2 De balans', subtitle: 'Vergelijkingen oplossen', route: '/practice/8_2', icon: '🎓' },
+    { id: 'fruit_challenge', title: '🍎 Fruit Challenge', subtitle: 'Wiskundige fruitpuzzel', route: '/fruit-challenge', icon: '🍎' },
     { id: '8_2_blitz', title: '§8.2 Balans Blitz', subtitle: 'Snelle challenge', route: '/8-2/blitz', icon: '⚡' },
     { id: '8_3', title: '§8.3 Termtris', subtitle: 'Vergelijkingen met balans', route: '/8-3/termtris', icon: '🧱' },
+    { id: 'balance', title: 'Balans Minigame', subtitle: 'Leer de balansmethode', route: '/balance-game?difficulty=D', icon: '⚖️' },
 ];
 
 /* ── progress doc ────────────────────────────────────── */
@@ -58,6 +59,8 @@ export interface Chapter8Progress {
     balanceGameCompletedAt: unknown;
     section8_2Completed: boolean;
     section8_2CompletedAt: unknown;
+    fruitChallengeCompleted: boolean;
+    fruitChallengeCompletedAt: unknown;
     section8_2BlitzPassed: boolean;
     section8_2BlitzPassedAt: unknown;
     section8_3Completed: boolean;
@@ -76,6 +79,8 @@ const DEFAULT_PROGRESS: Chapter8Progress = {
     balanceGameCompletedAt: null,
     section8_2Completed: false,
     section8_2CompletedAt: null,
+    fruitChallengeCompleted: false,
+    fruitChallengeCompletedAt: null,
     section8_2BlitzPassed: false,
     section8_2BlitzPassedAt: null,
     section8_3Completed: false,
@@ -137,6 +142,14 @@ export async function markSection8_2Completed(uid: string): Promise<void> {
     }, { merge: true });
 }
 
+export async function markFruitChallengeCompleted(uid: string): Promise<void> {
+    await setDoc(flowDocRef(uid), {
+        fruitChallengeCompleted: true,
+        fruitChallengeCompletedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+    }, { merge: true });
+}
+
 export async function markSection8_2BlitzPassed(uid: string): Promise<void> {
     await setDoc(flowDocRef(uid), {
         section8_2BlitzPassed: true,
@@ -162,14 +175,16 @@ export function isStepUnlocked(stepId: FlowStepId, progress: Chapter8Progress): 
             return true; // always unlocked
         case '8_1':
             return progress.intro8_1Passed;
-        case 'balance':
-            return progress.section8_1Completed;
         case '8_2':
-            return progress.balanceGameCompleted;
-        case '8_2_blitz':
+            return progress.section8_1Completed;
+        case 'fruit_challenge':
             return progress.section8_2Completed;
+        case '8_2_blitz':
+            return progress.fruitChallengeCompleted || progress.section8_2Completed;
         case '8_3':
             return progress.section8_2BlitzPassed;
+        case 'balance':
+            return progress.section8_3Completed;
         default:
             return false;
     }
@@ -182,14 +197,16 @@ export function isStepCompleted(stepId: FlowStepId, progress: Chapter8Progress):
             return progress.intro8_1Passed;
         case '8_1':
             return progress.section8_1Completed;
-        case 'balance':
-            return progress.balanceGameCompleted;
         case '8_2':
             return progress.section8_2Completed;
+        case 'fruit_challenge':
+            return progress.fruitChallengeCompleted;
         case '8_2_blitz':
             return progress.section8_2BlitzPassed;
         case '8_3':
             return progress.section8_3Completed;
+        case 'balance':
+            return progress.balanceGameCompleted;
         default:
             return false;
     }

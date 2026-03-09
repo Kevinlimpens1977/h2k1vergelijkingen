@@ -1,0 +1,745 @@
+/**
+ * 🧱 TERMTRIS — Award-winning Tetris math game CSS
+ *
+ * Theme: Deep space arcade with neon tetromino accents,
+ * glass-morphism panels, and immersive game feel.
+ */
+
+/* ── animations ──────────────────────────────────────── */
+
+@keyframes tt-fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tt-bounceIn {
+    0%   { opacity: 0; transform: scale(0.5); }
+    60%  { opacity: 1; transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes tt-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.5; }
+}
+
+@keyframes tt-flash {
+    0%   { background: rgba(253, 203, 110, 0.8) !important; }
+    100% { background: rgba(253, 203, 110, 0) !important; }
+}
+
+@keyframes tt-slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes tt-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(108, 92, 231, 0.3); }
+    50%      { box-shadow: 0 0 24px rgba(108, 92, 231, 0.6), 0 0 48px rgba(108, 92, 231, 0.2); }
+}
+
+@keyframes tt-neonPulse {
+    0%, 100% { text-shadow: 0 0 4px currentColor; }
+    50%      { text-shadow: 0 0 12px currentColor, 0 0 24px currentColor; }
+}
+
+@keyframes tt-timerDanger {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.6; }
+}
+
+@keyframes tt-streakFire {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+@keyframes tt-lineClear {
+    0% { transform: scaleX(1); background: rgba(253, 203, 110, 0.8); }
+    50% { transform: scaleX(1.05); background: rgba(255, 255, 255, 0.9); }
+    100% { transform: scaleX(0); background: transparent; }
+}
+
+/* ── page ────────────────────────────────────────────── */
+
+.tt-page {
+    min-height: 100vh;
+    font-family: 'Fredoka', 'Inter', -apple-system, sans-serif;
+    background: linear-gradient(150deg, #0a0a1f 0%, #12122e 40%, #1a0a2e 100%);
+    color: #e2e8f0;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.tt-page::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+        radial-gradient(ellipse at 30% 70%, rgba(108, 92, 231, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 30%, rgba(238, 90, 36, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── topbar ──────────────────────────────────────────── */
+
+.tt-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: rgba(10, 10, 31, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(108, 92, 231, 0.2);
+    position: relative;
+    z-index: 10;
+}
+
+.tt-topbar-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.tt-topbar-title .tt-icon {
+    font-size: 1.3rem;
+    animation: tt-neonPulse 2s infinite;
+    color: #6c5ce7;
+}
+
+.tt-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ── timer progress bar ──────────────────────────────── */
+
+.tt-progress {
+    height: 4px;
+    background: rgba(108, 92, 231, 0.1);
+    position: relative;
+    z-index: 10;
+}
+
+.tt-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6c5ce7, #a855f7, #ee5a24);
+    transition: width 1s linear;
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 12px rgba(108, 92, 231, 0.4);
+}
+
+.tt-progress-fill--danger {
+    background: linear-gradient(90deg, #f43f5e, #ef4444);
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+}
+
+/* ── main game layout ────────────────────────────────── */
+
+.tt-game-layout {
+    display: flex;
+    gap: 1.25rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.tt-field-col {
+    flex-shrink: 0;
+}
+
+.tt-side-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+/* ── field (tetris grid) ─────────────────────────────── */
+
+.tt-field {
+    display: grid;
+    padding: 3px;
+    background: rgba(10, 10, 31, 0.8);
+    border-radius: 12px;
+    border: 2px solid rgba(108, 92, 231, 0.25);
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.3),
+        inset 0 0 20px rgba(108, 92, 231, 0.05);
+}
+
+.tt-cell {
+    border-radius: 3px;
+    transition: all 0.08s ease;
+}
+
+.tt-cell--empty {
+    background: rgba(108, 92, 231, 0.03);
+    border: 1px solid rgba(108, 92, 231, 0.05);
+}
+
+.tt-cell--filled {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.tt-cell--active {
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* ── next piece preview ──────────────────────────────── */
+
+.tt-next-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(226, 232, 240, 0.4);
+    text-align: center;
+}
+
+.tt-next-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(108, 92, 231, 0.2);
+    border-radius: 10px;
+    padding: 8px;
+    display: grid;
+    gap: 1px;
+}
+
+/* ── status indicator ────────────────────────────────── */
+
+.tt-status {
+    text-align: center;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    animation: tt-fadeIn 0.25s ease;
+}
+
+.tt-status--playing {
+    background: rgba(0, 184, 148, 0.1);
+    color: #00b894;
+    border: 1px solid rgba(0, 184, 148, 0.25);
+}
+
+.tt-status--question {
+    background: rgba(108, 92, 231, 0.08);
+    color: #a78bfa;
+    border: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+/* ── controls reminder ───────────────────────────────── */
+
+.tt-controls-card {
+    padding: 0.85rem 1.25rem;
+    background: rgba(0, 184, 148, 0.06);
+    border: 1px solid rgba(0, 184, 148, 0.2);
+    border-radius: 12px;
+    text-align: center;
+    font-size: 1rem;
+    color: rgba(226, 232, 240, 0.6);
+    font-weight: 600;
+}
+
+/* ── HUD panels ──────────────────────────────────────── */
+
+.tt-hud {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tt-hud-panel {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    text-align: center;
+    border: 1px solid rgba(108, 92, 231, 0.15);
+}
+
+.tt-hud-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(226, 232, 240, 0.4);
+    margin-bottom: 0.2rem;
+}
+
+.tt-hud-timer {
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: #00ced1;
+}
+
+.tt-hud-timer--danger {
+    color: #f43f5e;
+    animation: tt-timerDanger 0.5s infinite;
+}
+
+.tt-hud-score {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: #a78bfa;
+    line-height: 1;
+}
+
+.tt-hud-stats-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tt-hud-stat {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    padding: 0.6rem;
+    text-align: center;
+    border: 1px solid rgba(108, 92, 231, 0.1);
+}
+
+.tt-hud-stat-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.tt-hud-stat-label {
+    font-size: 0.7rem;
+    color: rgba(226, 232, 240, 0.4);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+/* ── streak indicator ────────────────────────────────── */
+
+.tt-streak {
+    text-align: center;
+    padding: 0.45rem 0.75rem;
+    background: linear-gradient(135deg, rgba(253, 203, 110, 0.1), rgba(225, 112, 85, 0.08));
+    border-radius: 10px;
+    border: 1px solid rgba(253, 203, 110, 0.25);
+    animation: tt-fadeIn 0.25s ease;
+}
+
+.tt-streak-text {
+    font-weight: 800;
+    font-size: 1.1rem;
+    background: linear-gradient(90deg, #f97316, #ef4444, #f97316);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: tt-streakFire 1s linear infinite;
+}
+
+/* ── streak banner (bonus) ───────────────────────────── */
+
+.tt-streak-banner {
+    text-align: center;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #6c5ce7, #a855f7);
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.05rem;
+    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
+    animation: tt-bounceIn 0.4s ease;
+}
+
+/* ── question card (in QuestionCard component) ───────── */
+
+.tt-question-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    border-radius: 14px;
+    padding: 1.5rem;
+    border: 1px solid rgba(108, 92, 231, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    animation: tt-slideUp 0.3s ease;
+}
+
+.tt-question-prompt {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    line-height: 1.5;
+    margin: 0 0 0.75rem;
+    text-align: center;
+}
+
+.tt-equation-display {
+    padding: 0.7rem 1rem;
+    background: rgba(108, 92, 231, 0.08);
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1.3rem;
+    text-align: center;
+    color: #a78bfa;
+    margin-bottom: 0.5rem;
+    border: 1px solid rgba(108, 92, 231, 0.15);
+}
+
+.tt-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.tt-option {
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+    border: 2px solid rgba(108, 92, 231, 0.15);
+    background: rgba(255, 255, 255, 0.03);
+    color: #e2e8f0;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.tt-option:hover:not(:disabled) {
+    background: rgba(108, 92, 231, 0.1);
+    border-color: rgba(108, 92, 231, 0.35);
+    transform: translateX(3px);
+}
+
+.tt-option--correct {
+    background: rgba(0, 184, 148, 0.15) !important;
+    border-color: #00b894 !important;
+    color: #00b894 !important;
+}
+
+.tt-option--wrong {
+    background: rgba(244, 63, 94, 0.15) !important;
+    border-color: #f43f5e !important;
+    color: #f43f5e !important;
+    animation: tt-bounceIn 0.3s ease;
+}
+
+.tt-option:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.tt-input-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tt-input {
+    flex: 1;
+    font-size: 1.15rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 2px solid rgba(108, 92, 231, 0.2);
+    background: rgba(255, 255, 255, 0.04);
+    color: #e2e8f0;
+    font-weight: 600;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.tt-input:focus {
+    border-color: rgba(108, 92, 231, 0.5);
+    box-shadow: 0 0 12px rgba(108, 92, 231, 0.15);
+}
+
+.tt-input::placeholder {
+    color: rgba(226, 232, 240, 0.3);
+}
+
+.tt-submit-btn {
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #6c5ce7, #5b4cd9);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.tt-submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
+}
+
+.tt-submit-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* ── feedback ────────────────────────────────────────── */
+
+.tt-feedback {
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    padding: 0.3rem;
+    margin-bottom: 0.4rem;
+    animation: tt-bounceIn 0.3s ease;
+    border-radius: 8px;
+}
+
+.tt-feedback--correct {
+    color: #00b894;
+    background: rgba(0, 184, 148, 0.08);
+}
+
+.tt-feedback--wrong {
+    color: #f43f5e;
+    background: rgba(244, 63, 94, 0.08);
+}
+
+/* ── ready screen ────────────────────────────────────── */
+
+.tt-ready {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.tt-ready-icon {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    animation: tt-bounceIn 0.6s ease-out;
+}
+
+.tt-ready h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 0.3rem;
+    background: linear-gradient(135deg, #6c5ce7, #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.tt-ready p {
+    color: rgba(226, 232, 240, 0.7);
+    font-size: 0.95rem;
+    margin: 0 0 1.5rem;
+}
+
+/* ── rules card ──────────────────────────────────────── */
+
+.tt-rules {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(8px);
+    border-radius: 14px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(108, 92, 231, 0.2);
+    text-align: left;
+}
+
+.tt-rules-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(226, 232, 240, 0.45);
+    margin-bottom: 0.5rem;
+}
+
+.tt-rules ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tt-rules li {
+    padding: 0.3rem 0;
+    font-size: 0.85rem;
+    color: rgba(226, 232, 240, 0.8);
+    border-bottom: 1px solid rgba(108, 92, 231, 0.08);
+}
+
+.tt-rules li:last-child {
+    border-bottom: none;
+}
+
+/* ── start button ────────────────────────────────────── */
+
+.tt-start-btn {
+    padding: 0.9rem 2.5rem;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, #6c5ce7, #a855f7);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 8px 32px rgba(108, 92, 231, 0.3);
+    transition: all 0.2s;
+    animation: tt-glow 2s infinite;
+}
+
+.tt-start-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(108, 92, 231, 0.4);
+}
+
+/* ── result screen ───────────────────────────────────── */
+
+.tt-result {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.tt-result-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 2px solid rgba(108, 92, 231, 0.2);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+    animation: tt-slideUp 0.4s ease-out;
+}
+
+.tt-result-card--pass {
+    border-color: rgba(0, 184, 148, 0.4);
+    box-shadow: 0 8px 40px rgba(0, 184, 148, 0.12);
+}
+
+.tt-result-card--fail {
+    border-color: rgba(244, 63, 94, 0.3);
+}
+
+.tt-result-icon {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    animation: tt-bounceIn 0.5s ease-out;
+}
+
+.tt-result h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem;
+}
+
+/* ── stats grid ──────────────────────────────────────── */
+
+.tt-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.tt-stat {
+    text-align: center;
+    padding: 0.4rem 0.5rem;
+}
+
+.tt-stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.tt-stat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(226, 232, 240, 0.45);
+    font-weight: 700;
+    margin-top: 0.15rem;
+}
+
+/* ── buttons ─────────────────────────────────────────── */
+
+.tt-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.tt-btn {
+    padding: 0.65rem 1.5rem;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.tt-btn--primary {
+    background: linear-gradient(135deg, #6c5ce7, #5b4cd9);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
+}
+
+.tt-btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(108, 92, 231, 0.4);
+}
+
+.tt-btn--ghost {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(226, 232, 240, 0.7);
+    border: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+.tt-btn--ghost:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+}
+
+/* ── responsive ──────────────────────────────────────── */
+
+@media (max-width: 700px) {
+    .tt-game-layout {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tt-topbar {
+        padding: 0.5rem 1rem;
+    }
+
+    .tt-ready h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* ── reduced motion ──────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

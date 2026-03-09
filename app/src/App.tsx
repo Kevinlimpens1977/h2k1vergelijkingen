@@ -17,6 +17,7 @@ import LetterIntroPage from './features/letter-intro/LetterIntroPage';
 import Intro8_1 from './features/section8-1-intro/routes/Intro8_1';
 import SpeedTest8_1 from './features/section8-1-intro/routes/SpeedTest8_1';
 import BalansBlitz8_2 from './pages/BalansBlitz8_2';
+import FruitChallengePage from './pages/FruitChallengePage';
 import TermtrisPage from './features/termtris-8-3/TermtrisPage';
 
 /** Redirect away from auth pages if already logged in */
@@ -56,17 +57,17 @@ export default function App() {
               <ProtectedRoute><RequireUnlocked stepId="8_1"><PracticePage /></RequireUnlocked></ProtectedRoute>
             } />
 
-            {/* Balans Minigame — requires §8.1 completed */}
-            <Route path="/balance-game" element={
-              <ProtectedRoute><RequireUnlocked stepId="balance"><BalanceGamePage /></RequireUnlocked></ProtectedRoute>
-            } />
-
-            {/* §8.2 Practice — requires balance game completed */}
+            {/* §8.2 Practice — requires §8.1 completed */}
             <Route path="/practice/8_2" element={
               <ProtectedRoute><RequireUnlocked stepId="8_2"><PracticePage8_2 /></RequireUnlocked></ProtectedRoute>
             } />
 
-            {/* §8.2 Balans Blitz — requires §8.2 practice completed */}
+            {/* 🍎 Fruit Challenge — requires §8.2 completed */}
+            <Route path="/fruit-challenge" element={
+              <ProtectedRoute><RequireUnlocked stepId="fruit_challenge"><FruitChallengePage /></RequireUnlocked></ProtectedRoute>
+            } />
+
+            {/* §8.2 Balans Blitz — requires Fruit Challenge or §8.2 completed */}
             <Route path="/8-2/blitz" element={
               <ProtectedRoute><RequireUnlocked stepId="8_2_blitz"><BalansBlitz8_2 /></RequireUnlocked></ProtectedRoute>
             } />
@@ -76,6 +77,11 @@ export default function App() {
               <ProtectedRoute><RequireUnlocked stepId="8_3"><TermtrisPage /></RequireUnlocked></ProtectedRoute>
             } />
             <Route path="/8-3" element={<Navigate to="/8-3/termtris" replace />} />
+
+            {/* ⚖️ Balans Minigame — requires §8.3 completed */}
+            <Route path="/balance-game" element={
+              <ProtectedRoute><RequireUnlocked stepId="balance"><BalanceGamePage /></RequireUnlocked></ProtectedRoute>
+            } />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

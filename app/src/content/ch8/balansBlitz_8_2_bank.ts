@@ -13,13 +13,13 @@ export const BALANS_BLITZ_8_2: BlitzQ[] = [
     { id: "b2", type: "mc", prompt: "Je haalt 4 knikkers links weg. Wat moet je doen om eerlijk te blijven?", options: ["rechts ook 4 weg", "rechts 8 weg", "niets"], correctIndex: 0 },
 
     // Appelmoes / vergelijkingen
-    { id: "b3", type: "mc", prompt: "Welke vergelijking past bij: 5 blikjes (a) wegen 700 g?", options: ["5a = 700", "a + 5 = 700", "700a = 5"], correctIndex: 0 },
-    { id: "b4", type: "input", prompt: "5a = 700. a = ?", answer: "140" },
+    { id: "b3", type: "mc", prompt: "Welke vergelijking past bij: 4 blikken appelmoes (a) wegen 800 g?", options: ["4a = 800", "a + 4 = 800", "800a = 4"], correctIndex: 0 },
+    { id: "b4", type: "input", prompt: "4a = 800. a = ?", answer: "200", accept: ["200g", "200 g", "200gram", "200 gram", "200gr", "200 gr"] },
 
     // Kaas/koffie rekenen
-    { id: "b5", type: "input", prompt: "3 kazen wegen 36 kg. 1 kaas weegt… kg", answer: "12" },
-    { id: "b6", type: "input", prompt: "200 g + 900 g + 400 g = … g", answer: "1500" },
-    { id: "b7", type: "input", prompt: "5 pakken koffie wegen 1500 g. 1 pak weegt… g", answer: "300" },
+    { id: "b5", type: "input", prompt: "3 kazen wegen 36 kg. 1 kaas weegt… kg", answer: "12", accept: ["12kg", "12 kg", "12kilo", "12 kilo", "12kilogram", "12 kilogram"] },
+    { id: "b6", type: "input", prompt: "Balans B (koffie): 300 g + 600 g + 600 g = … g", answer: "1500", accept: ["1500g", "1500 g", "1500gram", "1500 gram", "1500gr", "1500 gr"] },
+    { id: "b7", type: "input", prompt: "5 pakken koffie wegen 1500 g. 1 pak weegt… g", answer: "300", accept: ["300g", "300 g", "300gram", "300 gram", "300gr", "300 gr"] },
 
     // Knikkerzakjes
     { id: "b8", type: "mc", prompt: "Waarom gaat een kant omhoog als je knikkers wegneemt?", options: ["die kant wordt lichter", "die kant wordt zwaarder", "de andere kant wordt lichter"], correctIndex: 0 },

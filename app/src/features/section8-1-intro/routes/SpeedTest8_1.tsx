@@ -34,6 +34,7 @@ import {
     type LeaderboardEntry,
 } from '../../../services/unifiedLeaderboardService';
 import { formatMathDisplay } from '../../../utils/formatMathDisplay';
+import { useAutoClickerGuard } from '../../../hooks/useAutoClickerGuard';
 import '../styles/SpeedTest8_1.css';
 
 type Phase = 'ready' | 'playing' | 'ended';
@@ -89,6 +90,9 @@ export default function SpeedTest8_1() {
     const startTimeRef = useRef(0);
     const questionStartRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+
+    /* ── auto-clicker guard ───────────────────────────── */
+    const { registerClick, isBlocked, reset: resetGuard, AutoClickerOverlay } = useAutoClickerGuard();
 
     const question = isBoss && bossQuestion ? bossQuestion : questions[qIdx % questions.length];
 
@@ -225,11 +229,15 @@ export default function SpeedTest8_1() {
         setEnteredTop3(false);
         setShowRivalBeat(false);
         setFeedback(null);
-    }, []);
+        resetGuard();
+    }, [resetGuard]);
 
     /* ── answer ──────────────────────────────────────── */
     const handleAnswer = useCallback((optionIdx: number) => {
-        if (phase !== 'playing' || feedback !== null) return;
+        if (phase !== 'playing' || feedback !== null || isBlocked) return;
+
+        // Auto-clicker check
+        if (!registerClick()) return;
 
         const responseMs = Date.now() - questionStartRef.current;
         const correct = optionIdx === question.correctIndex;
@@ -316,7 +324,7 @@ export default function SpeedTest8_1() {
                 questionStartRef.current = Date.now();
             }, 500);
         }
-    }, [phase, feedback, question, streak, power, isBoss, rival, showRivalBeat, score]);
+    }, [phase, feedback, question, streak, power, isBoss, rival, showRivalBeat, score, isBlocked, registerClick]);
 
     /* ── save results on end ─────────────────────────── */
     useEffect(() => {
@@ -592,6 +600,9 @@ export default function SpeedTest8_1() {
                     🎉 Je staat in de TOP 3!
                 </div>
             )}
+
+            {/* Auto-clicker overlay */}
+            <AutoClickerOverlay />
         </div>
     );
 }

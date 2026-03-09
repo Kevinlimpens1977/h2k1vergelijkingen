@@ -17,6 +17,7 @@ import {
     type BoardId,
     type LeaderboardEntry,
 } from '../services/unifiedLeaderboardService';
+import { useRayanEasterEgg } from '../hooks/useRayanEasterEgg';
 
 /* ── medal config ─────────────────────────────────────── */
 const MEDALS = ['🥇', '🥈', '🥉'] as const;
@@ -80,6 +81,9 @@ export default function HomePage() {
     const navigate = useNavigate();
     const [progress, setProgress] = useState<Chapter8Progress | null>(null);
 
+    // Easter egg popups
+    const { EasterEggPopup } = useRayanEasterEgg(profile?.uid, profile?.firstName);
+
     // Top 3 per board
     const [topScores, setTopScores] = useState<Partial<Record<BoardId, LeaderboardEntry[]>>>({});
 
@@ -113,6 +117,9 @@ export default function HomePage() {
 
     return (
         <div className="y-page">
+            {/* Easter egg */}
+            <EasterEggPopup />
+
             {/* Game HUD header */}
             <GameHeader
                 completedCount={completedCount}

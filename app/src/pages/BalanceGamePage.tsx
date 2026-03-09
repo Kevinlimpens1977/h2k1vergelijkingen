@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Balans Minigame — Practice + Challenge modes (Youth Theme)
  *
  * PRACTICE COMPLETION: Complete 8 puzzles OR solve 5 in a row without hints
@@ -41,6 +41,7 @@ import {
 import Top3Sidebar from '../components/Top3Sidebar';
 import { formatMathDisplay } from '../utils/formatMathDisplay';
 import './BalanceGame.css';
+import '../styles/BalansMinigame.css';
 
 const MARBLE_AMOUNTS = [1, 2, 5, 10];
 const BAG_AMOUNTS = [1, 2];
@@ -421,39 +422,37 @@ export default function BalanceGamePage() {
        ════════════════════════════════════════════════════ */
     if (mode === 'select') {
         return (
-            <div className="y-page">
-                <header className="y-topbar">
-                    <div className="y-topbar-logo">
-                        <span className="y-topbar-logo-icon">⚖️</span>
+            <div className="bg-page">
+                <header className="bg-topbar">
+                    <div className="bg-topbar-title">
+                        <span className="bg-icon">⚖️</span>
                         <span>Balans Minigame</span>
                     </div>
-                    <div className="y-topbar-user">
+                    <div className="bg-topbar-right">
                         {devMode && <span className="bal-dev-chip">DEV</span>}
-                        <button onClick={() => navigate('/')} className="y-btn--ghost y-btn" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem' }}>← Terug</button>
+                        <button onClick={() => navigate('/')} className="bg-btn bg-btn--ghost">← Terug</button>
                     </div>
                 </header>
 
-                <div className="y-banner">
-                    <h1>⚖️ Balans Minigame</h1>
+                <div className="bg-ready">
+                    <div className="bg-ready-icon">⚖️</div>
+                    <h1>Balans Minigame</h1>
                     <p>Los vergelijkingen op door de balans in evenwicht te houden</p>
-                </div>
 
-                <div className="y-main" style={{ maxWidth: 560 }}>
                     {/* Practice card */}
                     <button
-                        className="y-card bal-mode-card"
+                        className="bg-mode-card bg-mode-card--practice"
                         onClick={startPractice}
-                        style={{ borderTop: '3px solid var(--y-primary)', textAlign: 'left', cursor: 'pointer', width: '100%', marginBottom: '1rem' }}
                     >
-                        <div className="bal-mode-card-header">
-                            <span className="bal-mode-emoji">🎯</span>
+                        <div className="bg-mode-card-header">
+                            <span className="bg-mode-emoji">🎯</span>
                             <div style={{ flex: 1 }}>
-                                <div className="bal-mode-title">Oefenen</div>
-                                <div className="bal-mode-sub">Leer stap voor stap de balansmethode</div>
+                                <div className="bg-mode-title">Oefenen</div>
+                                <div className="bg-mode-sub">Leer stap voor stap de balansmethode</div>
                             </div>
-                            <span className="y-badge y-badge--active">Start →</span>
+                            <span className="bg-start-badge">Start →</span>
                         </div>
-                        <div className="bal-mode-details">
+                        <div className="bg-mode-details">
                             <span>8 puzzels</span>
                             <span>·</span>
                             <span>Geen tijdslimiet</span>
@@ -464,30 +463,23 @@ export default function BalanceGamePage() {
 
                     {/* Challenge card */}
                     <button
-                        className="y-card bal-mode-card"
+                        className="bg-mode-card bg-mode-card--challenge"
                         onClick={practiceComplete || devMode ? startChallenge : undefined}
                         disabled={!practiceComplete && !devMode}
-                        style={{
-                            borderTop: '3px solid var(--y-cyan)',
-                            textAlign: 'left',
-                            cursor: practiceComplete || devMode ? 'pointer' : 'default',
-                            width: '100%',
-                            opacity: practiceComplete || devMode ? 1 : 0.55,
-                        }}
                     >
-                        <div className="bal-mode-card-header">
-                            <span className="bal-mode-emoji">🏆</span>
+                        <div className="bg-mode-card-header">
+                            <span className="bg-mode-emoji">🏆</span>
                             <div style={{ flex: 1 }}>
-                                <div className="bal-mode-title">Challenge</div>
-                                <div className="bal-mode-sub">4 minuten — scoor punten & versla je klasgenoten</div>
+                                <div className="bg-mode-title">Challenge</div>
+                                <div className="bg-mode-sub">4 minuten — scoor punten & versla je klasgenoten</div>
                             </div>
                             {practiceComplete || devMode ? (
-                                <span className="y-badge y-badge--active">Start →</span>
+                                <span className="bg-start-badge">Start →</span>
                             ) : (
-                                <span className="y-badge y-badge--locked">🔒 Eerst oefenen</span>
+                                <span className="bg-locked-badge">🔒 Eerst oefenen</span>
                             )}
                         </div>
-                        <div className="bal-mode-details">
+                        <div className="bg-mode-details">
                             <span>4 minuten</span>
                             <span>·</span>
                             <span>Punten + Streaks</span>
@@ -506,58 +498,45 @@ export default function BalanceGamePage() {
     if (mode === 'challengeEnd') {
         const isNewBest = challengeScore > challengeBest;
         if (isNewBest && challengeScore > challengeBest) {
-            // Update local best
-            setChallengeScore(challengeScore); // keep
+            setChallengeScore(challengeScore);
         }
 
         return (
-            <div className="y-page">
-                <header className="y-topbar">
-                    <div className="y-topbar-logo">
-                        <span className="y-topbar-logo-icon">⚖️</span>
+            <div className="bg-page">
+                <header className="bg-topbar">
+                    <div className="bg-topbar-title">
+                        <span className="bg-icon">⚖️</span>
                         <span>Balans Challenge — Klaar!</span>
                     </div>
                 </header>
 
-                <div className="y-main" style={{ maxWidth: 500, paddingTop: '2rem' }}>
-                    <div className="y-card" style={{ textAlign: 'center', padding: '2rem', borderTop: '3px solid var(--y-cyan)' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🏆</div>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--y-text)', margin: '0 0 0.25rem' }}>
+                <div className="bg-result">
+                    <div className="bg-result-card">
+                        <div className="bg-result-icon">🏆</div>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#00b894', margin: '0 0 0.5rem' }}>
                             Challenge voltooid!
                         </h2>
                         {isNewBest && (
-                            <div style={{
-                                display: 'inline-block',
-                                padding: '0.2rem 0.8rem',
-                                borderRadius: '8px',
-                                background: 'linear-gradient(135deg, var(--y-amber), #ffeaa7)',
-                                color: '#e17055',
-                                fontWeight: 800,
-                                fontSize: '0.8rem',
-                                marginBottom: '1rem',
-                            }}>
-                                🎉 NIEUW RECORD!
-                            </div>
+                            <div className="bg-new-record">🎉 NIEUW RECORD!</div>
                         )}
 
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', margin: '1.5rem 0' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--y-primary)' }}>{challengeScore}</div>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--y-muted)', textTransform: 'uppercase' }}>Score</div>
+                        <div className="bg-stats">
+                            <div className="bg-stat">
+                                <div className="bg-stat-value" style={{ color: '#a78bfa' }}>{challengeScore}</div>
+                                <div className="bg-stat-label">Score</div>
                             </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--y-success)' }}>{challengePuzzlesSolved}</div>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--y-muted)', textTransform: 'uppercase' }}>Opgelost</div>
+                            <div className="bg-stat">
+                                <div className="bg-stat-value" style={{ color: '#00b894' }}>{challengePuzzlesSolved}</div>
+                                <div className="bg-stat-label">Opgelost</div>
                             </div>
                             {myRank > 0 && (
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--y-cyan)' }}>#{myRank}</div>
-                                    <div style={{ fontSize: '0.72rem', color: 'var(--y-muted)', textTransform: 'uppercase' }}>Rang</div>
+                                <div className="bg-stat">
+                                    <div className="bg-stat-value" style={{ color: '#00ced1' }}>#{myRank}</div>
+                                    <div className="bg-stat-label">Rang</div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Leaderboard */}
                         {leaderboard.length > 0 && (
                             <div style={{ margin: '1rem 0', textAlign: 'left' }}>
                                 <Top3Sidebar
@@ -571,13 +550,9 @@ export default function BalanceGamePage() {
                             </div>
                         )}
 
-                        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginTop: '1.5rem' }}>
-                            <button className="y-btn y-btn--secondary" onClick={() => setMode('select')}>
-                                ← Menu
-                            </button>
-                            <button className="y-btn y-btn--primary" onClick={startChallenge}>
-                                🔄 Nog een ronde
-                            </button>
+                        <div className="bg-actions">
+                            <button className="bg-btn bg-btn--ghost" onClick={() => setMode('select')}>← Menu</button>
+                            <button className="bg-btn bg-btn--primary" onClick={startChallenge}>🔄 Nog een ronde</button>
                         </div>
                     </div>
                 </div>
@@ -594,7 +569,7 @@ export default function BalanceGamePage() {
        GAME UI (Practice + Challenge share layout)
        ════════════════════════════════════════════════════ */
     return (
-        <div className="y-page">
+        <div className="bg-page">
             {/* toasts */}
             <div className="bal-toasts">
                 {toasts.map((t) => (
@@ -603,56 +578,47 @@ export default function BalanceGamePage() {
             </div>
 
             {/* header */}
-            <header className="y-topbar">
-                <div className="y-topbar-logo">
-                    <span className="y-topbar-logo-icon">⚖️</span>
+            <header className="bg-topbar">
+                <div className="bg-topbar-title">
+                    <span className="bg-icon">⚖️</span>
                     <span>Balans Minigame</span>
                 </div>
-                <div className="y-topbar-user" style={{ gap: '0.5rem' }}>
+                <div className="bg-topbar-right">
                     {devMode && <span className="bal-dev-chip">DEV</span>}
 
                     {/* Mode chip */}
-                    <span className="y-topbar-badge" style={{
-                        background: mode === 'challenge'
-                            ? 'linear-gradient(135deg, var(--y-cyan), #00cec9)'
-                            : 'linear-gradient(135deg, var(--y-primary), var(--y-primary2))',
-                    }}>
+                    <span className={`bg-mode-chip ${mode === 'challenge' ? 'bg-mode-chip--challenge' : 'bg-mode-chip--practice'}`}>
                         {mode === 'challenge' ? '🏆 Challenge' : '🎯 Oefenen'}
                     </span>
 
                     {/* Timer (challenge only) */}
                     {mode === 'challenge' && (
-                        <span style={{
-                            fontWeight: 800,
-                            fontSize: '0.9rem',
-                            color: timeLeft <= 30 ? 'var(--y-danger)' : 'var(--y-text)',
-                            fontVariantNumeric: 'tabular-nums',
-                        }}>
+                        <span className={`bg-timer ${timeLeft <= 30 ? 'bg-timer--danger' : ''}`}>
                             ⏱ {formatTime(timeLeft)}
                         </span>
                     )}
 
                     {/* Score (challenge) */}
                     {mode === 'challenge' && (
-                        <span style={{ fontWeight: 800, color: 'var(--y-primary)', fontSize: '0.9rem' }}>
+                        <span className="bg-topbar-score">
                             {challengeScore} pts
                         </span>
                     )}
 
                     {/* Streak */}
                     {(mode === 'challenge' ? challengeStreak : practiceStreak) > 0 && (
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e17055' }}>
+                        <span className="bg-topbar-streak">
                             🔥 {mode === 'challenge' ? challengeStreak : practiceStreak}
                         </span>
                     )}
 
                     {/* Solved counter */}
-                    <span className="y-topbar-number">
+                    <span className="bg-topbar-count">
                         Opgelost: {mode === 'challenge' ? challengePuzzlesSolved : roundsCompleted}
                         {mode === 'practice' ? `/${PRACTICE_TARGET}` : ''}
                     </span>
 
-                    <button onClick={() => setMode('select')} className="y-btn--ghost y-btn" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem' }}>
+                    <button onClick={() => setMode('select')} className="bg-btn bg-btn--ghost" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem' }}>
                         ✕ Stop
                     </button>
                 </div>
@@ -660,8 +626,8 @@ export default function BalanceGamePage() {
 
             {/* Progress bar (practice) */}
             {mode === 'practice' && (
-                <div className="y-progress" style={{ borderRadius: 0, height: 5 }}>
-                    <div className="y-progress-fill" style={{ width: `${(roundsCompleted / PRACTICE_TARGET) * 100}%` }} />
+                <div className="bg-progress">
+                    <div className="bg-progress-fill" style={{ width: `${(roundsCompleted / PRACTICE_TARGET) * 100}%` }} />
                 </div>
             )}
 
@@ -669,19 +635,19 @@ export default function BalanceGamePage() {
                 {/* Practice complete overlay */}
                 {showPracticeComplete && (
                     <div className="bal-complete-overlay">
-                        <div className="y-card" style={{ textAlign: 'center', padding: '2rem', borderTop: '3px solid var(--y-success)', maxWidth: 420 }}>
+                        <div className="bg-result-card" style={{ textAlign: 'center', padding: '2rem', maxWidth: 420 }}>
                             <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🎉</div>
-                            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--y-success)', margin: '0 0 0.5rem' }}>
+                            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#00b894', margin: '0 0 0.5rem' }}>
                                 Oefenen voltooid!
                             </h2>
-                            <p style={{ color: 'var(--y-muted)', margin: '0 0 1rem', fontSize: '0.9rem' }}>
+                            <p style={{ color: 'rgba(226,232,240,0.6)', margin: '0 0 1rem', fontSize: '0.9rem' }}>
                                 Je hebt de balansmethode onder de knie. Challenge mode is nu ontgrendeld!
                             </p>
-                            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                                <button className="y-btn y-btn--secondary" onClick={() => setMode('select')}>
+                            <div className="bg-actions">
+                                <button className="bg-btn bg-btn--ghost" onClick={() => setMode('select')}>
                                     ← Terug
                                 </button>
-                                <button className="y-btn y-btn--primary" onClick={startChallenge}>
+                                <button className="bg-btn bg-btn--primary" onClick={startChallenge}>
                                     🏆 Start Challenge
                                 </button>
                             </div>
@@ -767,12 +733,12 @@ export default function BalanceGamePage() {
                                 <div className="bal-solved-card">
                                     <div style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>✅</div>
                                     <div className="bal-solved-value">{formatMathDisplay(solutionStr)}</div>
-                                    <div style={{ color: 'var(--y-muted)', marginBottom: '0.75rem', fontSize: '0.85rem' }}>
+                                    <div style={{ color: 'rgba(226,232,240,0.5)', marginBottom: '0.75rem', fontSize: '0.85rem' }}>
                                         Opgelost in {actionLog.length} stappen
                                         {hintsUsed > 0 && ` · ${hintsUsed} hint${hintsUsed > 1 ? 's' : ''}`}
                                     </div>
                                     <button
-                                        className="y-btn y-btn--primary"
+                                        className="bg-btn bg-btn--primary"
                                         onClick={handleNextRound}
                                         disabled={saving}
                                     >
@@ -789,7 +755,7 @@ export default function BalanceGamePage() {
                                                 {DIVIDE_OPTIONS.map((d) => (
                                                     <button
                                                         key={`div-${d}`}
-                                                        className="y-btn y-btn--secondary"
+                                                        className="bg-btn bg-btn--secondary"
                                                         disabled={!canDivide(liveState, d)}
                                                         onClick={() => doDivide(d)}
                                                         style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
@@ -809,7 +775,7 @@ export default function BalanceGamePage() {
                                                 {MARBLE_AMOUNTS.map((amt) => (
                                                     <button
                                                         key={`qm-${amt}`}
-                                                        className="y-btn y-btn--secondary"
+                                                        className="bg-btn bg-btn--secondary"
                                                         disabled={!canRemoveMarbles(liveState, amt)}
                                                         onClick={() => doBothSidesAction('REMOVE_MARBLES', amt)}
                                                         style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
@@ -820,7 +786,7 @@ export default function BalanceGamePage() {
                                                 {BAG_AMOUNTS.map((amt) => (
                                                     <button
                                                         key={`qb-${amt}`}
-                                                        className="y-btn y-btn--secondary"
+                                                        className="bg-btn bg-btn--secondary"
                                                         disabled={!canRemoveBags(liveState, amt)}
                                                         onClick={() => doBothSidesAction('REMOVE_BAGS', amt)}
                                                         style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
@@ -835,7 +801,7 @@ export default function BalanceGamePage() {
                                     {/* Undo + Hint */}
                                     <div className="bal-action-row" style={{ justifyContent: 'center', marginTop: '0.5rem' }}>
                                         <button
-                                            className="y-btn y-btn--ghost"
+                                            className="bg-btn bg-btn--ghost"
                                             disabled={!canUndo}
                                             onClick={doUndo}
                                             style={{ fontSize: '0.85rem' }}
@@ -843,7 +809,7 @@ export default function BalanceGamePage() {
                                             {stepBuffer.length > 0 ? '↩ Annuleer' : '↩ Ongedaan'}
                                         </button>
                                         <button
-                                            className="y-btn y-btn--ghost"
+                                            className="bg-btn bg-btn--ghost"
                                             onClick={doHint}
                                             style={{ fontSize: '0.85rem' }}
                                         >

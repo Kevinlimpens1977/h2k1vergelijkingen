@@ -2,6 +2,7 @@
  * TERMTRIS QuestionCard — displays the current question + answer UI.
  *
  * KEY FIX: MC options are SHUFFLED so the correct answer isn't always first.
+ * Now uses Termtris.css classes for dark arcade styling.
  */
 
 import { useState, useMemo } from 'react';
@@ -69,11 +70,7 @@ export default function QuestionCard({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {/* Feedback flash */}
             {feedback && (
-                <div style={{
-                    textAlign: 'center', fontWeight: 800, fontSize: '1.1rem',
-                    color: feedback === 'correct' ? 'var(--y-success)' : '#e17055',
-                    animation: 'termtris-fadeIn 0.2s ease',
-                }}>
+                <div className={`tt-feedback ${feedback === 'correct' ? 'tt-feedback--correct' : 'tt-feedback--wrong'}`}>
                     {feedback === 'correct' ? `✅ +${lastPoints}` : `❌ ${lastPoints}`}
                 </div>
             )}
@@ -86,17 +83,17 @@ export default function QuestionCard({
                     alignSelf: 'flex-start',
                     gap: '0.35rem',
                     padding: '0.25rem 0.65rem',
-                    background: 'rgba(253, 203, 110, 0.12)',
-                    border: '1px solid rgba(253, 203, 110, 0.3)',
+                    background: 'rgba(253, 203, 110, 0.1)',
+                    border: '1px solid rgba(253, 203, 110, 0.25)',
                     borderRadius: 20,
                     fontSize: '0.72rem',
                     fontWeight: 700,
-                    color: '#e17055',
+                    color: '#f97316',
                     whiteSpace: 'nowrap',
                 }}>
                     📖 Boek p. {question.bookRef.page} – {question.bookRef.exercise}
                     {question.bookRef.label && (
-                        <span style={{ color: 'var(--y-muted)', fontWeight: 600, marginLeft: 2 }}>
+                        <span style={{ color: 'rgba(226,232,240,0.5)', fontWeight: 600, marginLeft: 2 }}>
                             · {question.bookRef.label}
                         </span>
                     )}
@@ -104,59 +101,32 @@ export default function QuestionCard({
             )}
 
             {/* Question card */}
-            <div className="y-card" style={{
-                padding: '1rem 1.25rem',
-                borderTop: '3px solid var(--y-cyan)',
-            }}>
+            <div className="tt-question-card">
                 {equationLine && (
-                    <div style={{
-                        marginBottom: '0.4rem',
-                        padding: '0.4rem 0.75rem',
-                        background: 'rgba(0,206,209,0.06)',
-                        borderRadius: 10,
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        textAlign: 'center',
-                        color: 'var(--y-primary)',
-                    }}>
+                    <div className="tt-equation-display">
                         {formatMathDisplay(equationLine)}
                     </div>
                 )}
-                <p style={{
-                    fontSize: '0.9rem',
-                    fontWeight: 600,
-                    color: 'var(--y-text)',
-                    margin: 0,
-                    textAlign: 'center',
-                    lineHeight: 1.5,
-                }}>
+                <p className="tt-question-prompt" style={{ margin: 0 }}>
                     {formatMathDisplay(questionLine)}
                 </p>
             </div>
 
             {/* MC options (SHUFFLED) */}
             {question.type === 'mc' && shuffled && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <div className="tt-options">
                     {shuffled.shuffled.map((opt, displayIdx) => {
-                        let btnClass = 'y-btn y-btn--secondary';
+                        let optClass = 'tt-option';
                         if (selectedDisplayIdx === displayIdx) {
-                            btnClass = feedback === 'correct'
-                                ? 'y-btn y-btn--success'
-                                : feedback === 'wrong'
-                                    ? 'y-btn y-btn--danger'
-                                    : 'y-btn y-btn--primary';
+                            if (feedback === 'correct') optClass += ' tt-option--correct';
+                            else if (feedback === 'wrong') optClass += ' tt-option--wrong';
                         }
                         return (
                             <button
                                 key={displayIdx}
-                                className={btnClass}
+                                className={optClass}
                                 onClick={() => handleMcClick(displayIdx)}
                                 disabled={!!feedback}
-                                style={{
-                                    textAlign: 'left',
-                                    padding: '0.55rem 1rem',
-                                    fontSize: '0.9rem',
-                                }}
                             >
                                 {formatMathDisplay(opt)}
                             </button>
@@ -167,8 +137,9 @@ export default function QuestionCard({
 
             {/* Input */}
             {question.type === 'input' && (
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="tt-input-row">
                     <input
+                        className="tt-input"
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
@@ -176,22 +147,11 @@ export default function QuestionCard({
                         placeholder="Typ je antwoord…"
                         disabled={!!feedback}
                         autoFocus
-                        style={{
-                            flex: 1,
-                            fontSize: '1.05rem',
-                            padding: '0.6rem 0.85rem',
-                            borderRadius: 12,
-                            border: '2px solid var(--y-outline)',
-                            fontWeight: 600,
-                            outline: 'none',
-                            transition: 'border-color 0.2s',
-                        }}
                     />
                     <button
-                        className="y-btn y-btn--primary"
+                        className="tt-submit-btn"
                         onClick={handleSubmit}
                         disabled={!!feedback || !inputValue.trim()}
-                        style={{ padding: '0.6rem 1.1rem' }}
                     >
                         ↵
                     </button>

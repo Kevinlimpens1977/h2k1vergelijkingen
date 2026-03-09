@@ -9,9 +9,10 @@ export type PointsRule = {
 
 export type TaskBase = {
     id: string;
-    type: "mc" | "input" | "order" | "balanceStep" | "multiInput";
+    type: "mc" | "input" | "order" | "balanceStep" | "multiInput" | "theory";
     title?: string;
     prompt: string;
+    image?: string;
     hint1?: string;
     hint2?: string;
     explainCorrect?: string;
@@ -58,7 +59,11 @@ export type BalanceStepTask = TaskBase & {
     nextEquation: string;
 };
 
-export type Task = McTask | InputTask | MultiInputTask | OrderTask | BalanceStepTask;
+export type TheoryTask = TaskBase & {
+    type: "theory";
+};
+
+export type Task = McTask | InputTask | MultiInputTask | OrderTask | BalanceStepTask | TheoryTask;
 
 const DEFAULT_POINTS: PointsRule = { firstTry: 4, afterHint1: 2, afterHint2: 1 };
 
@@ -80,6 +85,7 @@ export const section8_2 = {
             type: "mc",
             title: "Wip in evenwicht",
             prompt: "Britt en Ellen zitten op een wip. De wip is in evenwicht. Wat kun je zeggen over hun gewicht?",
+            image: "/images/ch8/p50opg8.png",
             options: ["Britt is zwaarder", "Ellen is zwaarder", "Britt en Ellen zijn even zwaar"],
             correctIndex: 2,
             hint1: "Evenwicht betekent: links en rechts even zwaar.",
@@ -94,6 +100,7 @@ export const section8_2 = {
             type: "mc",
             title: "Extra gewicht",
             prompt: "De hond springt bij Britt op schoot. Wat gebeurt er met de wip?",
+            image: "/images/ch8/p50opg8.png",
             options: ["Britt-kant gaat omlaag", "Britt-kant gaat omhoog", "Niets verandert"],
             correctIndex: 0,
             hint1: "Meer gewicht = die kant zakt.",
@@ -109,10 +116,12 @@ export const section8_2 = {
             id: "8_2_L1_01",
             type: "input",
             title: "Gewichten optellen",
-            prompt: "Rechts staan gewichten van 400 g, 200 g en 100 g. Hoeveel gram is dat samen?",
-            answer: "700",
-            hint1: "Tel 400 + 200 + 100.",
-            explainCorrect: "Yes: 700 g.",
+            prompt: "Rechts staan gewichten van 300 g, 300 g en 200 g. Hoeveel gram is dat samen?",
+            image: "/images/ch8/p50opg9.png",
+            answer: "800",
+            accept: ["800g", "800 g", "800gram", "800 gram", "800gr", "800 gr"],
+            hint1: "Tel 300 + 300 + 200.",
+            explainCorrect: "Yes: 800 g.",
             explainWrong: "Tel de gewichten nog eens stap voor stap op.",
             points: DEFAULT_POINTS,
             tags: ["optellen", "balans"],
@@ -122,12 +131,13 @@ export const section8_2 = {
             id: "8_2_L1_02",
             type: "mc",
             title: "Vergelijking bij de balans",
-            prompt: "Links staan 5 blikjes appelmoes (a). Rechts is 700 gram. Welke vergelijking past erbij?",
-            options: ["5a = 700", "a + 5 = 700", "700a = 5"],
+            prompt: "Links staan 4 blikken appelmoes (a). Rechts is 800 gram. Welke vergelijking past erbij?",
+            image: "/images/ch8/p50opg9.png",
+            options: ["4a = 800", "a + 4 = 800", "800a = 4"],
             correctIndex: 0,
-            hint1: "a is het gewicht van 1 blikje.",
-            explainCorrect: "Klopt: 5 blikjes = 700 g → 5a = 700.",
-            explainWrong: "Je vermenigvuldigt a met 5 omdat er 5 blikjes zijn.",
+            hint1: "a is het gewicht van 1 blik.",
+            explainCorrect: "Klopt: 4 blikken = 800 g → 4a = 800.",
+            explainWrong: "Je vermenigvuldigt a met 4 omdat er 4 blikken zijn.",
             points: DEFAULT_POINTS,
             tags: ["vergelijking", "variabele"],
             bookRef: { page: 50, exercise: "9", label: "Appelmoes" }
@@ -135,13 +145,14 @@ export const section8_2 = {
         {
             id: "8_2_L1_03",
             type: "input",
-            title: "Gewicht per blikje",
-            prompt: "5a = 700. Hoeveel gram weegt 1 blikje (a)?",
-            answer: "140",
-            hint1: "Deel 700 door 5.",
-            hint2: "700 ÷ 5 = 140.",
-            explainCorrect: "Top: a = 140 gram.",
-            explainWrong: "Je moet delen door 5, omdat a één blikje is.",
+            title: "Gewicht per blik",
+            prompt: "4a = 800. Hoeveel gram weegt 1 blik appelmoes (a)?",
+            answer: "200",
+            accept: ["200g", "200 g", "200gram", "200 gram", "200gr", "200 gr"],
+            hint1: "Deel 800 door 4.",
+            hint2: "800 ÷ 4 = 200.",
+            explainCorrect: "Top: a = 200 gram.",
+            explainWrong: "Je moet delen door 4, omdat a één blik is.",
             points: DEFAULT_POINTS,
             tags: ["delen", "vergelijking"],
             bookRef: { page: 50, exercise: "9", label: "Appelmoes" }
@@ -152,8 +163,10 @@ export const section8_2 = {
             id: "8_2_L2_01",
             type: "input",
             title: "Kaas: totaalgewicht",
-            prompt: "Bij de kaas-balans wegen 3 kazen samen 36 kg. Hoeveel kg weegt 1 kaas?",
+            prompt: "Balans A (kaas): 3 kazen links wegen samen 36 kg. Hoeveel kg weegt 1 kaas?",
+            image: "/images/ch8/p50opg10.png",
             answer: "12",
+            accept: ["12kg", "12 kg", "12kilo", "12 kilo", "12kilogram", "12 kilogram"],
             hint1: "Deel 36 door 3.",
             hint2: "36 ÷ 3 = 12.",
             explainCorrect: "Juist: 12 kg per kaas.",
@@ -166,9 +179,11 @@ export const section8_2 = {
             id: "8_2_L2_02",
             type: "input",
             title: "Koffie: gewichten optellen",
-            prompt: "Links staan gewichten van 200 g, 900 g en 400 g. Hoeveel gram is dat samen?",
+            prompt: "Balans B (koffie): links staan gewichten van 300 g, 600 g en 600 g. Hoeveel gram is dat samen?",
+            image: "/images/ch8/p50opg10.png",
             answer: "1500",
-            hint1: "Tel 200 + 900 + 400.",
+            accept: ["1500g", "1500 g", "1500gram", "1500 gram", "1500gr", "1500 gr"],
+            hint1: "Tel 300 + 600 + 600.",
             explainCorrect: "Yes: 1500 g.",
             explainWrong: "Tel de drie gewichten op.",
             points: DEFAULT_POINTS,
@@ -179,11 +194,13 @@ export const section8_2 = {
             id: "8_2_L2_03",
             type: "input",
             title: "Koffie: gewicht per pak",
-            prompt: "5 pakken koffie wegen samen 1500 gram. Hoeveel gram is 1 pak?",
+            prompt: "Balans B (koffie): 5 pakken koffie wegen samen 1500 gram. Hoeveel gram is 1 pak?",
+            image: "/images/ch8/p50opg10.png",
             answer: "300",
+            accept: ["300g", "300 g", "300gram", "300 gram", "300gr", "300 gr"],
             hint1: "Deel 1500 door 5.",
             hint2: "1500 ÷ 5 = 300.",
-            explainCorrect: "Top: 300 g per pak.",
+            explainCorrect: "Top: 300 g per pak koffie.",
             explainWrong: "Je moet delen door 5 (vijf gelijke pakken).",
             points: DEFAULT_POINTS,
             tags: ["delen", "context"],
@@ -196,6 +213,7 @@ export const section8_2 = {
             type: "mc",
             title: "Waarom gaat links omhoog?",
             prompt: "Links zijn knikkers weggehaald. Waarom gaat de linkerkant omhoog?",
+            image: "/images/ch8/p51opg11.png",
             options: ["Links is lichter geworden", "Links is zwaarder geworden", "Rechts is lichter geworden"],
             correctIndex: 0,
             hint1: "Als je gewicht weghaalt, wordt die kant lichter.",
@@ -210,6 +228,7 @@ export const section8_2 = {
             type: "input",
             title: "Zelfde weghalen",
             prompt: "Links zijn 5 knikkers weggehaald. Hoeveel knikkers moet je rechts weghalen om weer eerlijk te maken?",
+            image: "/images/ch8/p51opg11.png",
             answer: "5",
             hint1: "Op een balans doe je aan beide kanten hetzelfde.",
             explainCorrect: "Precies: 5 eraf aan beide kanten.",
@@ -223,8 +242,9 @@ export const section8_2 = {
             type: "multiInput",
             title: "Van balans naar vergelijking",
             prompt: "Schrijf de vergelijking bij: 4 zakjes (a) + 5 knikkers = 17 knikkers.",
+            image: "/images/ch8/p51opg11.png",
             fields: [
-                { key: "eq", label: "Vergelijking (met a)", placeholder: "bijv. 4a + 5 = 17" },
+                { key: "eq", label: "Vergelijking (met a)", placeholder: "bijv. 3x + 2 = 14" },
                 { key: "a", label: "a =", placeholder: "getal" }
             ],
             answers: { eq: "4a+5=17", a: "3" },
@@ -246,6 +266,7 @@ export const section8_2 = {
             type: "input",
             title: "Vergelijking opstellen",
             prompt: "Links: 7 kazen (g) + 3 kg. Rechts: 24 kg. Vul in: 7g + 3 = 24. Wat staat er voor de g?",
+            image: "/images/ch8/p51opg12.png",
             answer: "7",
             hint1: "Tel hoeveel kazen er links staan.",
             explainCorrect: "Yes: 7g + 3 = 24.",
@@ -259,6 +280,7 @@ export const section8_2 = {
             type: "balanceStep",
             title: "Balansstap kiezen",
             prompt: "Je wilt g alleen krijgen. Welke stap is geldig?",
+            image: "/images/ch8/p51opg12.png",
             equation: "7g + 3 = 24",
             choices: [
                 { label: "−3 aan beide kanten", op: "-3" },
@@ -279,7 +301,9 @@ export const section8_2 = {
             type: "input",
             title: "Los op",
             prompt: "7g = 21. Hoeveel kg weegt 1 kaas (g)?",
+            image: "/images/ch8/p51opg12.png",
             answer: "3",
+            accept: ["3kg", "3 kg", "3kilo", "3 kilo", "3kilogram", "3 kilogram"],
             hint1: "Deel 21 door 7.",
             explainCorrect: "Top: g = 3 kg.",
             explainWrong: "Je moet delen door 7 om g alleen te krijgen.",
@@ -288,42 +312,127 @@ export const section8_2 = {
             bookRef: { page: 51, exercise: "12", label: "Kaas + 3 kg" }
         },
 
-        // Extra: valkuil-validatie (nieuw, zelfde leerdoel)
+        // Theorie-slide — "Doe aan beide kanten hetzelfde" (boek p.51-52)
         {
-            id: "8_2_X_01",
-            type: "mc",
-            title: "Welke stap is geldig?",
-            prompt: "Je hebt: 5a + 6 = 16. Welke stap is geldig?",
-            options: [
-                "Links −6 en rechts −6",
-                "Links −6 en rechts +6",
-                "Alleen links −6"
-            ],
-            correctIndex: 0,
-            hint1: "Aan beide kanten hetzelfde doen.",
-            explainCorrect: "Juist: −6 aan beide kanten houdt het eerlijk.",
-            explainWrong: "Als je niet hetzelfde doet, verandert de balans.",
+            id: "8_2_TH_01",
+            type: "theory",
+            title: "Theorie: de balansmethode",
+            prompt: "Lees de theorie hieronder goed door. Bij het oplossen van een vergelijking kun je denken aan een balans. Als je van beide kanten hetzelfde eraf haalt of erbij doet, blijft de balans in evenwicht.",
+            image: "/images/ch8/8_2theorie.png",
+            tags: ["theorie"],
+            bookRef: { page: 51, label: "Theorie" }
+        },
+
+        // Opgave 13 — 2a + 3 = 9 (balans met zakjes en knikkers)
+        {
+            id: "8_2_X_01a",
+            type: "input",
+            title: "Knikkers weghalen",
+            prompt: "De balans is in evenwicht. Links liggen 2 zakjes (a) en 3 losse knikkers. Rechts liggen 9 losse knikkers. Bij de balans past: 2a + 3 = 9. Hoeveel knikkers kun je links en rechts maximaal weghalen?",
+            image: "/images/ch8/p52opg13.png",
+            answer: "3",
+            hint1: "Kijk hoeveel losse knikkers er links liggen.",
+            hint2: "Links liggen 3 losse knikkers. Die kun je aan beide kanten weghalen.",
+            explainCorrect: "Goed: je kunt 3 knikkers aan beide kanten weghalen.",
+            explainWrong: "Links liggen 3 losse knikkers — dat is het maximum dat je kunt weghalen.",
             points: DEFAULT_POINTS,
-            tags: ["balansstap", "valkuil"]
+            tags: ["balansstap", "begrip"],
+            bookRef: { page: 52, exercise: "13a", label: "Knikkers weghalen" }
         },
         {
-            id: "8_2_X_02",
-            type: "order",
-            title: "Zet de stappen goed",
-            prompt: "Zet de stappen in de juiste volgorde voor: 4x + 5 = 17",
-            steps: [
-                "4x = 12",
-                "x = 3",
-                "4x + 5 = 17",
-                "4x + 5 − 5 = 17 − 5"
-            ],
-            correctOrder: [2, 3, 0, 1],
-            hint1: "Eerst schrijf je de startvergelijking op.",
-            hint2: "Haal daarna 5 weg aan beide kanten, dan deel je door 4.",
-            explainCorrect: "Top: start → −5 aan beide kanten → 4x=12 → x=3.",
-            explainWrong: "Kijk: eerst moet je de +5 wegwerken, daarna pas delen.",
+            id: "8_2_X_01b",
+            type: "mc",
+            title: "Na het weghalen",
+            prompt: "Je haalt 3 knikkers weg aan beide kanten van 2a + 3 = 9. Welke vergelijking krijg je dan?",
+            image: "/images/ch8/p52opg13.png",
+            options: ["2a = 6", "2a = 9", "2a + 3 = 6"],
+            correctIndex: 0,
+            hint1: "2a + 3 − 3 = 9 − 3.",
+            explainCorrect: "Klopt: 2a + 3 − 3 = 9 − 3 → 2a = 6.",
+            explainWrong: "Je haalt aan beide kanten 3 eraf: links valt de +3 weg, rechts wordt 9 − 3 = 6.",
             points: DEFAULT_POINTS,
-            tags: ["stappenplan"]
+            tags: ["balansstap"],
+            bookRef: { page: 52, exercise: "13b", label: "Tweede balans" }
+        },
+        {
+            id: "8_2_X_01c",
+            type: "input",
+            title: "Knikkers per zakje",
+            prompt: "2a = 6. Hoeveel knikkers zitten er in één zakje?",
+            image: "/images/ch8/p52opg13.png",
+            answer: "3",
+            hint1: "Deel 6 door 2.",
+            explainCorrect: "Top: a = 3 knikkers per zakje!",
+            explainWrong: "Je moet 6 delen door 2 (want er zijn 2 zakjes).",
+            points: DEFAULT_POINTS,
+            tags: ["delen", "oplossen"],
+            bookRef: { page: 52, exercise: "13c", label: "Oplossen" }
+        },
+        {
+            id: "8_2_X_02a",
+            type: "multiInput",
+            title: "Balans A — vergelijking",
+            prompt: "Bekijk balans A. Links staan 4 zakjes (a). Rechts staan 8 knikkers. Schrijf de vergelijking op en bereken a.",
+            image: "/images/ch8/p52opg14.png",
+            fields: [
+                { key: "eq", label: "Vergelijking", placeholder: "bijv. 2x = 8" },
+                { key: "a", label: "a =", placeholder: "getal" }
+            ],
+            answers: { eq: "4a=8", a: "2" },
+            accept: {
+                eq: ["4a = 8", "4a=8", "4a =8", "4a= 8"].map(s => s.replace(/\s+/g, ""))
+            },
+            hint1: "Links: 4 zakjes = 4a, geen losse knikkers. Rechts: 8 knikkers.",
+            hint2: "4a = 8. Deel door 4.",
+            explainCorrect: "Top: 4a = 8, dus a = 2 knikkers per zakje.",
+            explainWrong: "Tel links: 4 zakjes (4a), geen losse knikkers. Rechts: 8. Dus 4a = 8.",
+            points: DEFAULT_POINTS,
+            tags: ["vergelijking", "oplossen"],
+            bookRef: { page: 52, exercise: "14a", label: "Balans A" }
+        },
+        {
+            id: "8_2_X_02b",
+            type: "multiInput",
+            title: "Balans B — vergelijking",
+            prompt: "Bekijk balans B. Links staan 4 zakjes (a) en 2 losse knikkers. Rechts staan 14 knikkers. Schrijf de vergelijking op en bereken a.",
+            image: "/images/ch8/p52opg14.png",
+            fields: [
+                { key: "eq", label: "Vergelijking", placeholder: "bijv. 2x + 3 = 9" },
+                { key: "a", label: "a =", placeholder: "getal" }
+            ],
+            answers: { eq: "4a+2=14", a: "3" },
+            accept: {
+                eq: ["4a + 2 = 14", "4a+2=14", "4a +2= 14", "4a+2 = 14"].map(s => s.replace(/\s+/g, ""))
+            },
+            hint1: "Links: 4 zakjes = 4a, plus 2 knikkers. Rechts: 14.",
+            hint2: "4a + 2 = 14. Haal 2 eraf: 4a = 12. Deel door 4.",
+            explainCorrect: "Top: 4a + 2 = 14, dus a = 3 knikkers per zakje.",
+            explainWrong: "Tel links: 4 zakjes (4a) + 2 losse knikkers. Rechts: 14. Dus 4a + 2 = 14.",
+            points: DEFAULT_POINTS,
+            tags: ["vergelijking", "oplossen"],
+            bookRef: { page: 52, exercise: "14b", label: "Balans B" }
+        },
+        {
+            id: "8_2_X_02c",
+            type: "multiInput",
+            title: "Balans C — vergelijking",
+            prompt: "Bekijk balans C. Links staan 5 zakjes (a) en 4 losse knikkers. Rechts staan 24 knikkers. Schrijf de vergelijking op en bereken a.",
+            image: "/images/ch8/p52opg14.png",
+            fields: [
+                { key: "eq", label: "Vergelijking", placeholder: "bijv. 2x + 3 = 9" },
+                { key: "a", label: "a =", placeholder: "getal" }
+            ],
+            answers: { eq: "5a+4=24", a: "4" },
+            accept: {
+                eq: ["5a + 4 = 24", "5a+4=24", "5a +4= 24", "5a+4 = 24"].map(s => s.replace(/\s+/g, ""))
+            },
+            hint1: "Links: 5 zakjes = 5a, plus 4 knikkers. Rechts: 24.",
+            hint2: "5a + 4 = 24. Haal 4 eraf: 5a = 20. Deel door 5.",
+            explainCorrect: "Top: 5a + 4 = 24, dus a = 4 knikkers per zakje.",
+            explainWrong: "Tel links: 5 zakjes (5a) + 4 losse knikkers. Rechts: 24. Dus 5a + 4 = 24.",
+            points: DEFAULT_POINTS,
+            tags: ["vergelijking", "oplossen"],
+            bookRef: { page: 52, exercise: "14c", label: "Balans C" }
         }
     ] as Task[]
 };

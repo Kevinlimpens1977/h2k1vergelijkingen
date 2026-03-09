@@ -1,10 +1,3 @@
-/**
- * Developer Mode context — Ctrl+Shift+Z toggle.
- *
- * When enabled, all route guards and roadmap locks are bypassed.
- * Persisted in localStorage; never touches Firestore.
- */
-
 import {
     createContext,
     useContext,
@@ -13,6 +6,7 @@ import {
     useCallback,
     type ReactNode,
 } from 'react';
+import StudentDashboard from '../components/StudentDashboard';
 
 /* ── types ────────────────────────────────────────────── */
 
@@ -40,6 +34,7 @@ export function DevModeProvider({ children }: { children: ReactNode }) {
     });
 
     const [toast, setToast] = useState<string | null>(null);
+    const [dashboardOpen, setDashboardOpen] = useState(false);
 
     const toggle = useCallback(() => {
         setDevMode((prev) => {
@@ -51,6 +46,8 @@ export function DevModeProvider({ children }: { children: ReactNode }) {
                 ? 'Developer mode: AAN (alle onderdelen ontgrendeld)'
                 : 'Developer mode: UIT',
             );
+            // Close dashboard when DevMode is deactivated
+            if (!next) setDashboardOpen(false);
             return next;
         });
     }, []);
@@ -111,6 +108,57 @@ export function DevModeProvider({ children }: { children: ReactNode }) {
                 }}>
                     {toast}
                 </div>
+            )}
+
+            {/* Persistent DevMode bar with dashboard button */}
+            {devMode && !dashboardOpen && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '4rem',
+                    right: '1rem',
+                    zIndex: 49999,
+                    display: 'flex',
+                    gap: '0.5rem',
+                    alignItems: 'center',
+                }}>
+                    <button
+                        onClick={() => setDashboardOpen(true)}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '10px',
+                            border: '1.5px solid #6c5ce7',
+                            background: 'linear-gradient(135deg, #16213e, #0f3460)',
+                            color: '#fff',
+                            fontWeight: 700,
+                            fontSize: '0.82rem',
+                            cursor: 'pointer',
+                            fontFamily: "'Inter', system-ui, sans-serif",
+                            boxShadow: '0 4px 16px rgba(108,92,231,0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            transition: 'all 0.15s',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                            e.currentTarget.style.boxShadow = '0 6px 24px rgba(108,92,231,0.5)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = '0 4px 16px rgba(108,92,231,0.3)';
+                        }}
+                    >
+                        📊 Leerling Dashboard
+                    </button>
+                </div>
+            )}
+
+            {/* Dashboard overlay */}
+            {devMode && dashboardOpen && (
+                <StudentDashboard
+                    classId="klas2k"
+                    onClose={() => setDashboardOpen(false)}
+                />
             )}
         </DevModeContext.Provider>
     );
