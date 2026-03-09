@@ -5,14 +5,24 @@ import {
     serverTimestamp,
     collection,
     getDocs,
+    arrayUnion,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import type { RouteSwitch } from './adaptiveRouter';
 
 /* ── types ───────────────────────────────────────────── */
 
 export type ParagraphId = '8_1' | '8_2' | '8_3' | '8_4' | '8_5';
 export type RouteChoice = 'O' | 'D' | 'U' | null;
 export type ProgressStatus = 'not_started' | 'in_progress' | 'completed';
+
+export interface AdaptiveSnapshot {
+    currentRoute: 'O' | 'D' | 'U';
+    totalAnswered: number;
+    totalCorrect: number;
+    switchCount: number;
+    isLocked: boolean;
+}
 
 export interface ParagraphProgress {
     paragraphId: ParagraphId;
@@ -21,6 +31,12 @@ export interface ParagraphProgress {
     lastSeenAt: unknown;
     completedExercises: string[];
     updatedAt: unknown;
+    /** Adaptive routing snapshot for cross-session persistence. */
+    adaptiveSnapshot?: AdaptiveSnapshot | null;
+    /** Log of route switches within this paragraph. */
+    routeHistory?: RouteSwitch[];
+    /** Whether the student has opened the slides for this paragraph. */
+    slidesOpened?: boolean;
 }
 
 /* ── paragraph metadata ──────────────────────────────── */
@@ -75,6 +91,9 @@ export async function touchProgress(uid: string, paragraphId: ParagraphId): Prom
             lastSeenAt: serverTimestamp(),
             completedExercises: [],
             updatedAt: serverTimestamp(),
+            adaptiveSnapshot: null,
+            routeHistory: [],
+            slidesOpened: false,
         });
     } else {
         await setDoc(ref, {
@@ -99,3 +118,38 @@ export async function markCompleted(uid: string, paragraphId: ParagraphId): Prom
         updatedAt: serverTimestamp(),
     }, { merge: true });
 }
+
+/** Save the adaptive routing snapshot for cross-session persistence. */
+export async function saveAdaptiveSnapshot(
+    uid: string,
+    paragraphId: ParagraphId,
+    snapshot: AdaptiveSnapshot,
+    route: RouteChoice,
+): Promise<void> {
+    await setDoc(progressDocRef(uid, paragraphId), {
+        adaptiveSnapshot: snapshot,
+        route,
+        updatedAt: serverTimestamp(),
+    }, { merge: true });
+}
+
+/** Append a route switch to the routeHistory array. */
+export async function appendRouteSwitch(
+    uid: string,
+    paragraphId: ParagraphId,
+    routeSwitch: RouteSwitch,
+): Promise<void> {
+    await setDoc(progressDocRef(uid, paragraphId), {
+        routeHistory: arrayUnion(routeSwitch),
+        updatedAt: serverTimestamp(),
+    }, { merge: true });
+}
+
+/** Mark slides as opened for this paragraph. */
+export async function saveSlidesOpened(uid: string, paragraphId: ParagraphId): Promise<void> {
+    await setDoc(progressDocRef(uid, paragraphId), {
+        slidesOpened: true,
+        updatedAt: serverTimestamp(),
+    }, { merge: true });
+}
+

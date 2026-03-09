@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import {
     generateSession,
@@ -12,7 +12,21 @@ import {
     type ErrorTag,
 } from '../services/exerciseGenerator';
 import { logAttempt, appendCompletedExercise } from '../services/attempts';
-import type { RouteChoice } from '../services/progress';
+import {
+    getProgress,
+    saveAdaptiveSnapshot,
+    appendRouteSwitch,
+    type RouteChoice,
+} from '../services/progress';
+import {
+    createAdaptiveState,
+    restoreAdaptiveState,
+    recordAnswerAndEvaluate,
+    toSnapshot,
+    getRouteChoice,
+    type AdaptiveState,
+} from '../services/adaptiveRouter';
+import RouteChangeToast from '../components/RouteChangeToast';
 import { formatMathDisplay } from '../utils/formatMathDisplay';
 import { algebraEquals } from '../utils/algebraEquals';
 import './Practice.css';
@@ -25,21 +39,29 @@ type FeedbackState =
     | { type: 'hint'; message: string; tags: ErrorTag[] }
     | { type: 'exhausted'; tags: ErrorTag[] };
 
-/**
- * CAN_COMBINE has two steps:
- *   step1 = "Kun je samenvoegen? ja/nee"
- *   step2 = "Wat wordt het samen?" (only if canCombine && user answered ja correctly)
- */
 type CombineStep = 'step1' | 'step2';
+
+const ROUTE_LABEL: Record<string, string> = {
+    O: 'Ondersteunend',
+    D: 'Doorlopend',
+    U: 'Uitdagend',
+};
 
 export default function PracticePage() {
     const { profile } = useAuth();
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const route = (searchParams.get('route') as RouteChoice) || 'D';
+
+    /* ── adaptive state ─────────────────────────────────── */
+    const adaptiveRef = useRef<AdaptiveState>(createAdaptiveState('D'));
+    const [currentRouteLabel, setCurrentRouteLabel] = useState('Doorlopend');
+    const [initDone, setInitDone] = useState(false);
+
+    /* toast state */
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastVisible, setToastVisible] = useState(false);
 
     /* session state */
-    const [exercises, setExercises] = useState<Exercise[]>(() => generateSession(route));
+    const [exercises, setExercises] = useState<Exercise[]>([]);
     const [currentIdx, setCurrentIdx] = useState(0);
     const [answer, setAnswer] = useState('');
     const [feedback, setFeedback] = useState<FeedbackState>({ type: 'none' });
@@ -50,6 +72,9 @@ export default function PracticePage() {
     /* CAN_COMBINE step tracking */
     const [combineStep, setCombineStep] = useState<CombineStep>('step1');
 
+    /* end-of-paragraph U option */
+    const [showUOption, setShowUOption] = useState(false);
+
     /* timing */
     const startTimeRef = useRef<number>(Date.now());
     useEffect(() => {
@@ -59,8 +84,91 @@ export default function PracticePage() {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const current: Exercise | undefined = exercises[currentIdx];
-    const isSessionDone = currentIdx >= exercises.length;
-    const progress = Math.min(currentIdx / exercises.length, 1);
+    const isSessionDone = exercises.length > 0 && currentIdx >= exercises.length;
+    const progress = exercises.length > 0 ? Math.min(currentIdx / exercises.length, 1) : 0;
+
+    /* ── initialize: load snapshot or start fresh ────────── */
+    useEffect(() => {
+        if (!profile) return;
+        (async () => {
+            try {
+                const prog = await getProgress(profile.uid, '8_1');
+                let startRoute: 'O' | 'D' | 'U' = 'D';
+
+                if (prog?.adaptiveSnapshot) {
+                    // Cross-session: restore route (but fresh window)
+                    const restored = restoreAdaptiveState(prog.adaptiveSnapshot);
+                    adaptiveRef.current = restored;
+                    startRoute = restored.currentRoute;
+                } else {
+                    adaptiveRef.current = createAdaptiveState('D');
+                }
+
+                setCurrentRouteLabel(ROUTE_LABEL[startRoute] || 'Doorlopend');
+                setExercises(generateSession(startRoute as RouteChoice));
+                setInitDone(true);
+            } catch (err) {
+                console.warn('Could not load adaptive state:', err);
+                adaptiveRef.current = createAdaptiveState('D');
+                setExercises(generateSession('D'));
+                setInitDone(true);
+            }
+        })();
+    }, [profile]);
+
+    /* ── adaptive evaluation after answer ────────────────── */
+    const evaluateAndMaybeSwitch = useCallback(async (isCorrect: boolean) => {
+        if (!profile) return;
+
+        const { newState, decision } = recordAnswerAndEvaluate(adaptiveRef.current, isCorrect);
+        adaptiveRef.current = newState;
+
+        // Persist snapshot
+        try {
+            await saveAdaptiveSnapshot(
+                profile.uid,
+                '8_1',
+                toSnapshot(newState),
+                getRouteChoice(newState),
+            );
+        } catch (err) {
+            console.warn('Could not save adaptive snapshot:', err);
+        }
+
+        // Route switch?
+        if (decision.switched) {
+            setCurrentRouteLabel(ROUTE_LABEL[decision.newRoute] || 'Doorlopend');
+
+            // Log the switch
+            try {
+                await appendRouteSwitch(profile.uid, '8_1', {
+                    from: adaptiveRef.current.currentRoute === decision.newRoute
+                        ? 'D' // fallback
+                        : adaptiveRef.current.currentRoute,
+                    to: decision.newRoute,
+                    reason: decision.reason,
+                    atQuestion: newState.totalAnswered,
+                    timestamp: new Date().toISOString(),
+                });
+            } catch (err) {
+                console.warn('Could not log route switch:', err);
+            }
+
+            // Show toast
+            setToastMessage(decision.message);
+            setToastVisible(true);
+
+            // Regenerate remaining exercises with new difficulty
+            const remaining = exercises.length - (currentIdx + 1);
+            if (remaining > 0) {
+                const newBatch = generateSession(decision.newRoute as RouteChoice).slice(0, remaining);
+                setExercises((prev) => {
+                    const kept = prev.slice(0, currentIdx + 1);
+                    return [...kept, ...newBatch];
+                });
+            }
+        }
+    }, [profile, exercises.length, currentIdx]);
 
     /* ── MC_TERMS: handle option click ──────────────────── */
     const handleMCAnswer = useCallback(async (picked: string) => {
@@ -100,7 +208,10 @@ export default function PracticePage() {
         } finally {
             setSaving(false);
         }
-    }, [current, profile, saving]);
+
+        // Adaptive evaluation
+        await evaluateAndMaybeSwitch(isCorrect);
+    }, [current, profile, saving, evaluateAndMaybeSwitch]);
 
     /* ── CAN_COMBINE step 1: ja/nee ─────────────────────── */
     const handleCombineYN = useCallback(async (picked: 'ja' | 'nee') => {
@@ -113,9 +224,7 @@ export default function PracticePage() {
 
         if (isCorrect) {
             if (current.canCombine && picked === 'ja') {
-                // Correct "ja" → advance to step 2
                 setFeedback({ type: 'correct' });
-                // Small delay then move to step 2
                 setTimeout(() => {
                     setCombineStep('step2');
                     setFeedback({ type: 'none' });
@@ -124,12 +233,10 @@ export default function PracticePage() {
                     setTimeout(() => inputRef.current?.focus(), 50);
                 }, 800);
             } else {
-                // Correct "nee" → done
                 setFeedback({ type: 'correct' });
                 setSessionCorrect((c) => c + 1);
             }
 
-            // Log the step-1 attempt
             setSaving(true);
             try {
                 await logAttempt(profile.uid, {
@@ -144,7 +251,6 @@ export default function PracticePage() {
                     retries: 0,
                 });
                 if (!current.canCombine) {
-                    // "nee" was correct and exercise is done
                     await appendCompletedExercise(profile.uid, '8_1', current.id);
                 }
             } catch (err) {
@@ -152,8 +258,14 @@ export default function PracticePage() {
             } finally {
                 setSaving(false);
             }
+
+            // Adaptive evaluation (correct answer for step 1)
+            if (!current.canCombine) {
+                // "nee" was correct and exercise is done → evaluate
+                await evaluateAndMaybeSwitch(true);
+            }
+            // If canCombine, we wait for step 2 to evaluate
         } else {
-            // Wrong answer
             const tags = detectYNErrorTags(picked, current.correctAnswer);
             setFeedback({ type: 'exhausted', tags });
 
@@ -175,8 +287,11 @@ export default function PracticePage() {
             } finally {
                 setSaving(false);
             }
+
+            // Adaptive evaluation (wrong answer)
+            await evaluateAndMaybeSwitch(false);
         }
-    }, [current, profile, saving]);
+    }, [current, profile, saving, evaluateAndMaybeSwitch]);
 
     /* ── CAN_COMBINE step 2: simplify input ─────────────── */
     const handleCombineCheck = useCallback(async () => {
@@ -211,6 +326,9 @@ export default function PracticePage() {
             } finally {
                 setSaving(false);
             }
+
+            // Adaptive evaluation
+            await evaluateAndMaybeSwitch(true);
         } else {
             const tags = detectErrorTags(answer, current.combinedAnswer);
 
@@ -238,9 +356,12 @@ export default function PracticePage() {
                 } finally {
                     setSaving(false);
                 }
+
+                // Adaptive evaluation
+                await evaluateAndMaybeSwitch(false);
             }
         }
-    }, [current, profile, answer, retries, saving]);
+    }, [current, profile, answer, retries, saving, evaluateAndMaybeSwitch]);
 
     /* ── next exercise ──────────────────────────────────── */
     const handleNext = useCallback(() => {
@@ -254,14 +375,35 @@ export default function PracticePage() {
 
     /* ── restart session ────────────────────────────────── */
     const handleRestart = useCallback(() => {
-        setExercises(generateSession(route));
+        const route = adaptiveRef.current.currentRoute;
+        setExercises(generateSession(route as RouteChoice));
         setCurrentIdx(0);
         setAnswer('');
         setFeedback({ type: 'none' });
         setRetries(0);
         setSessionCorrect(0);
         setCombineStep('step1');
-    }, [route]);
+        setShowUOption(false);
+    }, []);
+
+    /* ── start U bonus round ────────────────────────────── */
+    const handleStartUBonus = useCallback(() => {
+        adaptiveRef.current = {
+            ...adaptiveRef.current,
+            currentRoute: 'U',
+            answersWindow: [],
+            isLocked: true, // no more auto-switches in bonus round
+        };
+        setCurrentRouteLabel('Uitdagend');
+        setExercises(generateSession('U'));
+        setCurrentIdx(0);
+        setAnswer('');
+        setFeedback({ type: 'none' });
+        setRetries(0);
+        setSessionCorrect(0);
+        setCombineStep('step1');
+        setShowUOption(false);
+    }, []);
 
     /* ── keyboard shortcut ──────────────────────────────── */
     const handleKeyDown = useCallback(
@@ -269,9 +411,8 @@ export default function PracticePage() {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (feedback.type === 'correct' || feedback.type === 'exhausted') {
-                    // If combine step1 just went correct and canCombine, don't advance
                     if (current?.exerciseType === 'CAN_COMBINE' && combineStep === 'step1' && feedback.type === 'correct' && current.canCombine) {
-                        return; // step2 transition happening automatically
+                        return;
                     }
                     handleNext();
                 } else if (combineStep === 'step2') {
@@ -281,8 +422,6 @@ export default function PracticePage() {
         },
         [feedback, handleNext, handleCombineCheck, current, combineStep],
     );
-
-    const routeLabel = route === 'O' ? 'Ondersteunend' : route === 'U' ? 'Uitdagend' : 'Doorlopend';
 
     /* ── render helpers ──────────────────────────────────── */
 
@@ -357,7 +496,6 @@ export default function PracticePage() {
                 </div>
 
                 {combineStep === 'step1' ? (
-                    /* Step 1: Ja / Nee */
                     feedback.type === 'none' ? (
                         <div className="practice-yn-buttons">
                             <button
@@ -376,17 +514,14 @@ export default function PracticePage() {
                             </button>
                         </div>
                     ) : feedback.type === 'correct' && current.canCombine ? (
-                        /* Transitioning to step 2 — brief correct message */
                         <div className="practice-feedback practice-feedback--correct">
                             <span className="practice-feedback-icon">✓</span>
                             Ja, klopt! Even kijken wat het samen wordt…
                         </div>
                     ) : (
-                        /* Correct "nee" or wrong answer → show next */
                         renderNextButton()
                     )
                 ) : (
-                    /* Step 2: Text input for combined answer */
                     <>
                         <div className="practice-input-group">
                             <label className="practice-input-label" htmlFor="practice-combine">
@@ -460,15 +595,34 @@ export default function PracticePage() {
 
     /* ── main render ─────────────────────────────────────── */
 
+    if (!initDone) {
+        return (
+            <div className="practice-page">
+                <div className="practice-main">
+                    <div className="practice-card" style={{ textAlign: 'center', padding: '3rem' }}>
+                        Laden...
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="practice-page">
+            {/* Route change toast */}
+            <RouteChangeToast
+                message={toastMessage}
+                visible={toastVisible}
+                onDone={() => setToastVisible(false)}
+            />
+
             <header className="practice-header">
                 <button onClick={() => navigate('/paragraph/8_1')} className="practice-back">
                     ← Terug
                 </button>
                 <div className="practice-header-info">
                     <h1>§8.1 Oefenen</h1>
-                    <span>Route {routeLabel}</span>
+                    <span>Route {currentRouteLabel}</span>
                 </div>
                 <div className="practice-progress-bar">
                     <div className="practice-progress-track">
@@ -512,6 +666,31 @@ export default function PracticePage() {
                                 <span className="practice-stat-label">Score</span>
                             </div>
                         </div>
+
+                        {/* End-of-paragraph U option */}
+                        {adaptiveRef.current.currentRoute === 'D' && !showUOption && (
+                            <div style={{
+                                marginTop: '1.5rem',
+                                padding: '1rem',
+                                background: 'rgba(167, 139, 250, 0.08)',
+                                border: '1px solid rgba(167, 139, 250, 0.2)',
+                                borderRadius: '0.75rem',
+                                textAlign: 'center',
+                            }}>
+                                <p style={{ color: '#c4b5fd', marginBottom: '0.75rem' }}>
+                                    Je hebt deze paragraaf goed gedaan! Wil je ook de uitdagende opgaven proberen?
+                                </p>
+                                <button
+                                    className="practice-btn practice-btn--again"
+                                    style={{
+                                        background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                                    }}
+                                    onClick={handleStartUBonus}
+                                >
+                                    🚀 Ja, uitdagende opgaven!
+                                </button>
+                            </div>
+                        )}
 
                         <div className="practice-complete-actions">
                             <button
@@ -593,3 +772,4 @@ export default function PracticePage() {
         </div>
     );
 }
+

@@ -47,9 +47,9 @@ interface DifficultyConfig {
 }
 
 const DIFFICULTY: Record<string, DifficultyConfig> = {
-    O: { coeffMin: 1, coeffMax: 6, constMin: 1, constMax: 10, mcCount: 8 },
-    D: { coeffMin: -9, coeffMax: 9, constMin: -20, constMax: 20, mcCount: 5 },
-    U: { coeffMin: -15, coeffMax: 15, constMin: -30, constMax: 30, mcCount: 2 },
+    O: { coeffMin: 1, coeffMax: 6, constMin: 1, constMax: 10, mcCount: 16 },
+    D: { coeffMin: -9, coeffMax: 9, constMin: -20, constMax: 20, mcCount: 10 },
+    U: { coeffMin: -15, coeffMax: 15, constMin: -30, constMax: 30, mcCount: 4 },
 };
 
 function getDifficulty(route: RouteChoice): DifficultyConfig {
@@ -497,7 +497,7 @@ export function generateSession(route: RouteChoice = 'D'): Exercise[] {
     const exercises: Exercise[] = [];
     const seenPrompts = new Set<string>();
 
-    const total = 10;
+    const total = 20;
     const combineCount = total - cfg.mcCount;
 
     // Build an interleaved schedule

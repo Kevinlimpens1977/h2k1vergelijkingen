@@ -1,0 +1,436 @@
+/* ── Letterrekenen Intro — Youth Theme ───────────────── */
+
+.li-page {
+    min-height: 100vh;
+    background: var(--y-bg);
+    color: var(--y-text);
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.li-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: var(--y-muted);
+    font-size: 1.1rem;
+}
+
+/* ── header ──────────────────────────────────────────── */
+
+.li-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--y-panel);
+    border-bottom: 2px solid var(--y-outline);
+    box-shadow: 0 2px 12px rgba(30, 41, 59, 0.06);
+}
+
+.li-back {
+    background: var(--y-panel2);
+    border: 1.5px solid var(--y-outline);
+    color: var(--y-muted);
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: border-color 0.2s;
+    min-height: 36px;
+}
+
+.li-back:hover {
+    border-color: var(--y-primary);
+    color: var(--y-primary);
+}
+
+.li-header-info h1 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--y-text);
+}
+
+.li-header-info span {
+    font-size: 0.8rem;
+    color: var(--y-muted);
+}
+
+.li-stats {
+    margin-left: auto;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.li-streak {
+    color: #e17055;
+    font-weight: 700;
+}
+
+.li-score {
+    color: var(--y-success);
+    font-weight: 700;
+}
+
+/* ── progress bar ────────────────────────────────────── */
+
+.li-progress-bar {
+    height: 6px;
+    background: rgba(108, 92, 231, 0.06);
+}
+
+.li-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--y-primary), var(--y-cyan));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.li-progress-label {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--y-muted);
+    padding: 0.25rem 0;
+}
+
+/* ── main ────────────────────────────────────────────── */
+
+.li-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.li-task-card {
+    max-width: 580px;
+    width: 100%;
+    background: var(--y-panel);
+    border: 1px solid var(--y-outline);
+    border-radius: var(--y-radius);
+    padding: 2rem;
+    box-shadow: var(--y-shadow);
+    animation: liFadeIn 0.3s ease;
+}
+
+@keyframes liFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── prompt ──────────────────────────────────────────── */
+
+.li-prompt {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.li-prompt-line {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--y-text);
+}
+
+.li-prompt-line:first-child {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+
+.li-prompt-line--empty {
+    height: 0.5rem;
+}
+
+/* Stage B: multi-line equations */
+.li-prompt-line--equation {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--y-text);
+    margin-bottom: 0.15rem;
+}
+
+.li-question-line {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--y-primary);
+    margin-top: 0.75rem;
+    text-align: center;
+}
+
+/* ── info card (C0 mapping) ─────────────────────────── */
+
+.li-info-card {
+    text-align: center;
+}
+
+.li-info-card .li-prompt-line {
+    font-size: 1.1rem;
+}
+
+.li-info-card .li-prompt-line:first-child {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--y-primary);
+    margin-bottom: 0.5rem;
+}
+
+.li-info-mapping {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--y-text);
+    line-height: 2;
+}
+
+/* ── input ───────────────────────────────────────────── */
+
+.li-input-group {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.li-input {
+    background: var(--y-panel2);
+    border: 2px solid var(--y-outline);
+    border-radius: var(--y-radius-sm);
+    color: var(--y-text);
+    font-size: 1.3rem;
+    padding: 0.75rem 1.25rem;
+    width: 140px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-weight: 700;
+}
+
+.li-input:focus {
+    border-color: var(--y-primary);
+    box-shadow: var(--y-glow);
+}
+
+.li-input:disabled {
+    opacity: 0.6;
+}
+
+.li-check-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    border: none;
+    color: white;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px var(--y-primary-glow);
+    min-height: 44px;
+}
+
+.li-check-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px var(--y-primary-glow);
+}
+
+.li-check-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ── feedback banner ────────────────────────────────── */
+
+.li-feedback {
+    text-align: center;
+    padding: 1rem 1.25rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    animation: liFadeIn 0.25s ease;
+}
+
+.li-feedback--correct {
+    background: rgba(0, 184, 148, 0.08);
+    border: 1.5px solid rgba(0, 184, 148, 0.2);
+    color: var(--y-success);
+}
+
+.li-feedback--wrong {
+    background: rgba(225, 112, 85, 0.08);
+    border: 1.5px solid rgba(225, 112, 85, 0.2);
+    color: var(--y-danger);
+}
+
+.li-feedback-explanation {
+    font-size: 0.85rem;
+    color: var(--y-muted);
+    margin-top: 0.5rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+/* ── countdown + next button ─────────────────────────── */
+
+.li-countdown-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.li-countdown {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--y-primary);
+    padding: 0.4rem 1.2rem;
+    background: rgba(108, 92, 231, 0.06);
+    border-radius: 20px;
+    border: 1.5px solid rgba(108, 92, 231, 0.15);
+    animation: liCountPulse 1s ease-in-out infinite;
+}
+
+@keyframes liCountPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.li-next-btn {
+    padding: 0.75rem 2.5rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--y-success), #00d2a0);
+    border: none;
+    color: white;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(0, 184, 148, 0.25);
+    min-height: 48px;
+    animation: liFadeIn 0.3s ease;
+}
+
+.li-next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 184, 148, 0.35);
+}
+
+/* ── info card button ───────────────────────────────── */
+
+.li-info-next-btn {
+    margin-top: 1.5rem;
+    padding: 0.75rem 2.5rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    border: none;
+    color: white;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px var(--y-primary-glow);
+    min-height: 48px;
+}
+
+.li-info-next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px var(--y-primary-glow);
+}
+
+/* ── complete card ───────────────────────────────────── */
+
+.li-complete-card {
+    max-width: 500px;
+    width: 100%;
+    margin: auto;
+    text-align: center;
+    padding: 2.5rem 2rem;
+    background: var(--y-panel);
+    border: 2px solid rgba(0, 184, 148, 0.15);
+    border-radius: var(--y-radius-lg);
+    box-shadow: var(--y-shadow-lg);
+    animation: liFadeIn 0.4s ease;
+}
+
+.li-complete-icon {
+    font-size: 3.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.li-complete-card h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 0.75rem;
+    color: var(--y-success);
+}
+
+.li-complete-card p {
+    color: var(--y-muted);
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.li-continue-btn {
+    margin-top: 1rem;
+    padding: 0.85rem 3rem;
+    border-radius: var(--y-radius-sm);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    border: none;
+    color: white;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px var(--y-primary-glow);
+    min-height: 52px;
+}
+
+.li-continue-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px var(--y-primary-glow);
+}
+
+/* ── responsive ─────────────────────────────────────── */
+
+@media (max-width: 600px) {
+    .li-task-card {
+        padding: 1.25rem;
+    }
+
+    .li-prompt-line:first-child {
+        font-size: 1.4rem;
+    }
+
+    .li-input {
+        font-size: 1.1rem;
+        width: 120px;
+    }
+
+    .li-question-line {
+        font-size: 1.1rem;
+    }
+}
+
+/* ── stage transition badge ─────────────────────────── */
+
+.li-stage-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.8rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--y-primary), var(--y-primary2));
+    color: white;
+    margin-bottom: 0.75rem;
+}

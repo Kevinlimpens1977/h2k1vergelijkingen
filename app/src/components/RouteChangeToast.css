@@ -1,0 +1,39 @@
+.route-toast {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.route-toast--visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.route-toast--hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-1.5rem);
+}
+
+.route-toast__content {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.97));
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 1rem;
+    padding: 0.85rem 1.5rem;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    max-width: 420px;
+    text-align: center;
+}
+
+.route-toast__message {
+    color: #f1f5f9;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.5;
+}

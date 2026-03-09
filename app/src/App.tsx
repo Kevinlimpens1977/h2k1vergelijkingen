@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import { DevModeProvider } from './context/DevModeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import RequireUnlocked from './components/RequireUnlocked';
+import RequireLetterIntro from './components/RequireLetterIntro';
 import Chapter8Entry from './components/Chapter8Entry';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -12,6 +13,7 @@ import SummaryPage from './pages/SummaryPage';
 import PracticePage from './pages/PracticePage';
 import PracticePage8_2 from './pages/PracticePage8_2';
 import BalanceGamePage from './pages/BalanceGamePage';
+import LetterIntroPage from './features/letter-intro/LetterIntroPage';
 import Intro8_1 from './features/section8-1-intro/routes/Intro8_1';
 import SpeedTest8_1 from './features/section8-1-intro/routes/SpeedTest8_1';
 import BalansBlitz8_2 from './pages/BalansBlitz8_2';
@@ -35,15 +37,18 @@ export default function App() {
             <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
             <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
 
+            {/* Letterrekenen Intro — mandatory first module */}
+            <Route path="/intro/letterrekenen" element={<ProtectedRoute><LetterIntroPage /></ProtectedRoute>} />
+
             {/* Chapter 8 entry — redirects to first incomplete step */}
-            <Route path="/hoofdstuk-8" element={<ProtectedRoute><Chapter8Entry /></ProtectedRoute>} />
+            <Route path="/hoofdstuk-8" element={<ProtectedRoute><RequireLetterIntro><Chapter8Entry /></RequireLetterIntro></ProtectedRoute>} />
 
             {/* Paragraph pages (generic) */}
             <Route path="/paragraph/:id" element={<ProtectedRoute><ParagraphPage /></ProtectedRoute>} />
             <Route path="/summary" element={<ProtectedRoute><SummaryPage /></ProtectedRoute>} />
 
-            {/* §8.1 Intro — always unlocked (step 1) */}
-            <Route path="/8-1/intro" element={<ProtectedRoute><Intro8_1 /></ProtectedRoute>} />
+            {/* §8.1 Intro — gated behind letter intro */}
+            <Route path="/8-1/intro" element={<ProtectedRoute><RequireLetterIntro><Intro8_1 /></RequireLetterIntro></ProtectedRoute>} />
             <Route path="/8-1/speed-test" element={<ProtectedRoute><SpeedTest8_1 /></ProtectedRoute>} />
 
             {/* §8.1 Practice — requires intro passed */}

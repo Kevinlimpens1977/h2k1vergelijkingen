@@ -245,7 +245,7 @@ export function generateSession8_2(route: RouteChoice = 'D'): Exercise8_2[] {
     const exercises: Exercise8_2[] = [];
     const seenPrompts = new Set<string>();
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
         let attempts = 0;
         let ex: Exercise8_2;
         do {

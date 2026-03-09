@@ -48,6 +48,8 @@ export const CHAPTER_8_FLOW: FlowStep[] = [
 /* ── progress doc ────────────────────────────────────── */
 
 export interface Chapter8Progress {
+    letterIntroCompleted: boolean;
+    letterIntroCompletedAt: unknown;
     intro8_1Passed: boolean;
     intro8_1PassedAt: unknown;
     section8_1Completed: boolean;
@@ -64,6 +66,8 @@ export interface Chapter8Progress {
 }
 
 const DEFAULT_PROGRESS: Chapter8Progress = {
+    letterIntroCompleted: false,
+    letterIntroCompletedAt: null,
     intro8_1Passed: false,
     intro8_1PassedAt: null,
     section8_1Completed: false,
@@ -92,6 +96,14 @@ export async function getChapter8Progress(uid: string): Promise<Chapter8Progress
 }
 
 /* ── write helpers ───────────────────────────────────── */
+
+export async function markLetterIntroCompleted(uid: string): Promise<void> {
+    await setDoc(flowDocRef(uid), {
+        letterIntroCompleted: true,
+        letterIntroCompletedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+    }, { merge: true });
+}
 
 export async function markIntro8_1Passed(uid: string): Promise<void> {
     await setDoc(flowDocRef(uid), {

@@ -5,20 +5,19 @@ import {
     PARAGRAPHS,
     getProgress,
     touchProgress,
-    saveRoute,
+    saveSlidesOpened,
     markCompleted,
     type ParagraphId,
     type ParagraphProgress,
-    type RouteChoice,
 } from '../services/progress';
 import './Paragraph.css';
 import { markSection8_1Completed } from '../services/chapter8Flow';
 
-const ROUTE_LABELS: { value: RouteChoice; label: string; desc: string }[] = [
-    { value: 'O', label: 'Ondersteunend', desc: 'Extra begeleiding' },
-    { value: 'D', label: 'Doorlopend', desc: 'Standaard route' },
-    { value: 'U', label: 'Uitdagend', desc: 'Extra uitdaging' },
-];
+const ROUTE_INFO: Record<string, { label: string; color: string; emoji: string }> = {
+    O: { label: 'Ondersteunend', color: '#60a5fa', emoji: '🔵' },
+    D: { label: 'Doorlopend', color: '#34d399', emoji: '🟢' },
+    U: { label: 'Uitdagend', color: '#a78bfa', emoji: '🟣' },
+};
 
 export default function ParagraphPage() {
     const { id } = useParams<{ id: string }>();
@@ -57,12 +56,25 @@ export default function ParagraphPage() {
         );
     }
 
-    async function handleRouteChange(route: RouteChoice) {
-        if (!profile) return;
-        setSaving(true);
-        await saveRoute(profile.uid, paragraphId, route);
-        setProgress((prev) => prev ? { ...prev, route } : prev);
-        setSaving(false);
+    /* ── slides gate ─────────────────────────────────────── */
+    const slidesOpened = progress?.slidesOpened === true;
+
+    async function handleSlidesClick() {
+        // Open slides in new tab
+        window.open(`/slides/${paragraphId}.pdf`, '_blank');
+
+        // Mark slides as opened if not already
+        if (!slidesOpened && profile) {
+            setSaving(true);
+            try {
+                await saveSlidesOpened(profile.uid, paragraphId);
+                setProgress((prev) => prev ? { ...prev, slidesOpened: true } : prev);
+            } catch (err) {
+                console.warn('Could not save slides opened:', err);
+            } finally {
+                setSaving(false);
+            }
+        }
     }
 
     async function handleComplete() {
@@ -77,7 +89,18 @@ export default function ParagraphPage() {
         setSaving(false);
     }
 
-    const slideUrl = `/slides/${paragraphId}.pdf`;
+    /* ── route info (read-only) ──────────────────────────── */
+    const currentRoute = progress?.adaptiveSnapshot?.currentRoute || 'D';
+    const routeInfo = ROUTE_INFO[currentRoute] || ROUTE_INFO['D'];
+
+    /* ── practice URL (no manual route param — adaptive handles it) */
+    function getPracticeUrl(): string {
+        if (paragraphId === '8_1') return `/practice/8_1`;
+        if (paragraphId === '8_2') return `/practice/8_2`;
+        return '';
+    }
+
+    const hasPractice = paragraphId === '8_1' || paragraphId === '8_2';
 
     return (
         <div className="par-page">
@@ -96,103 +119,124 @@ export default function ParagraphPage() {
                 <div className="par-loading">Laden...</div>
             ) : (
                 <main className="par-main">
-                    {/* slides link */}
+                    {/* slides section */}
                     <section className="par-section">
                         <h2 className="par-section-title">Slides</h2>
-                        <a
-                            href={slideUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="par-slide-link"
-                        >
-                            📄 Open slides {meta.title} (PDF)
-                        </a>
-                    </section>
-
-                    {/* route selector */}
-                    <section className="par-section">
-                        <h2 className="par-section-title">Kies je leerroute</h2>
-                        <div className="par-route-grid">
-                            {ROUTE_LABELS.map((r) => (
+                        {slidesOpened ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <span style={{
+                                    color: '#34d399',
+                                    fontSize: '1.1rem',
+                                    fontWeight: 600,
+                                }}>
+                                    ✅ Je hebt de slides al bekeken
+                                </span>
                                 <button
-                                    key={r.value}
-                                    className={`par-route-card ${progress?.route === r.value ? 'par-route-card--active' : ''}`}
-                                    onClick={() => handleRouteChange(r.value)}
+                                    onClick={handleSlidesClick}
+                                    className="par-slide-link"
+                                    style={{ fontSize: '0.85rem', opacity: 0.7 }}
+                                >
+                                    Nog eens bekijken
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={handleSlidesClick}
+                                    className="par-slide-link"
                                     disabled={saving}
                                 >
-                                    <span className="par-route-card-label">{r.label}</span>
-                                    <span className="par-route-card-desc">{r.desc}</span>
+                                    📄 Open slides {meta.title} (PDF)
                                 </button>
-                            ))}
-                        </div>
+                                <p style={{
+                                    color: '#fbbf24',
+                                    fontSize: '0.85rem',
+                                    marginTop: '0.5rem',
+                                    opacity: 0.9,
+                                }}>
+                                    ⚠ Bekijk eerst de slides om de opdrachten te ontgrendelen.
+                                </p>
+                            </>
+                        )}
                     </section>
+
+                    {/* route info (read-only) */}
+                    {hasPractice && slidesOpened && (
+                        <section className="par-section">
+                            <h2 className="par-section-title">Leerroute</h2>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                padding: '0.75rem 1rem',
+                                background: 'rgba(255,255,255,0.04)',
+                                borderRadius: '0.75rem',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                            }}>
+                                <span style={{ fontSize: '1.3rem' }}>{routeInfo.emoji}</span>
+                                <div>
+                                    <div style={{
+                                        fontWeight: 600,
+                                        color: routeInfo.color,
+                                    }}>
+                                        {routeInfo.label}
+                                    </div>
+                                    <div style={{
+                                        fontSize: '0.8rem',
+                                        color: '#94a3b8',
+                                    }}>
+                                        {progress?.adaptiveSnapshot
+                                            ? 'Je gaat verder waar je gebleven was'
+                                            : 'De app past je route automatisch aan'}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    )}
 
                     {/* exercises / practice */}
                     <section className="par-section">
                         <h2 className="par-section-title">Opgaven</h2>
-                        {paragraphId === '8_1' ? (
+                        {hasPractice ? (
                             <>
                                 <p className="par-placeholder" style={{ marginBottom: '1rem' }}>
-                                    Oefen met het samenvoegen van gelijksoortige termen.
+                                    {paragraphId === '8_1'
+                                        ? 'Oefen met het samenvoegen van gelijksoortige termen.'
+                                        : 'Oefen met het oplossen van vergelijkingen (balansmethode).'}
                                     {progress?.completedExercises?.length
                                         ? ` Je hebt al ${progress.completedExercises.length} opgave(n) goed beantwoord.`
                                         : ''}
                                 </p>
-                                {progress?.route ? (
+                                {slidesOpened ? (
                                     <button
                                         className="par-complete-btn"
                                         style={{
                                             background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
                                             marginTop: 0,
                                         }}
-                                        onClick={() => navigate(`/practice/8_1?route=${progress.route}`)}
+                                        onClick={() => navigate(getPracticeUrl())}
                                     >
-                                        ▶ Start oefenen (Route {progress.route})
+                                        ▶ Start oefenen
                                     </button>
                                 ) : (
-                                    <p className="par-placeholder" style={{
-                                        color: '#fbbf24',
+                                    <div style={{
+                                        padding: '1rem',
                                         background: 'rgba(251, 191, 36, 0.06)',
-                                        borderColor: 'rgba(251, 191, 36, 0.15)',
-                                    }}>
-                                        ⚠ Kies eerst een leerroute hierboven om te kunnen oefenen.
-                                    </p>
-                                )}
-                            </>
-                        ) : paragraphId === '8_2' ? (
-                            <>
-                                <p className="par-placeholder" style={{ marginBottom: '1rem' }}>
-                                    Oefen met het oplossen van vergelijkingen (balansmethode).
-                                    {progress?.completedExercises?.length
-                                        ? ` Je hebt al ${progress.completedExercises.length} opgave(n) goed beantwoord.`
-                                        : ''}
-                                </p>
-                                {progress?.route ? (
-                                    <button
-                                        className="par-complete-btn"
-                                        style={{
-                                            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                                            marginTop: 0,
-                                        }}
-                                        onClick={() => navigate(`/practice/8_2?route=${progress.route}`)}
-                                    >
-                                        ▶ Start oefenen (Route {progress.route})
-                                    </button>
-                                ) : (
-                                    <p className="par-placeholder" style={{
+                                        border: '1px solid rgba(251, 191, 36, 0.15)',
+                                        borderRadius: '0.75rem',
                                         color: '#fbbf24',
-                                        background: 'rgba(251, 191, 36, 0.06)',
-                                        borderColor: 'rgba(251, 191, 36, 0.15)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
                                     }}>
-                                        ⚠ Kies eerst een leerroute hierboven om te kunnen oefenen.
-                                    </p>
+                                        <span style={{ fontSize: '1.2rem' }}>🔒</span>
+                                        <span>Bekijk eerst de slides hierboven om de opdrachten te ontgrendelen.</span>
+                                    </div>
                                 )}
                             </>
                         ) : (
                             <p className="par-placeholder">
-                                {progress?.route
-                                    ? `Opgaven voor route ${progress.route} worden binnenkort toegevoegd.`
-                                    : 'Kies eerst een leerroute hierboven.'}
+                                Opgaven voor deze paragraaf worden binnenkort toegevoegd.
                             </p>
                         )}
                     </section>
@@ -212,3 +256,4 @@ export default function ParagraphPage() {
         </div>
     );
 }
+
