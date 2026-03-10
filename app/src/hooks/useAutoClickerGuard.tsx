@@ -23,7 +23,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 /* ── config ──────────────────────────────────────────── */
 
 /** Sliding window for volume check */
-const WINDOW_MS = 3000;
+const WINDOW_MS = 2000;
 /** Clicks within the window to trigger instant block */
 const THRESHOLD_CLICKS = 5;
 /** Cooldown before user can continue after getting caught */
