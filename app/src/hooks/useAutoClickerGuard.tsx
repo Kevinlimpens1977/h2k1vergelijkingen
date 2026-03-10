@@ -1,5 +1,5 @@
 /**
- * 🛡️ Auto-Clicker Guard — detects inhuman click speeds
+ * 🛡️ Auto-Clicker Guard v2 — multi-layered bot detection
  *
  * Usage:
  *   const { registerClick, isBlocked, AutoClickerOverlay } = useAutoClickerGuard();
@@ -7,29 +7,59 @@
  *   // render <AutoClickerOverlay /> in your component
  *   // check isBlocked before processing clicks
  *
- * Detection: If >= THRESHOLD_CLICKS happen within WINDOW_MS, it's flagged.
- * Typical humans need 300-500ms minimum between MC answers (read + click).
- * Auto-clickers fire at 50-150ms intervals.
+ * Detection layers:
+ *   1. Volume:     >= 5 clicks within 3s → instant block
+ *   2. Speed:      interval < 250ms → adds suspicion
+ *   3. Regularity: std-dev of recent intervals < 35ms → bot-like timing
+ *   4. Cumulative: suspicion score accumulates with slow decay;
+ *                  block triggers at score >= 5
+ *
+ * Typical humans need 400-800ms between MC answers (read + decide + click).
+ * Auto-clickers fire at 50-500ms intervals with near-zero variance.
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 
 /* ── config ──────────────────────────────────────────── */
 
-/** clicks within this window to trigger detection */
-const WINDOW_MS = 2000;
-/** minimum clicks within the window to flag */
-const THRESHOLD_CLICKS = 8;
-/** cooldown before the user can continue after getting caught */
-const BLOCK_DURATION_MS = 8000;
-/** minimum interval between clicks to be considered human (ms) */
-const MIN_HUMAN_INTERVAL_MS = 180;
+/** Sliding window for volume check */
+const WINDOW_MS = 3000;
+/** Clicks within the window to trigger instant block */
+const THRESHOLD_CLICKS = 5;
+/** Cooldown before user can continue after getting caught */
+const BLOCK_DURATION_MS = 10000;
+/** Minimum interval between clicks to be considered human (ms) */
+const MIN_HUMAN_INTERVAL_MS = 250;
+/** Number of recent intervals to evaluate for regularity */
+const REGULARITY_SAMPLE_SIZE = 4;
+/** Max standard deviation (ms) of intervals to flag as bot-like */
+const MAX_BOT_STDDEV_MS = 35;
+/** Suspicion score threshold to trigger a block */
+const SUSPICION_BLOCK_THRESHOLD = 5;
+/** Points added per fast-click detection */
+const SUSPICION_FAST_CLICK = 2;
+/** Points added per regularity (bot-timing) detection */
+const SUSPICION_REGULARITY = 3;
+/** Points added per volume-burst detection */
+const SUSPICION_VOLUME = 4;
+/** Suspicion decays by 1 point every N ms */
+const SUSPICION_DECAY_INTERVAL_MS = 3000;
+
+/* ── helpers ─────────────────────────────────────────── */
+
+function stddev(values: number[]): number {
+    if (values.length < 2) return Infinity;
+    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+    const sqDiffs = values.map((v) => (v - mean) ** 2);
+    return Math.sqrt(sqDiffs.reduce((a, b) => a + b, 0) / values.length);
+}
 
 /* ── hook ────────────────────────────────────────────── */
 
 export function useAutoClickerGuard() {
     const clickTimestamps = useRef<number[]>([]);
-    const suspiciousCount = useRef(0);
+    const suspicionScore = useRef(0);
+    const lastDecayTime = useRef(Date.now());
     const [isBlocked, setIsBlocked] = useState(false);
     const [blockTimeLeft, setBlockTimeLeft] = useState(0);
     const [flashActive, setFlashActive] = useState(false);
@@ -65,53 +95,85 @@ export function useAutoClickerGuard() {
         return () => clearInterval(timer);
     }, [flashActive]);
 
+    /* ── trigger block ───────────────────────────────── */
+    const triggerBlock = useCallback(() => {
+        setDetectionCount((c) => c + 1);
+        setIsBlocked(true);
+        setFlashActive(true);
+        clickTimestamps.current = [];
+        // Don't reset suspicion — it persists across blocks to
+        // catch repeat offenders faster
+    }, []);
+
     /* ── register click ──────────────────────────────── */
     const registerClick = useCallback((): boolean => {
+        if (isBlocked) return false;
+
         const now = Date.now();
         const stamps = clickTimestamps.current;
+
+        // ── Decay suspicion over time ──
+        const timeSinceDecay = now - lastDecayTime.current;
+        if (timeSinceDecay >= SUSPICION_DECAY_INTERVAL_MS) {
+            const decayPoints = Math.floor(timeSinceDecay / SUSPICION_DECAY_INTERVAL_MS);
+            suspicionScore.current = Math.max(0, suspicionScore.current - decayPoints);
+            lastDecayTime.current = now;
+        }
 
         // Add current timestamp
         stamps.push(now);
 
-        // Remove timestamps older than the window
-        while (stamps.length > 0 && stamps[0] < now - WINDOW_MS) {
+        // Keep only timestamps within the larger analysis window (10s for regularity)
+        const analysisWindow = Math.max(WINDOW_MS, 10000);
+        while (stamps.length > 0 && stamps[0] < now - analysisWindow) {
             stamps.shift();
         }
 
-        // Check 1: Too many clicks in the window
-        if (stamps.length >= THRESHOLD_CLICKS) {
-            suspiciousCount.current++;
-            setDetectionCount((c) => c + 1);
-            setIsBlocked(true);
-            setFlashActive(true);
-            clickTimestamps.current = [];
-            return false; // blocked
+        // ── Layer 1: Volume — too many clicks in short window ──
+        const recentStamps = stamps.filter((t) => t >= now - WINDOW_MS);
+        if (recentStamps.length >= THRESHOLD_CLICKS) {
+            suspicionScore.current += SUSPICION_VOLUME;
+            triggerBlock();
+            return false;
         }
 
-        // Check 2: Interval between last two clicks is inhuman
+        // ── Layer 2: Speed — interval between last two clicks is inhuman ──
         if (stamps.length >= 2) {
             const lastInterval = stamps[stamps.length - 1] - stamps[stamps.length - 2];
             if (lastInterval < MIN_HUMAN_INTERVAL_MS) {
-                suspiciousCount.current++;
-                // Only trigger full block after 3 rapid-fire detections
-                if (suspiciousCount.current >= 3) {
-                    setDetectionCount((c) => c + 1);
-                    setIsBlocked(true);
-                    setFlashActive(true);
-                    clickTimestamps.current = [];
-                    suspiciousCount.current = 0;
-                    return false;
-                }
+                suspicionScore.current += SUSPICION_FAST_CLICK;
             }
         }
 
+        // ── Layer 3: Regularity — bot-like consistent timing ──
+        if (stamps.length >= REGULARITY_SAMPLE_SIZE + 1) {
+            const recentIntervals: number[] = [];
+            for (let i = stamps.length - REGULARITY_SAMPLE_SIZE; i < stamps.length; i++) {
+                recentIntervals.push(stamps[i] - stamps[i - 1]);
+            }
+            const sd = stddev(recentIntervals);
+            const avgInterval = recentIntervals.reduce((a, b) => a + b, 0) / recentIntervals.length;
+
+            // Bot-like: very regular timing AND reasonably fast
+            if (sd < MAX_BOT_STDDEV_MS && avgInterval < 800) {
+                suspicionScore.current += SUSPICION_REGULARITY;
+            }
+        }
+
+        // ── Check cumulative suspicion score ──
+        if (suspicionScore.current >= SUSPICION_BLOCK_THRESHOLD) {
+            triggerBlock();
+            return false;
+        }
+
         return true; // allowed
-    }, []);
+    }, [isBlocked, triggerBlock]);
 
     /* ── reset ───────────────────────────────────────── */
     const reset = useCallback(() => {
         clickTimestamps.current = [];
-        suspiciousCount.current = 0;
+        suspicionScore.current = 0;
+        lastDecayTime.current = Date.now();
         setIsBlocked(false);
         setFlashActive(false);
     }, []);
@@ -191,7 +253,8 @@ export function useAutoClickerGuard() {
                         60% { transform: scale(1.05); opacity: 1; }
                         100% { transform: scale(1); }
                     }
-                `}</style>
+                `}
+                </style>
             </>
         );
     }, [isBlocked, blockTimeLeft, detectionCount]);
