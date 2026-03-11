@@ -7,7 +7,7 @@
  */
 
 import type { ArenaLevel, MonsterDef } from './arenaConfig';
-import { ARENA_MONSTERS, HERO, STEPS_PER_LEVEL } from './arenaConfig';
+import { ARENA_MONSTERS, HERO } from './arenaConfig';
 import { generateEquation, generateButtonOptions, type GeneratedEquation, type Operation, type Equation } from './equationGenerator';
 import { calculateStepAP, monsterDefeatAP, bossDefeatAP, calculateRunScore, type APBreakdown, type RunScore } from './scoreEngine';
 
@@ -89,7 +89,7 @@ export type AnimationType =
 /* ── Constants ───────────────────────────────────────── */
 
 const REGULAR_COUNT: Record<ArenaLevel, number> = { 1: 4, 2: 4, 3: 4, 4: 2 };
-const BOSS_EQUATIONS = 2; // bosses always need 2 equations
+
 
 /* ── Factory ─────────────────────────────────────────── */
 
