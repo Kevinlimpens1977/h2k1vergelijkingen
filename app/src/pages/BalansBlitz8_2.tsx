@@ -442,7 +442,7 @@ export default function BalansBlitz8_2() {
                                 );
                             }
                             return (
-                                <p className="bb-question-text" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                                <p className="bb-question-text" style={{ fontSize: '1.8rem', fontWeight: 700 }}>
                                     {formatMathDisplay(question.prompt)}
                                 </p>
                             );

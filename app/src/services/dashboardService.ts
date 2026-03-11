@@ -58,6 +58,8 @@ const STEP_CHAIN: { key: keyof Chapter8Progress; label: string }[] = [
     { key: 'section8_2Completed', label: '§8.2 De balans' },
     { key: 'fruitChallengeCompleted', label: '🍎 Fruit Challenge' },
     { key: 'section8_2BlitzPassed', label: '§8.2 Blitz' },
+    { key: 'balanceIntro8_3Passed', label: '§8.3 Balansen Intro' },
+    { key: 'uitleg8_3Passed', label: '§8.3 Uitleg' },
     { key: 'section8_3Completed', label: '§8.3 Termtris' },
     { key: 'balanceGameCompleted', label: 'Balans Minigame' },
 ];
@@ -250,6 +252,8 @@ export async function fetchClassDashboard(classId: string): Promise<StudentRow[]
                     section8_2CompletedAt: null,
                     section8_2BlitzPassed: boards.has('balansblitz_8_2'),
                     section8_2BlitzPassedAt: null,
+                    uitleg8_3Passed: boards.has('termtris_8_3'),
+                    uitleg8_3PassedAt: null,
                     section8_3Completed: boards.has('termtris_8_3'),
                     section8_3CompletedAt: null,
                     updatedAt: null,

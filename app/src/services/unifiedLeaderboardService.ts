@@ -34,6 +34,7 @@ export const BOARD_IDS = {
     BALANCE_CHALLENGE: 'balance_challenge',
     BALANS_BLITZ: 'balansblitz_8_2',
     TERMTRIS: 'termtris_8_3',
+    ALGEBRA_ARENA: 'algebra_arena',
 } as const;
 
 export type BoardId = typeof BOARD_IDS[keyof typeof BOARD_IDS];

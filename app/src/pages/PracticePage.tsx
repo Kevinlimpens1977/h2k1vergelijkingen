@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useDevMode } from '../context/DevModeContext';
 import {
     generateSession,
     normalizeAnswer,
@@ -28,7 +29,7 @@ import {
 } from '../services/adaptiveRouter';
 import RouteChangeToast from '../components/RouteChangeToast';
 import { formatMathDisplay } from '../utils/formatMathDisplay';
-import { algebraEquals } from '../utils/algebraEquals';
+import { matchAnswer } from '../utils/mathValidator';
 import './Practice.css';
 
 const MAX_RETRIES_COMBINE = 1; // Step 2 of CAN_COMBINE
@@ -50,6 +51,7 @@ const ROUTE_LABEL: Record<string, string> = {
 export default function PracticePage() {
     const { profile } = useAuth();
     const navigate = useNavigate();
+    const { devMode } = useDevMode();
 
     /* ── adaptive state ─────────────────────────────────── */
     const adaptiveRef = useRef<AdaptiveState>(createAdaptiveState('D'));
@@ -300,7 +302,7 @@ export default function PracticePage() {
 
         const normalized = normalizeAnswer(answer);
         const correctNorm = normalizeAnswer(current.combinedAnswer);
-        const isCorrect = normalized === correctNorm || algebraEquals(answer, current.combinedAnswer);
+        const isCorrect = normalized === correctNorm || matchAnswer(answer, current.combinedAnswer);
         const durationMs = Date.now() - startTimeRef.current;
 
         if (isCorrect) {
@@ -769,6 +771,72 @@ export default function PracticePage() {
                     </div>
                 ) : null}
             </div>
+
+            {/* Dev-mode skip navigation */}
+            {devMode && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.75rem',
+                    padding: '0.5rem 1rem',
+                    background: 'linear-gradient(135deg, #2d3436, #636e72)',
+                    borderTop: '2px solid #e17055',
+                    zIndex: 9999,
+                    fontSize: '0.8rem',
+                    color: '#fff',
+                }}>
+                    <span style={{ fontWeight: 800, color: '#e17055', fontSize: '0.7rem' }}>DEV</span>
+                    <button
+                        onClick={() => {
+                            const prev = currentIdx - 1;
+                            if (prev >= 0) {
+                                setCurrentIdx(prev);
+                                setFeedback({ type: 'none' });
+                                setAnswer('');
+                                setRetries(0);
+                                setCombineStep('step1');
+                            }
+                        }}
+                        disabled={currentIdx === 0}
+                        style={{
+                            padding: '0.25rem 0.6rem', borderRadius: '6px',
+                            border: 'none', background: currentIdx === 0 ? '#555' : '#6c5ce7',
+                            color: '#fff', fontWeight: 700, cursor: currentIdx === 0 ? 'not-allowed' : 'pointer',
+                            fontSize: '0.8rem',
+                        }}
+                    >◀ Vorige</button>
+                    <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                        {currentIdx + 1}/{exercises.length}
+                    </span>
+                    <button
+                        onClick={() => {
+                            const next = currentIdx + 1;
+                            if (next < exercises.length) {
+                                setCurrentIdx(next);
+                                setFeedback({ type: 'none' });
+                                setAnswer('');
+                                setRetries(0);
+                                setCombineStep('step1');
+                            }
+                        }}
+                        disabled={currentIdx >= exercises.length - 1}
+                        style={{
+                            padding: '0.25rem 0.6rem', borderRadius: '6px',
+                            border: 'none', background: currentIdx >= exercises.length - 1 ? '#555' : '#6c5ce7',
+                            color: '#fff', fontWeight: 700, cursor: currentIdx >= exercises.length - 1 ? 'not-allowed' : 'pointer',
+                            fontSize: '0.8rem',
+                        }}
+                    >Volgende ▶</button>
+                    <span style={{ fontSize: '0.65rem', color: '#b2bec3', marginLeft: '0.5rem' }}>
+                        {current?.exerciseType}
+                    </span>
+                </div>
+            )}
         </div>
     );
 }

@@ -26,7 +26,7 @@ import { db } from '../lib/firebase';
 
 /* ── flow config ─────────────────────────────────────── */
 
-export type FlowStepId = '8_1_intro' | '8_1' | 'balance' | '8_2' | 'fruit_challenge' | '8_2_blitz' | '8_3';
+export type FlowStepId = '8_1_intro' | '8_1' | 'balance' | '8_2' | 'fruit_challenge' | '8_2_blitz' | '8_3_balance_intro' | '8_3_uitleg' | '8_3' | 'algebra_arena';
 
 export interface FlowStep {
     id: FlowStepId;
@@ -41,9 +41,12 @@ export const CHAPTER_8_FLOW: FlowStep[] = [
     { id: '8_1', title: '§8.1 Oefenen', subtitle: 'Gelijksoortige termen', route: '/paragraph/8_1', icon: '📝' },
     { id: '8_2', title: '§8.2 De balans', subtitle: 'Vergelijkingen oplossen', route: '/practice/8_2', icon: '🎓' },
     { id: 'fruit_challenge', title: '🍎 Fruit Challenge', subtitle: 'Wiskundige fruitpuzzel', route: '/fruit-challenge', icon: '🍎' },
-    { id: '8_2_blitz', title: '§8.2 Balans Blitz', subtitle: 'Snelle challenge', route: '/8-2/blitz', icon: '⚡' },
+    { id: '8_3_balance_intro', title: '§8.3 Balansen Intro', subtitle: 'Leer de balansmethode', route: '/8-3/balance-intro', icon: '⚖️' },
+    { id: '8_3_uitleg', title: '§8.3 Uitleg + Oefenen', subtitle: 'Theorie en opdrachten uit het boek', route: '/8-3/uitleg', icon: '📖' },
     { id: '8_3', title: '§8.3 Termtris', subtitle: 'Vergelijkingen met balans', route: '/8-3/termtris', icon: '🧱' },
+    { id: '8_2_blitz', title: '§8.2 Balans Blitz', subtitle: 'Snelle challenge', route: '/8-2/blitz', icon: '⚡' },
     { id: 'balance', title: 'Balans Minigame', subtitle: 'Leer de balansmethode', route: '/balance-game?difficulty=D', icon: '⚖️' },
+    { id: 'algebra_arena', title: '⚔️ Algebra Arena', subtitle: 'ENDGAME — Versla de monsters!', route: '/arena', icon: '⚔️' },
 ];
 
 /* ── progress doc ────────────────────────────────────── */
@@ -63,8 +66,14 @@ export interface Chapter8Progress {
     fruitChallengeCompletedAt: unknown;
     section8_2BlitzPassed: boolean;
     section8_2BlitzPassedAt: unknown;
+    balanceIntro8_3Passed: boolean;
+    balanceIntro8_3PassedAt: unknown;
+    uitleg8_3Passed: boolean;
+    uitleg8_3PassedAt: unknown;
     section8_3Completed: boolean;
     section8_3CompletedAt: unknown;
+    algebraArenaCompleted: boolean;
+    algebraArenaCompletedAt: unknown;
     updatedAt: unknown;
 }
 
@@ -83,8 +92,14 @@ const DEFAULT_PROGRESS: Chapter8Progress = {
     fruitChallengeCompletedAt: null,
     section8_2BlitzPassed: false,
     section8_2BlitzPassedAt: null,
+    balanceIntro8_3Passed: false,
+    balanceIntro8_3PassedAt: null,
+    uitleg8_3Passed: false,
+    uitleg8_3PassedAt: null,
     section8_3Completed: false,
     section8_3CompletedAt: null,
+    algebraArenaCompleted: false,
+    algebraArenaCompletedAt: null,
     updatedAt: null,
 };
 
@@ -158,10 +173,34 @@ export async function markSection8_2BlitzPassed(uid: string): Promise<void> {
     }, { merge: true });
 }
 
+export async function markBalanceIntro8_3Passed(uid: string): Promise<void> {
+    await setDoc(flowDocRef(uid), {
+        balanceIntro8_3Passed: true,
+        balanceIntro8_3PassedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+    }, { merge: true });
+}
+
+export async function markUitleg8_3Passed(uid: string): Promise<void> {
+    await setDoc(flowDocRef(uid), {
+        uitleg8_3Passed: true,
+        uitleg8_3PassedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+    }, { merge: true });
+}
+
 export async function markSection8_3Completed(uid: string): Promise<void> {
     await setDoc(flowDocRef(uid), {
         section8_3Completed: true,
         section8_3CompletedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+    }, { merge: true });
+}
+
+export async function markAlgebraArenaCompleted(uid: string): Promise<void> {
+    await setDoc(flowDocRef(uid), {
+        algebraArenaCompleted: true,
+        algebraArenaCompletedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
     }, { merge: true });
 }
@@ -179,12 +218,18 @@ export function isStepUnlocked(stepId: FlowStepId, progress: Chapter8Progress): 
             return progress.section8_1Completed;
         case 'fruit_challenge':
             return progress.section8_2Completed;
-        case '8_2_blitz':
-            return progress.fruitChallengeCompleted || progress.section8_2Completed;
+        case '8_3_balance_intro':
+            return progress.fruitChallengeCompleted;
+        case '8_3_uitleg':
+            return progress.balanceIntro8_3Passed;
         case '8_3':
-            return progress.section8_2BlitzPassed;
-        case 'balance':
+            return progress.uitleg8_3Passed;
+        case '8_2_blitz':
             return progress.section8_3Completed;
+        case 'balance':
+            return progress.section8_2BlitzPassed;
+        case 'algebra_arena':
+            return progress.balanceGameCompleted;
         default:
             return false;
     }
@@ -203,10 +248,16 @@ export function isStepCompleted(stepId: FlowStepId, progress: Chapter8Progress):
             return progress.fruitChallengeCompleted;
         case '8_2_blitz':
             return progress.section8_2BlitzPassed;
+        case '8_3_balance_intro':
+            return progress.balanceIntro8_3Passed;
+        case '8_3_uitleg':
+            return progress.uitleg8_3Passed;
         case '8_3':
             return progress.section8_3Completed;
         case 'balance':
             return progress.balanceGameCompleted;
+        case 'algebra_arena':
+            return progress.algebraArenaCompleted;
         default:
             return false;
     }

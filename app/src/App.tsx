@@ -19,6 +19,10 @@ import SpeedTest8_1 from './features/section8-1-intro/routes/SpeedTest8_1';
 import BalansBlitz8_2 from './pages/BalansBlitz8_2';
 import FruitChallengePage from './pages/FruitChallengePage';
 import TermtrisPage from './features/termtris-8-3/TermtrisPage';
+import Uitleg8_3Page from './features/uitleg-8-3/Uitleg8_3Page';
+import BalanceIntroPage from './features/balance-intro-8-3/BalanceIntroPage';
+import PracticePage8_3 from './pages/PracticePage8_3';
+import AlgebraArenaPage from './features/algebra-arena/AlgebraArenaPage';
 
 /** Redirect away from auth pages if already logged in */
 function GuestRoute({ children }: { children: React.ReactNode }) {
@@ -72,15 +76,35 @@ export default function App() {
               <ProtectedRoute><RequireUnlocked stepId="8_2_blitz"><BalansBlitz8_2 /></RequireUnlocked></ProtectedRoute>
             } />
 
-            {/* §8.3 Termtris — requires §8.2 Blitz passed */}
+            {/* §8.3 Balance Intro — requires Blitz passed */}
+            <Route path="/8-3/balance-intro" element={
+              <ProtectedRoute><RequireUnlocked stepId="8_3_balance_intro"><BalanceIntroPage /></RequireUnlocked></ProtectedRoute>
+            } />
+
+            {/* §8.3 Uitleg — requires Balance Intro passed */}
+            <Route path="/8-3/uitleg" element={
+              <ProtectedRoute><RequireUnlocked stepId="8_3_uitleg"><Uitleg8_3Page /></RequireUnlocked></ProtectedRoute>
+            } />
+
+            {/* §8.3 Practice — book exercises */}
+            <Route path="/practice/8_3" element={
+              <ProtectedRoute><RequireUnlocked stepId="8_3_uitleg"><PracticePage8_3 /></RequireUnlocked></ProtectedRoute>
+            } />
+
+            {/* §8.3 Termtris — requires §8.3 Uitleg passed */}
             <Route path="/8-3/termtris" element={
               <ProtectedRoute><RequireUnlocked stepId="8_3"><TermtrisPage /></RequireUnlocked></ProtectedRoute>
             } />
-            <Route path="/8-3" element={<Navigate to="/8-3/termtris" replace />} />
+            <Route path="/8-3" element={<Navigate to="/8-3/uitleg" replace />} />
 
             {/* ⚖️ Balans Minigame — requires §8.3 completed */}
             <Route path="/balance-game" element={
               <ProtectedRoute><RequireUnlocked stepId="balance"><BalanceGamePage /></RequireUnlocked></ProtectedRoute>
+            } />
+
+            {/* ⚔️ Algebra Arena — ENDGAME — requires balance game completed */}
+            <Route path="/arena" element={
+              <ProtectedRoute><RequireUnlocked stepId="algebra_arena"><AlgebraArenaPage /></RequireUnlocked></ProtectedRoute>
             } />
 
             <Route path="*" element={<Navigate to="/" replace />} />

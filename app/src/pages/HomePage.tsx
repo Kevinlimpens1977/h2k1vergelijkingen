@@ -42,6 +42,9 @@ const STEP_BOARDS: Partial<Record<FlowStepId, { boardId: BoardId; icon: string; 
     '8_3': [
         { boardId: BOARD_IDS.TERMTRIS, icon: '🧱', label: 'Termtris' },
     ],
+    'algebra_arena': [
+        { boardId: BOARD_IDS.ALGEBRA_ARENA, icon: '⚔️', label: 'Arena' },
+    ],
 };
 
 /* ── Top3 mini podium ─────────────────────────────────── */

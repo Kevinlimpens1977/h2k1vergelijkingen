@@ -1,20 +1,24 @@
 /**
- * §8.2 Practice Page — "De balans" content runner
+ * §8.3 Practice Page — "Vergelijkingen oplossen met een balans" content runner
  *
- * Renders section8_2.items sequentially:
- *   mc, input, multiInput, order, balanceStep
+ * Renders section8_3.items sequentially:
+ *   mc, input, multiInput, order, balanceStep, theory
  *
  * Points: 4 (first try), 2 (after hint1), 1 (after hint2)
- * Completion: all items correct at least once → markSection8_2Completed
+ * Completion: all items correct at least once → markSection8_3Completed (already done by Termtris)
+ *
+ * NOTE: This practice page does NOT mark 8.3 as "completed" in the flow —
+ * that's done by Termtris. This page just marks uitleg8_3 as passed.
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useDevMode } from '../context/DevModeContext';
-import { section8_2, type Task } from '../content/ch8/section8_2';
+import { section8_3, } from '../content/ch8/section8_3';
+import type { Task } from '../content/ch8/section8_2';
 import { logAttempt, appendCompletedExercise } from '../services/attempts';
-import { markSection8_2Completed } from '../services/chapter8Flow';
+import { markUitleg8_3Passed } from '../services/chapter8Flow';
 import { formatMathDisplay } from '../utils/formatMathDisplay';
 import { splitEquationPrompt } from '../utils/formatPromptParts';
 import { matchAnswer, matchMultiAnswer } from '../utils/mathValidator';
@@ -27,12 +31,12 @@ type FeedbackState =
     | { type: 'wrong'; msg: string }
     | { type: 'hint'; msg: string };
 
-export default function PracticePage8_2() {
+export default function PracticePage8_3() {
     const { profile } = useAuth();
     const { devMode } = useDevMode();
     const navigate = useNavigate();
 
-    const items = section8_2.items;
+    const items = section8_3.items;
     const [currentIdx, setCurrentIdx] = useState(0);
     const [feedback, setFeedback] = useState<FeedbackState>({ type: 'none' });
     const [hintsUsed, setHintsUsed] = useState(0);
@@ -78,7 +82,7 @@ export default function PracticePage8_2() {
 
     /* ── points calc ──────────────────────────────────── */
     const getPoints = () => {
-        const rule = current?.points ?? section8_2.pointsRule;
+        const rule = current?.points ?? section8_3.pointsRule;
         if (hintsUsed === 0) return rule.firstTry;
         if (hintsUsed === 1) return rule.afterHint1;
         return rule.afterHint2;
@@ -149,11 +153,10 @@ export default function PracticePage8_2() {
             setTotalPoints((p) => p + pts);
             setFeedback({ type: 'correct', msg: current.explainCorrect ?? 'Goed!', pts });
 
-            // Log attempt
             setSaving(true);
             try {
                 await logAttempt(profile.uid, {
-                    paragraphId: '8_2',
+                    paragraphId: '8_3',
                     exerciseType: current.type,
                     prompt: current.prompt,
                     studentAnswer,
@@ -163,7 +166,7 @@ export default function PracticePage8_2() {
                     durationMs: Date.now() - startTimeRef.current,
                     retries: 0,
                 });
-                await appendCompletedExercise(profile.uid, '8_2', current.id);
+                await appendCompletedExercise(profile.uid, '8_3', current.id);
             } catch (e) {
                 console.warn('Could not log attempt:', e);
             } finally {
@@ -179,12 +182,12 @@ export default function PracticePage8_2() {
         const nextIdx = currentIdx + 1;
         if (nextIdx >= items.length) {
             setSessionDone(true);
-            // Mark completion
+            // Mark uitleg/practice completion
             if (profile) {
                 try {
-                    await markSection8_2Completed(profile.uid);
+                    await markUitleg8_3Passed(profile.uid);
                 } catch (e) {
-                    console.warn('Could not mark 8.2 completed:', e);
+                    console.warn('Could not mark 8.3 practice completed:', e);
                 }
             }
         } else {
@@ -209,15 +212,15 @@ export default function PracticePage8_2() {
             <div className="y-page">
                 <header className="y-topbar">
                     <div className="y-topbar-logo">
-                        <span className="y-topbar-logo-icon">🎓</span>
-                        <span>§8.2 Voltooid!</span>
+                        <span className="y-topbar-logo-icon">⚖️</span>
+                        <span>§8.3 Voltooid!</span>
                     </div>
                 </header>
                 <div className="y-main" style={{ maxWidth: 500, paddingTop: '2rem' }}>
                     <div className="y-card" style={{ textAlign: 'center', padding: '2rem', borderTop: '3px solid var(--y-success)' }}>
                         <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🎉</div>
                         <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--y-success)', margin: '0 0 0.5rem' }}>
-                            §8.2 De balans — Klaar!
+                            §8.3 Oefenen — Klaar!
                         </h2>
                         <p style={{ color: 'var(--y-muted)', fontSize: '0.9rem', margin: '0 0 1rem' }}>
                             Je hebt alle opgaven voltooid met {totalPoints} punten!
@@ -226,8 +229,8 @@ export default function PracticePage8_2() {
                             <button className="y-btn y-btn--secondary" onClick={() => navigate('/')}>
                                 ← Leerpad
                             </button>
-                            <button className="y-btn y-btn--primary" onClick={() => navigate('/8-2/blitz')}>
-                                ⚡ Start Balans Blitz
+                            <button className="y-btn y-btn--primary" onClick={() => navigate('/8-3/termtris')}>
+                                🧱 Start Termtris
                             </button>
                         </div>
                     </div>
@@ -306,7 +309,7 @@ export default function PracticePage8_2() {
                 <header className="y-topbar">
                     <div className="y-topbar-logo">
                         <span className="y-topbar-logo-icon">📖</span>
-                        <span>§8.2 De balans — Theorie</span>
+                        <span>§8.3 — Theorie</span>
                     </div>
                     <div className="y-topbar-user" style={{ gap: '0.5rem' }}>
                         {devMode && <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '0.15rem 0.5rem', borderRadius: '6px', background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff' }}>DEV</span>}
@@ -360,6 +363,7 @@ export default function PracticePage8_2() {
                             color: 'var(--y-text)',
                             lineHeight: 1.6,
                             margin: '0 0 1rem',
+                            whiteSpace: 'pre-line',
                         }}>
                             {current.prompt}
                         </p>
@@ -404,8 +408,8 @@ export default function PracticePage8_2() {
             {/* top bar */}
             <header className="y-topbar">
                 <div className="y-topbar-logo">
-                    <span className="y-topbar-logo-icon">🎓</span>
-                    <span>§8.2 De balans</span>
+                    <span className="y-topbar-logo-icon">⚖️</span>
+                    <span>§8.3 Vergelijkingen met balans</span>
                 </div>
                 <div className="y-topbar-user" style={{ gap: '0.5rem' }}>
                     {devMode && <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '0.15rem 0.5rem', borderRadius: '6px', background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff' }}>DEV</span>}
@@ -652,6 +656,7 @@ export default function PracticePage8_2() {
                             : feedback.type === 'wrong'
                                 ? '#e17055'
                                 : '#e17055',
+                        whiteSpace: 'pre-line',
                     }}>
                         {feedback.type === 'correct' && <span>✅ +{feedback.pts} </span>}
                         {feedback.type === 'wrong' && <span>❌ </span>}

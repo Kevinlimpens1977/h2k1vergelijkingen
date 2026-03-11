@@ -16,7 +16,7 @@ import { useState, useEffect, useCallback, useRef, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { INTRO_LEVELS, type TaskData } from '../data/intro8_1_content';
-import { algebraEquals } from '../../../utils/algebraEquals';
+import { matchAnswer } from '../../../utils/mathValidator';
 import { generateSimilarTask } from '../utils/generateSimilarTask';
 import {
     markIntroCompleted,
@@ -108,7 +108,7 @@ export default function Intro8_1() {
         let correct = false;
         switch (task.type) {
             case 'INPUT':
-                correct = algebraEquals(ans, task.correctAnswer);
+                correct = matchAnswer(ans, task.correctAnswer);
                 break;
             case 'MC':
                 correct = opt === task.correctIndex;
@@ -117,8 +117,7 @@ export default function Intro8_1() {
                 correct = strip(ans) === strip(task.correctChoice);
                 break;
             case 'COMBINE_LIKE_TERMS': {
-                correct = algebraEquals(ans, task.correctAnswer) ||
-                    (task.alternativeAnswers?.some(alt => algebraEquals(ans, alt)) ?? false);
+                correct = matchAnswer(ans, task.correctAnswer, task.alternativeAnswers);
                 break;
             }
         }
