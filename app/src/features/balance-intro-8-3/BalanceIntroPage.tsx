@@ -308,17 +308,21 @@ export default function BalanceIntroPage() {
 
             const nextStepIdx = currentStepIdx + 1;
             if (nextStepIdx < problem.steps.length) {
-                // More steps in this problem
-                setPracticeState(prev => prev ? {
-                    ...prev,
-                    currentStepIdx: nextStepIdx,
-                    currentEquation: step.result,
-                } : null);
-                setTypedInput('');
-                setStepWrongCount(0);
-                setHintRevealed(false);
+                // More steps in this problem — clear feedback after short delay
+                // so the OperationPicker re-enables for the next step
+                setTimeout(() => {
+                    setPracticeState(prev => prev ? {
+                        ...prev,
+                        currentStepIdx: nextStepIdx,
+                        currentEquation: step.result,
+                    } : null);
+                    setTypedInput('');
+                    setStepWrongCount(0);
+                    setHintRevealed(false);
+                    setFeedback(null);
+                }, 1200);
             } else {
-                // Problem complete
+                // Problem complete — feedback stays so "Volgende opgave" button shows
                 const newConsecutive = practiceConsecutive + 1;
                 setPracticeConsecutive(newConsecutive);
                 setPracticeTotal(t => t + 1);
@@ -361,6 +365,9 @@ export default function BalanceIntroPage() {
     }, [practiceState, practiceConsecutive, stepWrongCount, finishModule]);
 
     const handlePracticeNext = useCallback(() => {
+        setFeedback(null);
+        setStepWrongCount(0);
+        setHintRevealed(false);
         loadNewPractice();
     }, [loadNewPractice]);
 
