@@ -254,7 +254,7 @@ export default function BalansBlitz8_2() {
                 <header className="bb-topbar">
                     <div className="bb-topbar-title">
                         <span className="bb-icon">⚡</span>
-                        <span>Balans Blitz</span>
+                        <span>Balans Blitz h8</span>
                     </div>
                     <div className="bb-topbar-stats">
                         {devMode && <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '0.15rem 0.5rem', borderRadius: '6px', background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff' }}>DEV</span>}
@@ -264,7 +264,7 @@ export default function BalansBlitz8_2() {
 
                 <div className="bb-ready">
                     <div className="bb-ready-icon">⚡</div>
-                    <h1>Balans Blitz — §8.2</h1>
+                    <h1>Balans Blitz h8</h1>
                     <p>Beantwoord zoveel mogelijk vragen in 4 minuten!</p>
 
                     <div className="bb-rules">
@@ -309,7 +309,7 @@ export default function BalansBlitz8_2() {
                 <header className="bb-topbar">
                     <div className="bb-topbar-title">
                         <span className="bb-icon">⚡</span>
-                        <span>Balans Blitz — Klaar!</span>
+                        <span>Balans Blitz h8 — Klaar!</span>
                     </div>
                 </header>
 
@@ -380,7 +380,7 @@ export default function BalansBlitz8_2() {
             <header className="bb-topbar">
                 <div className="bb-topbar-title">
                     <span className="bb-icon">⚡</span>
-                    <span>Balans Blitz</span>
+                    <span>Balans Blitz h8</span>
                 </div>
                 <div className="bb-topbar-stats">
                     {devMode && <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '0.15rem 0.5rem', borderRadius: '6px', background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff' }}>DEV</span>}

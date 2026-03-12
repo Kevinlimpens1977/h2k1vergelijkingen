@@ -227,7 +227,7 @@ export default function PracticePage8_2() {
                                 ← Leerpad
                             </button>
                             <button className="y-btn y-btn--primary" onClick={() => navigate('/8-2/blitz')}>
-                                ⚡ Start Balans Blitz
+                                ⚡ Start Balans Blitz h8
                             </button>
                         </div>
                     </div>

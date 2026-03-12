@@ -330,7 +330,7 @@ export async function fetchStudentDetail(uid: string): Promise<StudentDetail> {
         termen_quest_8_1: 'Termen Quest',
         speedtest_8_1: 'Speed Test',
         balance_challenge: 'Balans Minigame',
-        balansblitz_8_2: 'Balans Blitz',
+        balansblitz_8_2: 'Balans Blitz h8',
         termtris_8_3: 'Termtris',
         algebra_arena: 'Algebra Arena',
     };

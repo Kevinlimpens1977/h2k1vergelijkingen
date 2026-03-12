@@ -44,7 +44,7 @@ export const CHAPTER_8_FLOW: FlowStep[] = [
     { id: '8_3_balance_intro', title: '§8.3 Balansen Intro', subtitle: 'Leer de balansmethode', route: '/8-3/balance-intro', icon: '⚖️' },
     { id: '8_3_uitleg', title: '§8.3 Uitleg + Oefenen', subtitle: 'Theorie en opdrachten uit het boek', route: '/8-3/uitleg', icon: '📖' },
     { id: '8_3', title: '§8.3 Termtris', subtitle: 'Vergelijkingen met balans', route: '/8-3/termtris', icon: '🧱' },
-    { id: '8_2_blitz', title: '§8.2 Balans Blitz', subtitle: 'Snelle challenge', route: '/8-2/blitz', icon: '⚡' },
+    { id: '8_2_blitz', title: 'Balans Blitz h8', subtitle: 'Snelle challenge', route: '/8-2/blitz', icon: '⚡' },
     { id: 'balance', title: 'Balans Minigame', subtitle: 'Leer de balansmethode', route: '/balance-game?difficulty=D', icon: '⚖️' },
     { id: 'algebra_arena', title: '⚔️ Algebra Arena', subtitle: 'ENDGAME — Versla de monsters!', route: '/arena', icon: '⚔️' },
 ];
