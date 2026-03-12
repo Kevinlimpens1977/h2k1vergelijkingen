@@ -49,6 +49,13 @@ export function classifyFeedback(
                 showExpected: false,
             };
         }
+        if (result.reason === 'operation_description') {
+            return {
+                type: 'correct',
+                message: `${randomCorrect()} Goede bewerking!`,
+                showExpected: false,
+            };
+        }
         return {
             type: 'correct',
             message: randomCorrect(),

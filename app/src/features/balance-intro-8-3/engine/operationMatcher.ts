@@ -69,10 +69,31 @@ export function matchOperation(input: string): DetectedOperation | null {
     }
 
     // ── Pattern 2: "beide kanten -4", "aan beide kanten +3" ──
-    const beidMatch = s.match(/beide\s*kanten?\s*([+\-*/])\s*(\d+)/);
-    if (beidMatch) {
-        const val = parseInt(beidMatch[2], 10);
-        if (val > 0) return { type: symbolToType(beidMatch[1]), value: val };
+    // Also: "beide kanten min 4", "beide kanten delen door 2"
+    if (s.includes('beide') && s.includes('kant')) {
+        // Try symbol match first
+        const beidSymMatch = s.match(/beide\s*kanten?\s*([+\-*/])\s*(\d+)/);
+        if (beidSymMatch) {
+            const val = parseInt(beidSymMatch[2], 10);
+            if (val > 0) return { type: symbolToType(beidSymMatch[1]), value: val };
+        }
+        // Try word-based: "beide kanten min 4", "beide kanten plus 3"
+        if (matchesAny(s, ['min', 'minus', 'eraf', 'aftrekken', 'trek'])) {
+            const num = extractNumber(s);
+            if (num !== null && num > 0) return { type: 'subtract', value: num };
+        }
+        if (matchesAny(s, ['plus', 'erbij', 'optellen', 'bij'])) {
+            const num = extractNumber(s);
+            if (num !== null && num > 0) return { type: 'add', value: num };
+        }
+        if (matchesAny(s, ['delen', 'gedeeld', 'deel'])) {
+            const num = extractNumber(s);
+            if (num !== null && num > 1) return { type: 'divide', value: num };
+        }
+        if (matchesAny(s, ['keer', 'maal', 'vermenigvuldig'])) {
+            const num = extractNumber(s);
+            if (num !== null && num > 1) return { type: 'multiply', value: num };
+        }
     }
 
     // ── Pattern 3: Dutch subtract phrases ──
@@ -85,14 +106,14 @@ export function matchOperation(input: string): DetectedOperation | null {
 
     // ── Pattern 4: Dutch add phrases ──
     // "plus 3", "3 erbij", "drie erbij", "tel 3 op", "optellen met 3", "er 3 bij"
-    if (matchesAny(s, ['erbij', 'plus', 'optellen', 'tel', 'er bij', 'bij tellen', 'bijtellen'])) {
+    if (matchesAny(s, ['erbij', 'plus', 'optellen', 'tel op', 'er bij', 'bij tellen', 'bijtellen'])) {
         const num = extractNumber(s);
         if (num !== null && num > 0) return { type: 'add', value: num };
     }
 
     // ── Pattern 5: Dutch divide phrases ──
     // "delen door 2", "gedeeld door twee", "deel door 2", "/2"
-    if (matchesAny(s, ['delen', 'gedeeld', 'deel door', 'door'])) {
+    if (matchesAny(s, ['delen', 'gedeeld', 'deel door', 'deeld'])) {
         const num = extractNumber(s);
         if (num !== null && num > 1) return { type: 'divide', value: num };
     }
