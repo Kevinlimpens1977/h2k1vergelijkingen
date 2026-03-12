@@ -1,8 +1,8 @@
 /**
- * 🧱 TERMTRIS — Award-winning Tetris math game CSS
+ * 🧱 TERMTRIS — Fresh light theme (inspired by Fruit Challenge / y-page)
  *
- * Theme: Deep space arcade with neon tetromino accents,
- * glass-morphism panels, and immersive game feel.
+ * Theme: Clean, bright classroom-friendly design with soft gradient
+ * blobs, white panels, and vibrant but controlled accents.
  */
 
 /* ── animations ──────────────────────────────────────── */
@@ -34,13 +34,13 @@
 }
 
 @keyframes tt-glow {
-    0%, 100% { box-shadow: 0 0 8px rgba(108, 92, 231, 0.3); }
-    50%      { box-shadow: 0 0 24px rgba(108, 92, 231, 0.6), 0 0 48px rgba(108, 92, 231, 0.2); }
+    0%, 100% { box-shadow: 0 4px 20px rgba(108, 92, 231, 0.2); }
+    50%      { box-shadow: 0 8px 32px rgba(108, 92, 231, 0.35), 0 0 40px rgba(108, 92, 231, 0.1); }
 }
 
 @keyframes tt-neonPulse {
-    0%, 100% { text-shadow: 0 0 4px currentColor; }
-    50%      { text-shadow: 0 0 12px currentColor, 0 0 24px currentColor; }
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.08); }
 }
 
 @keyframes tt-timerDanger {
@@ -64,18 +64,38 @@
 .tt-page {
     min-height: 100vh;
     font-family: 'Fredoka', 'Inter', -apple-system, sans-serif;
-    background: linear-gradient(150deg, #0a0a1f 0%, #12122e 40%, #1a0a2e 100%);
-    color: #e2e8f0;
+    background: #f0f4ff;
+    color: #1e293b;
     position: relative;
     overflow-x: hidden;
 }
 
 .tt-page::before {
     content: '';
-    position: fixed; inset: 0;
-    background:
-        radial-gradient(ellipse at 30% 70%, rgba(108, 92, 231, 0.06) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 30%, rgba(238, 90, 36, 0.04) 0%, transparent 50%);
+    position: fixed;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: #6c5ce7;
+    top: -200px;
+    right: -150px;
+    filter: blur(100px);
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.tt-page::after {
+    content: '';
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: #00cec9;
+    bottom: -150px;
+    left: -100px;
+    filter: blur(100px);
+    opacity: 0.18;
     pointer-events: none;
     z-index: 0;
 }
@@ -87,9 +107,9 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 1.5rem;
-    background: rgba(10, 10, 31, 0.9);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(108, 92, 231, 0.2);
+    background: #ffffff;
+    border-bottom: 2px solid rgba(108, 92, 231, 0.12);
+    box-shadow: 0 2px 12px rgba(30, 41, 59, 0.06);
     position: relative;
     z-index: 10;
 }
@@ -100,6 +120,7 @@
     gap: 0.5rem;
     font-weight: 700;
     font-size: 1rem;
+    color: #1e293b;
 }
 
 .tt-topbar-title .tt-icon {
@@ -118,22 +139,22 @@
 
 .tt-progress {
     height: 4px;
-    background: rgba(108, 92, 231, 0.1);
+    background: rgba(108, 92, 231, 0.08);
     position: relative;
     z-index: 10;
 }
 
 .tt-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #6c5ce7, #a855f7, #ee5a24);
+    background: linear-gradient(90deg, #6c5ce7, #a855f7, #00cec9);
     transition: width 1s linear;
     border-radius: 0 2px 2px 0;
-    box-shadow: 0 0 12px rgba(108, 92, 231, 0.4);
+    box-shadow: 0 0 8px rgba(108, 92, 231, 0.3);
 }
 
 .tt-progress-fill--danger {
     background: linear-gradient(90deg, #f43f5e, #ef4444);
-    box-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
 }
 
 /* ── main game layout ────────────────────────────────── */
@@ -165,13 +186,13 @@
 
 .tt-field {
     display: grid;
-    padding: 3px;
-    background: rgba(10, 10, 31, 0.8);
-    border-radius: 12px;
-    border: 2px solid rgba(108, 92, 231, 0.25);
+    padding: 4px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 2px solid rgba(108, 92, 231, 0.15);
     box-shadow:
-        0 4px 24px rgba(0, 0, 0, 0.3),
-        inset 0 0 20px rgba(108, 92, 231, 0.05);
+        0 4px 24px rgba(30, 41, 59, 0.08),
+        inset 0 0 0 1px rgba(108, 92, 231, 0.05);
 }
 
 .tt-cell {
@@ -180,18 +201,18 @@
 }
 
 .tt-cell--empty {
-    background: rgba(108, 92, 231, 0.03);
-    border: 1px solid rgba(108, 92, 231, 0.05);
+    background: #f7f9ff;
+    border: 1px solid rgba(108, 92, 231, 0.06);
 }
 
 .tt-cell--filled {
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .tt-cell--active {
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 8px rgba(108, 92, 231, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 /* ── next piece preview ──────────────────────────────── */
@@ -201,17 +222,18 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: rgba(226, 232, 240, 0.4);
+    color: #64748b;
     text-align: center;
 }
 
 .tt-next-box {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1.5px solid rgba(108, 92, 231, 0.2);
+    background: #ffffff;
+    border: 1.5px solid rgba(108, 92, 231, 0.12);
     border-radius: 10px;
     padding: 8px;
     display: grid;
     gap: 1px;
+    box-shadow: 0 2px 8px rgba(30, 41, 59, 0.05);
 }
 
 /* ── status indicator ────────────────────────────────── */
@@ -226,27 +248,27 @@
 }
 
 .tt-status--playing {
-    background: rgba(0, 184, 148, 0.1);
+    background: rgba(0, 184, 148, 0.08);
     color: #00b894;
-    border: 1px solid rgba(0, 184, 148, 0.25);
+    border: 1.5px solid rgba(0, 184, 148, 0.2);
 }
 
 .tt-status--question {
-    background: rgba(108, 92, 231, 0.08);
-    color: #a78bfa;
-    border: 1px solid rgba(108, 92, 231, 0.2);
+    background: rgba(108, 92, 231, 0.06);
+    color: #6c5ce7;
+    border: 1.5px solid rgba(108, 92, 231, 0.15);
 }
 
 /* ── controls reminder ───────────────────────────────── */
 
 .tt-controls-card {
     padding: 0.85rem 1.25rem;
-    background: rgba(0, 184, 148, 0.06);
-    border: 1px solid rgba(0, 184, 148, 0.2);
+    background: rgba(0, 184, 148, 0.05);
+    border: 1.5px solid rgba(0, 184, 148, 0.15);
     border-radius: 12px;
     text-align: center;
     font-size: 1rem;
-    color: rgba(226, 232, 240, 0.6);
+    color: #64748b;
     font-weight: 600;
 }
 
@@ -259,12 +281,12 @@
 }
 
 .tt-hud-panel {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(8px);
-    border-radius: 12px;
+    background: #ffffff;
+    border-radius: 14px;
     padding: 1rem 1.25rem;
     text-align: center;
-    border: 1px solid rgba(108, 92, 231, 0.15);
+    border: 1.5px solid rgba(108, 92, 231, 0.1);
+    box-shadow: 0 2px 12px rgba(30, 41, 59, 0.05);
 }
 
 .tt-hud-label {
@@ -272,7 +294,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: rgba(226, 232, 240, 0.4);
+    color: #94a3b8;
     margin-bottom: 0.2rem;
 }
 
@@ -281,7 +303,7 @@
     font-weight: 800;
     line-height: 1;
     font-variant-numeric: tabular-nums;
-    color: #00ced1;
+    color: #00b894;
 }
 
 .tt-hud-timer--danger {
@@ -292,7 +314,7 @@
 .tt-hud-score {
     font-size: 2.6rem;
     font-weight: 800;
-    color: #a78bfa;
+    color: #6c5ce7;
     line-height: 1;
 }
 
@@ -303,22 +325,23 @@
 
 .tt-hud-stat {
     flex: 1;
-    background: rgba(255, 255, 255, 0.04);
+    background: #f7f9ff;
     border-radius: 10px;
     padding: 0.6rem;
     text-align: center;
-    border: 1px solid rgba(108, 92, 231, 0.1);
+    border: 1px solid rgba(108, 92, 231, 0.08);
 }
 
 .tt-hud-stat-value {
     font-size: 1.4rem;
     font-weight: 800;
     line-height: 1.1;
+    color: #1e293b;
 }
 
 .tt-hud-stat-label {
     font-size: 0.7rem;
-    color: rgba(226, 232, 240, 0.4);
+    color: #94a3b8;
     text-transform: uppercase;
     font-weight: 700;
 }
@@ -328,9 +351,9 @@
 .tt-streak {
     text-align: center;
     padding: 0.45rem 0.75rem;
-    background: linear-gradient(135deg, rgba(253, 203, 110, 0.1), rgba(225, 112, 85, 0.08));
+    background: linear-gradient(135deg, rgba(253, 203, 110, 0.12), rgba(225, 112, 85, 0.08));
     border-radius: 10px;
-    border: 1px solid rgba(253, 203, 110, 0.25);
+    border: 1.5px solid rgba(253, 203, 110, 0.3);
     animation: tt-fadeIn 0.25s ease;
 }
 
@@ -355,26 +378,25 @@
     color: #fff;
     font-weight: 800;
     font-size: 1.05rem;
-    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
+    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.25);
     animation: tt-bounceIn 0.4s ease;
 }
 
 /* ── question card (in QuestionCard component) ───────── */
 
 .tt-question-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(8px);
-    border-radius: 14px;
+    background: #ffffff;
+    border-radius: 16px;
     padding: 1.5rem;
-    border: 1px solid rgba(108, 92, 231, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border: 1.5px solid rgba(108, 92, 231, 0.12);
+    box-shadow: 0 4px 20px rgba(30, 41, 59, 0.06);
     animation: tt-slideUp 0.3s ease;
 }
 
 .tt-question-prompt {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #e2e8f0;
+    color: #1e293b;
     line-height: 1.5;
     margin: 0 0 0.75rem;
     text-align: center;
@@ -382,14 +404,14 @@
 
 .tt-equation-display {
     padding: 0.7rem 1rem;
-    background: rgba(108, 92, 231, 0.08);
-    border-radius: 10px;
+    background: rgba(108, 92, 231, 0.06);
+    border-radius: 12px;
     font-weight: 700;
     font-size: 1.3rem;
     text-align: center;
-    color: #a78bfa;
+    color: #6c5ce7;
     margin-bottom: 0.5rem;
-    border: 1px solid rgba(108, 92, 231, 0.15);
+    border: 1.5px solid rgba(108, 92, 231, 0.1);
 }
 
 .tt-options {
@@ -400,10 +422,10 @@
 
 .tt-option {
     padding: 0.75rem 1.25rem;
-    border-radius: 10px;
-    border: 2px solid rgba(108, 92, 231, 0.15);
-    background: rgba(255, 255, 255, 0.03);
-    color: #e2e8f0;
+    border-radius: 12px;
+    border: 2px solid rgba(108, 92, 231, 0.1);
+    background: #f7f9ff;
+    color: #1e293b;
     font-weight: 600;
     font-size: 1.1rem;
     text-align: left;
@@ -413,19 +435,19 @@
 }
 
 .tt-option:hover:not(:disabled) {
-    background: rgba(108, 92, 231, 0.1);
-    border-color: rgba(108, 92, 231, 0.35);
+    background: rgba(108, 92, 231, 0.06);
+    border-color: rgba(108, 92, 231, 0.25);
     transform: translateX(3px);
 }
 
 .tt-option--correct {
-    background: rgba(0, 184, 148, 0.15) !important;
+    background: rgba(0, 184, 148, 0.1) !important;
     border-color: #00b894 !important;
     color: #00b894 !important;
 }
 
 .tt-option--wrong {
-    background: rgba(244, 63, 94, 0.15) !important;
+    background: rgba(244, 63, 94, 0.08) !important;
     border-color: #f43f5e !important;
     color: #f43f5e !important;
     animation: tt-bounceIn 0.3s ease;
@@ -445,10 +467,10 @@
     flex: 1;
     font-size: 1.15rem;
     padding: 0.75rem 1rem;
-    border-radius: 10px;
-    border: 2px solid rgba(108, 92, 231, 0.2);
-    background: rgba(255, 255, 255, 0.04);
-    color: #e2e8f0;
+    border-radius: 12px;
+    border: 2px solid rgba(108, 92, 231, 0.12);
+    background: #fff;
+    color: #1e293b;
     font-weight: 600;
     font-family: inherit;
     outline: none;
@@ -456,19 +478,19 @@
 }
 
 .tt-input:focus {
-    border-color: rgba(108, 92, 231, 0.5);
-    box-shadow: 0 0 12px rgba(108, 92, 231, 0.15);
+    border-color: rgba(108, 92, 231, 0.4);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
 }
 
 .tt-input::placeholder {
-    color: rgba(226, 232, 240, 0.3);
+    color: #94a3b8;
 }
 
 .tt-submit-btn {
     padding: 0.75rem 1.25rem;
-    border-radius: 10px;
+    border-radius: 12px;
     border: none;
-    background: linear-gradient(135deg, #6c5ce7, #5b4cd9);
+    background: linear-gradient(135deg, #6c5ce7, #a855f7);
     color: #fff;
     font-weight: 700;
     font-size: 1.15rem;
@@ -493,20 +515,20 @@
     text-align: center;
     font-weight: 800;
     font-size: 1.1rem;
-    padding: 0.3rem;
+    padding: 0.4rem;
     margin-bottom: 0.4rem;
     animation: tt-bounceIn 0.3s ease;
-    border-radius: 8px;
+    border-radius: 10px;
 }
 
 .tt-feedback--correct {
     color: #00b894;
-    background: rgba(0, 184, 148, 0.08);
+    background: rgba(0, 184, 148, 0.06);
 }
 
 .tt-feedback--wrong {
     color: #f43f5e;
-    background: rgba(244, 63, 94, 0.08);
+    background: rgba(244, 63, 94, 0.06);
 }
 
 /* ── ready screen ────────────────────────────────────── */
@@ -537,7 +559,7 @@
 }
 
 .tt-ready p {
-    color: rgba(226, 232, 240, 0.7);
+    color: #64748b;
     font-size: 0.95rem;
     margin: 0 0 1.5rem;
 }
@@ -545,12 +567,12 @@
 /* ── rules card ──────────────────────────────────────── */
 
 .tt-rules {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(8px);
-    border-radius: 14px;
+    background: #ffffff;
+    border-radius: 16px;
     padding: 1.25rem;
     margin-bottom: 1.5rem;
-    border: 1px solid rgba(108, 92, 231, 0.2);
+    border: 1.5px solid rgba(108, 92, 231, 0.1);
+    box-shadow: 0 2px 12px rgba(30, 41, 59, 0.05);
     text-align: left;
 }
 
@@ -559,7 +581,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: rgba(226, 232, 240, 0.45);
+    color: #94a3b8;
     margin-bottom: 0.5rem;
 }
 
@@ -572,8 +594,8 @@
 .tt-rules li {
     padding: 0.3rem 0;
     font-size: 0.85rem;
-    color: rgba(226, 232, 240, 0.8);
-    border-bottom: 1px solid rgba(108, 92, 231, 0.08);
+    color: #475569;
+    border-bottom: 1px solid rgba(108, 92, 231, 0.06);
 }
 
 .tt-rules li:last-child {
@@ -592,14 +614,14 @@
     font-size: 1.2rem;
     cursor: pointer;
     font-family: inherit;
-    box-shadow: 0 8px 32px rgba(108, 92, 231, 0.3);
+    box-shadow: 0 8px 32px rgba(108, 92, 231, 0.2);
     transition: all 0.2s;
     animation: tt-glow 2s infinite;
 }
 
 .tt-start-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(108, 92, 231, 0.4);
+    box-shadow: 0 12px 40px rgba(108, 92, 231, 0.3);
 }
 
 /* ── result screen ───────────────────────────────────── */
@@ -614,22 +636,21 @@
 }
 
 .tt-result-card {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(12px);
+    background: #ffffff;
     border-radius: 20px;
     padding: 2rem;
-    border: 2px solid rgba(108, 92, 231, 0.2);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(108, 92, 231, 0.12);
+    box-shadow: 0 8px 40px rgba(30, 41, 59, 0.08);
     animation: tt-slideUp 0.4s ease-out;
 }
 
 .tt-result-card--pass {
-    border-color: rgba(0, 184, 148, 0.4);
-    box-shadow: 0 8px 40px rgba(0, 184, 148, 0.12);
+    border-color: rgba(0, 184, 148, 0.3);
+    box-shadow: 0 8px 40px rgba(0, 184, 148, 0.08);
 }
 
 .tt-result-card--fail {
-    border-color: rgba(244, 63, 94, 0.3);
+    border-color: rgba(244, 63, 94, 0.2);
 }
 
 .tt-result-icon {
@@ -642,6 +663,7 @@
     font-size: 1.5rem;
     font-weight: 800;
     margin: 0 0 0.5rem;
+    color: #1e293b;
 }
 
 /* ── stats grid ──────────────────────────────────────── */
@@ -656,20 +678,24 @@
 
 .tt-stat {
     text-align: center;
-    padding: 0.4rem 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #f7f9ff;
+    border-radius: 12px;
+    border: 1px solid rgba(108, 92, 231, 0.08);
 }
 
 .tt-stat-value {
     font-size: 1.8rem;
     font-weight: 800;
     line-height: 1.1;
+    color: #1e293b;
 }
 
 .tt-stat-label {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: rgba(226, 232, 240, 0.45);
+    color: #94a3b8;
     font-weight: 700;
     margin-top: 0.15rem;
 }
@@ -696,25 +722,26 @@
 }
 
 .tt-btn--primary {
-    background: linear-gradient(135deg, #6c5ce7, #5b4cd9);
+    background: linear-gradient(135deg, #6c5ce7, #a855f7);
     color: #fff;
-    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
+    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.2);
 }
 
 .tt-btn--primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(108, 92, 231, 0.4);
+    box-shadow: 0 6px 24px rgba(108, 92, 231, 0.3);
 }
 
 .tt-btn--ghost {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(226, 232, 240, 0.7);
-    border: 1px solid rgba(108, 92, 231, 0.2);
+    background: #fff;
+    color: #64748b;
+    border: 1.5px solid rgba(108, 92, 231, 0.12);
 }
 
 .tt-btn--ghost:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #e2e8f0;
+    background: #f7f9ff;
+    color: #1e293b;
+    border-color: rgba(108, 92, 231, 0.2);
 }
 
 /* ── responsive ──────────────────────────────────────── */
