@@ -1,9 +1,12 @@
 /**
- * Student Dashboard — MVP Component
+ * Student Dashboard — v2
  *
  * Full-screen overlay accessible via DevMode banner.
- * Shows a sortable class overview table with signals.
- * Click on a student row → detail panel slides in.
+ * Shows a sortable class overview table with signals + visual step dots.
+ * Click on a student row → detail panel slides in with per-step checklist,
+ * accuracy, game scores, and last activity.
+ *
+ * Fully synced with CHAPTER_8_FLOW (10 steps).
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -12,6 +15,8 @@ import {
     fetchStudentDetail,
     computeSignal,
     getSignalInfo,
+    STEP_CHAIN,
+    TOTAL_STEPS,
     type StudentRow,
     type StudentDetail,
     type SignalType,
@@ -19,12 +24,32 @@ import {
 
 /* ── types ───────────────────────────────────────────── */
 
-type SortKey = 'studentNumber' | 'firstName' | 'stepIndex' | 'signal';
+type SortKey = 'studentNumber' | 'firstName' | 'stepIndex' | 'signal' | 'lastActivity';
 type SortDir = 'asc' | 'desc';
 
 interface Props {
     classId: string;
     onClose: () => void;
+}
+
+/* ── helpers ─────────────────────────────────────────── */
+
+function formatTimeAgo(d: Date | null): string {
+    if (!d) return '—';
+    const now = Date.now();
+    const diff = now - d.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'zojuist';
+    if (mins < 60) return `${mins}m geleden`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}u geleden`;
+    const days = Math.floor(hrs / 24);
+    if (days === 1) return 'gisteren';
+    return `${days}d geleden`;
+}
+
+function pct(n: number, total: number): number {
+    return total > 0 ? Math.round((n / total) * 100) : 0;
 }
 
 /* ── component ───────────────────────────────────────── */
@@ -73,8 +98,7 @@ export default function StudentDashboard({ classId, onClose }: Props) {
         return students.reduce((sum, s) => sum + s.stepIndex, 0) / students.length;
     }, [students]);
 
-    /* ── signals (computed with available data) ───────── */
-    // MVP: signals based on stepIndex only (accuracy lazy-loaded)
+    /* ── signals ─────────────────────────────────────── */
 
     const signalMap = useMemo(() => {
         const map: Record<string, SignalType> = {};
@@ -116,6 +140,12 @@ export default function StudentDashboard({ classId, onClose }: Props) {
                     cmp = (signalPriority[sa] ?? 99) - (signalPriority[sb] ?? 99);
                     break;
                 }
+                case 'lastActivity': {
+                    const ta = a.lastActivity?.getTime() ?? 0;
+                    const tb = b.lastActivity?.getTime() ?? 0;
+                    cmp = ta - tb;
+                    break;
+                }
             }
             return sortDir === 'asc' ? cmp : -cmp;
         });
@@ -128,7 +158,7 @@ export default function StudentDashboard({ classId, onClose }: Props) {
             setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
         } else {
             setSortKey(key);
-            setSortDir('asc');
+            setSortDir(key === 'lastActivity' ? 'desc' : 'asc');
         }
     };
 
@@ -155,8 +185,18 @@ export default function StudentDashboard({ classId, onClose }: Props) {
 
     /* ── class stats ─────────────────────────────────── */
 
-    const completedCount = students.filter((s) => s.stepIndex >= 7).length;
+    const completedCount = students.filter((s) => s.stepIndex >= TOTAL_STEPS).length;
     const avgStep = classAvgStepIndex.toFixed(1);
+    const avgPct = pct(classAvgStepIndex, TOTAL_STEPS);
+    const checkCount = students.filter((s) => signalMap[s.uid] === 'check').length;
+    const topCount = students.filter((s) => signalMap[s.uid] === 'top').length;
+
+    /* ── step dot colors ─────────────────────────────── */
+
+    function stepDotColor(done: boolean, _idx: number): string {
+        if (done) return '#00b894';
+        return 'rgba(255,255,255,0.08)';
+    }
 
     /* ── styles ───────────────────────────────────────── */
 
@@ -199,17 +239,17 @@ export default function StudentDashboard({ classId, onClose }: Props) {
         },
         kpiRow: {
             display: 'flex',
-            gap: '1rem',
+            gap: '0.75rem',
             padding: '1rem 1.5rem',
             flexWrap: 'wrap' as const,
         },
-        kpiCard: {
-            flex: '1 1 140px',
+        kpiCard: (accent?: string) => ({
+            flex: '1 1 120px',
             padding: '0.75rem 1rem',
             borderRadius: '10px',
             background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-        },
+            border: `1px solid ${accent ? accent + '33' : 'rgba(255,255,255,0.08)'}`,
+        }),
         kpiValue: {
             fontSize: '1.6rem',
             fontWeight: 800,
@@ -284,7 +324,7 @@ export default function StudentDashboard({ classId, onClose }: Props) {
             top: 0,
             right: 0,
             bottom: 0,
-            width: '420px',
+            width: '440px',
             maxWidth: '90vw',
             background: '#1e1e3a',
             borderLeft: '2px solid #6c5ce7',
@@ -382,24 +422,57 @@ export default function StudentDashboard({ classId, onClose }: Props) {
                 <>
                     {/* KPI Cards */}
                     <div style={S.kpiRow}>
-                        <div style={S.kpiCard}>
+                        <div style={S.kpiCard()}>
                             <div style={S.kpiValue}>{students.length}</div>
                             <div style={S.kpiLabel}>Leerlingen</div>
                         </div>
-                        <div style={S.kpiCard}>
-                            <div style={S.kpiValue}>{avgStep}/7</div>
-                            <div style={S.kpiLabel}>Gem. stap</div>
+                        <div style={S.kpiCard()}>
+                            <div style={S.kpiValue}>{avgStep}<span style={{ fontSize: '0.8rem', color: '#64748b' }}>/{TOTAL_STEPS}</span></div>
+                            <div style={S.kpiLabel}>Gem. stap ({avgPct}%)</div>
                         </div>
-                        <div style={S.kpiCard}>
-                            <div style={S.kpiValue}>{completedCount}</div>
+                        <div style={S.kpiCard('#00b894')}>
+                            <div style={{ ...S.kpiValue, color: '#00b894' }}>{completedCount}</div>
                             <div style={S.kpiLabel}>Alles af</div>
                         </div>
-                        <div style={S.kpiCard}>
-                            <div style={S.kpiValue}>
-                                {students.filter((s) => signalMap[s.uid] === 'check').length}
-                            </div>
+                        <div style={S.kpiCard('#6c5ce7')}>
+                            <div style={{ ...S.kpiValue, color: '#6c5ce7' }}>{topCount}</div>
+                            <div style={S.kpiLabel}>🚀 Top</div>
+                        </div>
+                        <div style={S.kpiCard('#ff9f43')}>
+                            <div style={{ ...S.kpiValue, color: '#ff9f43' }}>{checkCount}</div>
                             <div style={S.kpiLabel}>⚠️ Aandacht</div>
                         </div>
+                    </div>
+
+                    {/* Step legend */}
+                    <div style={{
+                        padding: '0 1.5rem 0.75rem',
+                        display: 'flex',
+                        gap: '0.35rem',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                    }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, marginRight: '0.25rem' }}>
+                            STAPPEN:
+                        </span>
+                        {STEP_CHAIN.map((step, i) => (
+                            <span
+                                key={step.id}
+                                title={`${i + 1}. ${step.label}`}
+                                style={{
+                                    fontSize: '0.65rem',
+                                    color: '#94a3b8',
+                                    padding: '0.1rem 0.35rem',
+                                    borderRadius: '4px',
+                                    background: 'rgba(255,255,255,0.04)',
+                                    border: '1px solid rgba(255,255,255,0.06)',
+                                    cursor: 'default',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {step.icon} {i + 1}
+                            </span>
+                        ))}
                     </div>
 
                     {/* Search */}
@@ -428,13 +501,16 @@ export default function StudentDashboard({ classId, onClose }: Props) {
                                         Naam{sortArrow('firstName')}
                                     </th>
                                     <th style={S.th} onClick={() => handleSort('stepIndex')}>
-                                        Huidige stap{sortArrow('stepIndex')}
+                                        Stap{sortArrow('stepIndex')}
                                     </th>
                                     <th style={{ ...S.th, textAlign: 'center' }}>
-                                        Voortgang
+                                        Voortgang ({TOTAL_STEPS} stappen)
                                     </th>
                                     <th style={S.th} onClick={() => handleSort('signal')}>
                                         Signaal{sortArrow('signal')}
+                                    </th>
+                                    <th style={S.th} onClick={() => handleSort('lastActivity')}>
+                                        Laatst actief{sortArrow('lastActivity')}
                                     </th>
                                 </tr>
                             </thead>
@@ -464,42 +540,47 @@ export default function StudentDashboard({ classId, onClose }: Props) {
                                             </td>
                                             <td style={{ ...S.td, fontWeight: 700, color: '#fff' }}>
                                                 {s.firstName}
+                                                {!s.letterIntroDone && (
+                                                    <span style={{
+                                                        fontSize: '0.6rem', color: '#ff6b6b',
+                                                        marginLeft: '0.4rem', fontWeight: 600,
+                                                    }}>
+                                                        (letter intro)
+                                                    </span>
+                                                )}
                                             </td>
-                                            <td style={S.td}>
-                                                {s.stepLabel}
+                                            <td style={{ ...S.td, fontVariantNumeric: 'tabular-nums' }}>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}>{s.stepIndex}</span>
+                                                <span style={{ color: '#64748b' }}>/{TOTAL_STEPS}</span>
                                             </td>
                                             <td style={{ ...S.td, textAlign: 'center' }}>
+                                                {/* Step dots */}
                                                 <div style={{
                                                     display: 'inline-flex',
                                                     alignItems: 'center',
-                                                    gap: '0.4rem',
+                                                    gap: '3px',
                                                 }}>
-                                                    <div style={{
-                                                        width: '60px',
-                                                        height: '6px',
-                                                        borderRadius: '3px',
-                                                        background: 'rgba(255,255,255,0.08)',
-                                                        overflow: 'hidden',
-                                                    }}>
-                                                        <div style={{
-                                                            height: '100%',
-                                                            width: `${(s.stepIndex / 7) * 100}%`,
-                                                            borderRadius: '3px',
-                                                            background: s.stepIndex >= 7
-                                                                ? '#00b894'
-                                                                : s.stepIndex >= 4
-                                                                    ? '#6c5ce7'
-                                                                    : '#ff9f43',
-                                                            transition: 'width 0.3s ease',
-                                                        }} />
-                                                    </div>
+                                                    {STEP_CHAIN.map((step, i) => (
+                                                        <div
+                                                            key={step.id}
+                                                            title={step.label}
+                                                            style={{
+                                                                width: '10px',
+                                                                height: '10px',
+                                                                borderRadius: '2px',
+                                                                background: stepDotColor(s.stepCompletion[step.id], i),
+                                                                transition: 'background 0.2s',
+                                                            }}
+                                                        />
+                                                    ))}
                                                     <span style={{
-                                                        fontSize: '0.72rem',
+                                                        fontSize: '0.68rem',
                                                         color: '#64748b',
                                                         fontWeight: 600,
+                                                        marginLeft: '0.3rem',
                                                         fontVariantNumeric: 'tabular-nums',
                                                     }}>
-                                                        {s.stepIndex}/7
+                                                        {pct(s.stepIndex, TOTAL_STEPS)}%
                                                     </span>
                                                 </div>
                                             </td>
@@ -512,12 +593,15 @@ export default function StudentDashboard({ classId, onClose }: Props) {
                                                     <span style={{ color: '#475569', fontSize: '0.75rem' }}>—</span>
                                                 )}
                                             </td>
+                                            <td style={{ ...S.td, fontSize: '0.78rem', color: '#94a3b8' }}>
+                                                {formatTimeAgo(s.lastActivity)}
+                                            </td>
                                         </tr>
                                     );
                                 })}
                                 {sorted.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} style={{ ...S.td, textAlign: 'center', color: '#64748b', padding: '2rem' }}>
+                                        <td colSpan={6} style={{ ...S.td, textAlign: 'center', color: '#64748b', padding: '2rem' }}>
                                             {search ? 'Geen leerlingen gevonden.' : 'Geen leerlingen in deze klas.'}
                                         </td>
                                     </tr>
@@ -552,44 +636,76 @@ export default function StudentDashboard({ classId, onClose }: Props) {
                         </button>
                     </div>
 
-                    {/* Progress overview */}
-                    <div style={S.sectionTitle}>📚 Voortgang</div>
-                    <div style={S.dataRow}>
-                        <span style={S.dataLabel}>Huidige stap</span>
-                        <span style={S.dataValue}>{selectedStudent.stepLabel}</span>
-                    </div>
-                    <div style={S.dataRow}>
-                        <span style={S.dataLabel}>Stappen af</span>
-                        <span style={S.dataValue}>{selectedStudent.stepIndex}/7</span>
+                    {/* Overview cards */}
+                    <div style={{ display: 'flex', gap: '0.5rem', padding: '0.75rem 1.25rem', flexWrap: 'wrap' }}>
+                        <div style={{
+                            flex: '1 1 60px', padding: '0.5rem', borderRadius: '8px',
+                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                            textAlign: 'center',
+                        }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fff' }}>
+                                {selectedStudent.stepIndex}/{TOTAL_STEPS}
+                            </div>
+                            <div style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>
+                                Stappen
+                            </div>
+                        </div>
+                        <div style={{
+                            flex: '1 1 60px', padding: '0.5rem', borderRadius: '8px',
+                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                            textAlign: 'center',
+                        }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fff' }}>
+                                {pct(selectedStudent.stepIndex, TOTAL_STEPS)}%
+                            </div>
+                            <div style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>
+                                Voortgang
+                            </div>
+                        </div>
+                        <div style={{
+                            flex: '1 1 60px', padding: '0.5rem', borderRadius: '8px',
+                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                            textAlign: 'center',
+                        }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: selectedStudent.letterIntroDone ? '#00b894' : '#ff6b6b' }}>
+                                {selectedStudent.letterIntroDone ? '✓' : '✗'}
+                            </div>
+                            <div style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>
+                                Letter Intro
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Flow detail */}
-                    {selectedStudent.flowData && (
-                        <>
-                            <div style={S.sectionTitle}>📋 Stappen detail</div>
-                            {[
-                                { key: 'letterIntroCompleted', label: 'Letter Intro' },
-                                { key: 'intro8_1Passed', label: '§8.1 Intro' },
-                                { key: 'section8_1Completed', label: '§8.1 Oefenen' },
-                                { key: 'balanceGameCompleted', label: 'Balans Minigame' },
-                                { key: 'section8_2Completed', label: '§8.2 De balans' },
-                                { key: 'section8_2BlitzPassed', label: '§8.2 Blitz' },
-                                { key: 'section8_3Completed', label: '§8.3 Termtris' },
-                            ].map(({ key, label }) => {
-                                const done = !!(selectedStudent.flowData as unknown as Record<string, unknown>)?.[key];
-                                return (
-                                    <div key={key} style={{ ...S.dataRow, opacity: done ? 1 : 0.5 }}>
-                                        <span style={S.dataLabel}>
-                                            {done ? '✅' : '⬜'} {label}
-                                        </span>
-                                        <span style={{ ...S.dataValue, color: done ? '#00b894' : '#64748b' }}>
-                                            {done ? 'Klaar' : '—'}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </>
-                    )}
+                    {/* Step checklist — derived from STEP_CHAIN */}
+                    <div style={S.sectionTitle}>📋 Stappen ({selectedStudent.stepIndex}/{TOTAL_STEPS})</div>
+                    {STEP_CHAIN.map((step, i) => {
+                        const done = selectedStudent.stepCompletion[step.id];
+                        return (
+                            <div key={step.id} style={{
+                                ...S.dataRow,
+                                opacity: done ? 1 : 0.5,
+                                background: done ? 'rgba(0,184,148,0.03)' : 'transparent',
+                            }}>
+                                <span style={S.dataLabel}>
+                                    <span style={{ display: 'inline-block', width: '1.5rem', textAlign: 'center' }}>
+                                        {done ? '✅' : '⬜'}
+                                    </span>
+                                    <span style={{ marginLeft: '0.3rem' }}>
+                                        {i + 1}. {step.icon} {step.label}
+                                    </span>
+                                </span>
+                                <span style={{ ...S.dataValue, color: done ? '#00b894' : '#64748b', fontSize: '0.78rem' }}>
+                                    {done ? 'Klaar' : '—'}
+                                </span>
+                            </div>
+                        );
+                    })}
+
+                    {/* Last activity */}
+                    <div style={{ ...S.dataRow, marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.6rem' }}>
+                        <span style={S.dataLabel}>Laatst actief</span>
+                        <span style={S.dataValue}>{formatTimeAgo(selectedStudent.lastActivity)}</span>
+                    </div>
 
                     {/* Attempts stats (lazy loaded) */}
                     <div style={S.sectionTitle}>📊 Statistieken</div>

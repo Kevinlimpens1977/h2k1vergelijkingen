@@ -2,11 +2,13 @@
  * Answer Validator — orchestrates validation per mode.
  *
  * Wraps mathValidator.ts and adds step-equivalence checking.
+ * Also supports free-text operation descriptions ("−4", "vier eraf", etc.)
  */
 import { safeEval, matchAnswer } from '../../../utils/mathValidator';
 import { normalizeNotation, stripVariable } from './notationNormalizer';
 import { isSolutionMatch, isValidStep } from './stepEquivalence';
-import type { Equation } from './equationEngine';
+import { operationMatches } from './operationMatcher';
+import type { Equation, OperationType } from './equationEngine';
 import { eqToString } from './equationEngine';
 
 export type ValidationMode = 'strict-guided' | 'semi-open' | 'open-practice';
@@ -19,6 +21,7 @@ export type ValidationReason =
     | 'chained_correct'
     | 'button_match'
     | 'direct_solution'
+    | 'operation_description'
     | 'wrong_value'
     | 'wrong_step';
 
@@ -36,6 +39,8 @@ export interface ValidationContext {
     expectedAnswer?: string;
     solutionValue: number;
     variable: string;
+    /** Expected operation for this step (enables free-text operation matching) */
+    expectedOperation?: { type: OperationType; value: number };
 }
 
 /**
@@ -50,6 +55,13 @@ export function validateAnswer(
 
     // ① Button-based (strict-guided): should not use this function
     // (buttons are compared by ID in the component)
+
+    // ①½ Free-text operation description (e.g. "-4", "vier eraf", "beide kanten -4")
+    if (ctx.expectedOperation) {
+        if (operationMatches(rawInput, ctx.expectedOperation.type, ctx.expectedOperation.value)) {
+            return ok('operation_description', norm);
+        }
+    }
 
     // ② Exact match against expected answer string
     if (ctx.expectedAnswer) {

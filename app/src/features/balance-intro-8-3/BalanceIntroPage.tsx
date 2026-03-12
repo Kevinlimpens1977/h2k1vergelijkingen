@@ -44,6 +44,7 @@ interface PracticeState {
 }
 
 const PRACTICE_TARGET = 5; // consecutive correct to finish
+const MAX_WRONG_BEFORE_HINT = 4; // show hint + skip after this many wrong
 
 export default function BalanceIntroPage() {
     const { profile } = useAuth();
@@ -77,6 +78,8 @@ export default function BalanceIntroPage() {
     const [practiceConsecutive, setPracticeConsecutive] = useState(0);
     const [practiceTotal, setPracticeTotal] = useState(0);
     const [saving, setSaving] = useState(false);
+    const [stepWrongCount, setStepWrongCount] = useState(0);
+    const [hintRevealed, setHintRevealed] = useState(false);
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -129,6 +132,8 @@ export default function BalanceIntroPage() {
         setTypedInput('');
         setFeedback(null);
         setShowHint(false);
+        setStepWrongCount(0);
+        setHintRevealed(false);
         setWobble(false);
         setTimeout(() => inputRef.current?.focus(), 100);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -283,7 +288,7 @@ export default function BalanceIntroPage() {
         const { problem, currentStepIdx, currentEquation: curEq } = practiceState;
         const step = problem.steps[currentStepIdx];
 
-        // Build validation context
+        // Build validation context — includes expectedOperation for free-text matching
         const result = validateAnswer(typedInput, {
             mode: 'open-practice',
             currentEquation: curEq,
@@ -291,6 +296,7 @@ export default function BalanceIntroPage() {
             expectedAnswer: eqToString(step.result),
             solutionValue: problem.solution,
             variable: problem.equation.variable,
+            expectedOperation: { type: step.operation.type, value: step.operation.value },
         });
 
         const fb = classifyFeedback(result, eqToString(step.result));
@@ -341,6 +347,8 @@ export default function BalanceIntroPage() {
                     currentEquation: step.result,
                 } : null);
                 setTypedInput('');
+                setStepWrongCount(0);
+                setHintRevealed(false);
                 setTimeout(() => inputRef.current?.focus(), 100);
             } else {
                 // Problem complete
@@ -353,27 +361,75 @@ export default function BalanceIntroPage() {
                 }
             }
         } else {
-            setFeedback(fb);
-            setTiltAngle(computeTiltAngle(curEq, problem.solution) || 8);
-            setWobble(true);
-            setTimeout(() => setWobble(false), 800);
+            const newWrongCount = stepWrongCount + 1;
+            setStepWrongCount(newWrongCount);
 
-            // Reset after delay
-            setTimeout(() => {
-                setFeedback(null);
-                setTiltAngle(0);
-                setTypedInput('');
-                inputRef.current?.focus();
-            }, 2000);
+            if (newWrongCount >= MAX_WRONG_BEFORE_HINT) {
+                // Reveal the answer as hint — student can skip this step
+                const opSymbol = step.operation.type === 'add' ? '+' : step.operation.type === 'subtract' ? '−' : step.operation.type === 'multiply' ? '×' : '÷';
+                const hintMsg = `Het antwoord is: ${opSymbol}${step.operation.value} aan beide kanten → ${eqToString(step.result)}`;
+                setFeedback({ type: 'wrong_value', message: hintMsg, showExpected: false });
+                setHintRevealed(true);
+            } else {
+                setFeedback(fb);
+                setTiltAngle(computeTiltAngle(curEq, problem.solution) || 8);
+                setWobble(true);
+                setTimeout(() => setWobble(false), 800);
+
+                // Reset after delay
+                setTimeout(() => {
+                    setFeedback(null);
+                    setTiltAngle(0);
+                    setTypedInput('');
+                    inputRef.current?.focus();
+                }, 2000);
+            }
 
             // Reset consecutive
             setPracticeConsecutive(0);
         }
-    }, [practiceState, typedInput, practiceConsecutive, finishModule]);
+    }, [practiceState, typedInput, practiceConsecutive, stepWrongCount, finishModule]);
 
     const handlePracticeNext = useCallback(() => {
         loadNewPractice();
     }, [loadNewPractice]);
+
+    /** Skip to next step after hint is revealed (4 wrong answers) */
+    const handleHintSkip = useCallback(() => {
+        if (!practiceState) return;
+        const { problem, currentStepIdx } = practiceState;
+        const step = problem.steps[currentStepIdx];
+
+        // Apply the step to the equation
+        const opSymbol = step.operation.type === 'add' ? '+' : step.operation.type === 'subtract' ? '−' : step.operation.type === 'multiply' ? '×' : '÷';
+        const opStr = `${opSymbol}${step.operation.value}        ${opSymbol}${step.operation.value}`;
+
+        setEqSteps(prev => [
+            ...prev.map((s, i) => i === prev.length - 1 ? { ...s, operation: opStr } : s),
+            { equation: eqToString(step.result) },
+        ]);
+        setEquation(step.result);
+        setTiltAngle(0);
+        setStepWrongCount(0);
+        setHintRevealed(false);
+        setTypedInput('');
+
+        const nextStepIdx = currentStepIdx + 1;
+        if (nextStepIdx < problem.steps.length) {
+            setPracticeState(prev => prev ? {
+                ...prev,
+                currentStepIdx: nextStepIdx,
+                currentEquation: step.result,
+            } : null);
+            setFeedback(null);
+            setTimeout(() => inputRef.current?.focus(), 100);
+        } else {
+            // Problem complete (via hint skip — does NOT count as consecutive)
+            setFeedback({ type: 'correct', message: 'Opgave klaar. We gaan verder!', showExpected: false });
+            setPracticeTotal(t => t + 1);
+            // Don't increment consecutive — they needed hints
+        }
+    }, [practiceState]);
 
     // ═══════════════════════════════════════════════════
     // KEY HANDLER
@@ -715,11 +771,11 @@ export default function BalanceIntroPage() {
                     <EquationColumn steps={eqSteps} currentStepIndex={eqSteps.length - 1} />
 
                     {/* Input */}
-                    {!isComplete && step && (
+                    {!isComplete && !hintRevealed && step && (
                         <div className="bi-input-group">
                             <label className="bi-input-label">
                                 {practiceState?.currentStepIdx === 0
-                                    ? 'Wat is stap 1?'
+                                    ? 'Wat is stap 1? (bijv. −4 of "vier eraf")'
                                     : `Wat is stap ${(practiceState?.currentStepIdx ?? 0) + 1}?`
                                 }
                             </label>
@@ -729,7 +785,7 @@ export default function BalanceIntroPage() {
                                 value={typedInput}
                                 onChange={e => setTypedInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder="Typ je antwoord…"
+                                placeholder="Typ je antwoord… bijv. −4 of x = 3"
                                 autoComplete="off"
                                 autoFocus
                             />
@@ -743,6 +799,17 @@ export default function BalanceIntroPage() {
                                     </button>
                                 )}
                             </div>
+                            {/* Wrong attempt counter */}
+                            {stepWrongCount > 0 && stepWrongCount < MAX_WRONG_BEFORE_HINT && (
+                                <div style={{
+                                    marginTop: '0.35rem',
+                                    fontSize: '0.72rem',
+                                    color: '#ff9f43',
+                                    fontWeight: 600,
+                                }}>
+                                    Poging {stepWrongCount}/{MAX_WRONG_BEFORE_HINT} — {MAX_WRONG_BEFORE_HINT - stepWrongCount} kans{MAX_WRONG_BEFORE_HINT - stepWrongCount !== 1 ? 'en' : ''} over
+                                </div>
+                            )}
                             {showHint && step && (
                                 <div className="bi-feedback bi-feedback--hint" style={{ marginTop: '0.5rem' }}>
                                     Tip: kijk welk getal je moet weghalen om de x alleen te krijgen.
@@ -756,8 +823,17 @@ export default function BalanceIntroPage() {
 
                     {/* Feedback */}
                     {feedback && feedback.message && (
-                        <div className={`bi-feedback bi-feedback--${feedback.type === 'correct' || feedback.type === 'correct_alt_path' ? 'correct' : 'wrong'}`}>
+                        <div className={`bi-feedback bi-feedback--${feedback.type === 'correct' || feedback.type === 'correct_alt_path' ? 'correct' : hintRevealed ? 'hint' : 'wrong'}`}>
                             {feedback.message}
+                        </div>
+                    )}
+
+                    {/* Skip button after hint revealed (4 wrong) */}
+                    {hintRevealed && (
+                        <div className="bi-actions">
+                            <button className="bi-btn bi-btn--primary" onClick={handleHintSkip}>
+                                Begrepen — Ga verder →
+                            </button>
                         </div>
                     )}
 

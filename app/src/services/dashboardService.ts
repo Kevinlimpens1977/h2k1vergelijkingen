@@ -8,6 +8,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Chapter8Progress } from './chapter8Flow';
+import { CHAPTER_8_FLOW, isStepCompleted, type FlowStepId } from './chapter8Flow';
 import { BOARD_IDS, getLeaderboard } from './unifiedLeaderboardService';
 
 /* ── types ───────────────────────────────────────────── */
@@ -17,12 +18,18 @@ export interface StudentRow {
     firstName: string;
     studentNumber: string;
     classId: string;
-    /** Index 0-7 in the flow (0 = Letter Intro, 7 = Alles af) */
+    /** Index 0–TOTAL in the flow (0 = niets af, TOTAL = alles af) */
     stepIndex: number;
     /** Human-readable label for the current step */
     stepLabel: string;
     /** Raw chapter8_flow data (for detail panel) */
     flowData: Chapter8Progress | null;
+    /** Per-step completion map for detail panel */
+    stepCompletion: Record<FlowStepId, boolean>;
+    /** Whether letter-intro pre-gate is done */
+    letterIntroDone: boolean;
+    /** Last activity timestamp (updatedAt from flowData) */
+    lastActivity: Date | null;
 }
 
 export type SignalType = 'check' | 'top' | 'extra' | 'slow' | null;
@@ -51,27 +58,41 @@ export interface StudentDetail {
 
 /* ── step logic ──────────────────────────────────────── */
 
-const STEP_CHAIN: { key: keyof Chapter8Progress; label: string }[] = [
-    { key: 'letterIntroCompleted', label: 'Letter Intro' },
-    { key: 'intro8_1Passed', label: '§8.1 Intro' },
-    { key: 'section8_1Completed', label: '§8.1 Oefenen' },
-    { key: 'section8_2Completed', label: '§8.2 De balans' },
-    { key: 'fruitChallengeCompleted', label: '🍎 Fruit Challenge' },
-    { key: 'section8_2BlitzPassed', label: '§8.2 Blitz' },
-    { key: 'balanceIntro8_3Passed', label: '§8.3 Balansen Intro' },
-    { key: 'uitleg8_3Passed', label: '§8.3 Uitleg' },
-    { key: 'section8_3Completed', label: '§8.3 Termtris' },
-    { key: 'balanceGameCompleted', label: 'Balans Minigame' },
-];
+/** Total number of steps in the flow (excluding letterIntro pre-gate) */
+export const TOTAL_STEPS = CHAPTER_8_FLOW.length;
 
+/**
+ * The canonical step chain — derived directly from CHAPTER_8_FLOW.
+ * Each entry maps to a FlowStepId and its human-readable label.
+ */
+export const STEP_CHAIN: { id: FlowStepId; label: string; icon: string }[] =
+    CHAPTER_8_FLOW.map((s) => ({ id: s.id, label: s.title, icon: s.icon }));
+
+/**
+ * Resolve the current step index + label for a student.
+ * Returns { index: 0..TOTAL_STEPS, label }.
+ * index === TOTAL_STEPS means "alles af".
+ */
 export function resolveStep(flow: Chapter8Progress | null): { index: number; label: string } {
-    if (!flow) return { index: 0, label: 'Letter Intro' };
+    if (!flow) return { index: 0, label: STEP_CHAIN[0].label };
+
     for (let i = 0; i < STEP_CHAIN.length; i++) {
-        if (!(flow as unknown as Record<string, unknown>)[STEP_CHAIN[i].key]) {
+        if (!isStepCompleted(STEP_CHAIN[i].id, flow)) {
             return { index: i, label: STEP_CHAIN[i].label };
         }
     }
-    return { index: STEP_CHAIN.length, label: '✅ Alles af' };
+    return { index: TOTAL_STEPS, label: '✅ Alles af' };
+}
+
+/**
+ * Build per-step completion map for a student.
+ */
+function buildStepCompletion(flow: Chapter8Progress | null): Record<FlowStepId, boolean> {
+    const result = {} as Record<FlowStepId, boolean>;
+    for (const step of STEP_CHAIN) {
+        result[step.id] = flow ? isStepCompleted(step.id, flow) : false;
+    }
+    return result;
 }
 
 /* ── signal logic ────────────────────────────────────── */
@@ -104,7 +125,7 @@ export function computeSignal(
     if (student.stepIndex <= classAvgStepIndex - 2) return 'check';
 
     // Priority 2: 🚀 Top
-    if (accuracy !== null && accuracy >= 90 && student.stepIndex >= 4) return 'top';
+    if (accuracy !== null && accuracy >= 90 && student.stepIndex >= Math.floor(TOTAL_STEPS * 0.4)) return 'top';
 
     // Priority 3: 🔁 Oefent extra
     if (gameAttempts >= 3 && student.stepIndex > 0) return 'extra';
@@ -211,9 +232,6 @@ export async function fetchClassDashboard(classId: string): Promise<StudentRow[]
 
     // ── Step 3: Infer progress from leaderboard if flow data is missing ──
 
-    // Collect per-student leaderboard presence
-    // e.g. if student has termen_quest_8_1 or speedtest_8_1 score → intro passed
-    // if balance_challenge score → balance game completed, etc.
     const boardIds = Object.values(BOARD_IDS);
     const studentBoardPresence = new Map<string, Set<string>>();
 
@@ -240,7 +258,7 @@ export async function fetchClassDashboard(classId: string): Promise<StudentRow[]
             const boards = studentBoardPresence.get(s.uid);
             if (boards && boards.size > 0) {
                 flowData = {
-                    letterIntroCompleted: true, // Must have passed to reach any game
+                    letterIntroCompleted: true,
                     letterIntroCompletedAt: null,
                     intro8_1Passed: boards.has('termen_quest_8_1') || boards.has('speedtest_8_1'),
                     intro8_1PassedAt: null,
@@ -250,23 +268,42 @@ export async function fetchClassDashboard(classId: string): Promise<StudentRow[]
                     balanceGameCompletedAt: null,
                     section8_2Completed: boards.has('balansblitz_8_2'),
                     section8_2CompletedAt: null,
+                    fruitChallengeCompleted: false,
+                    fruitChallengeCompletedAt: null,
                     section8_2BlitzPassed: boards.has('balansblitz_8_2'),
                     section8_2BlitzPassedAt: null,
+                    balanceIntro8_3Passed: boards.has('termtris_8_3'),
+                    balanceIntro8_3PassedAt: null,
                     uitleg8_3Passed: boards.has('termtris_8_3'),
                     uitleg8_3PassedAt: null,
                     section8_3Completed: boards.has('termtris_8_3'),
                     section8_3CompletedAt: null,
+                    algebraArenaCompleted: boards.has('algebra_arena'),
+                    algebraArenaCompletedAt: null,
                     updatedAt: null,
                 } as Chapter8Progress;
             }
         }
 
         const { index, label } = resolveStep(flowData);
+        const stepCompletion = buildStepCompletion(flowData);
+
+        // Extract last activity time
+        let lastActivity: Date | null = null;
+        if (flowData?.updatedAt) {
+            const ts = flowData.updatedAt as { toDate?: () => Date; seconds?: number };
+            if (ts.toDate) lastActivity = ts.toDate();
+            else if (ts.seconds) lastActivity = new Date(ts.seconds * 1000);
+        }
+
         return {
             ...s,
             stepIndex: index,
             stepLabel: label,
             flowData,
+            stepCompletion,
+            letterIntroDone: !!flowData?.letterIntroCompleted,
+            lastActivity,
         };
     });
 }
@@ -295,6 +332,7 @@ export async function fetchStudentDetail(uid: string): Promise<StudentDetail> {
         balance_challenge: 'Balans Minigame',
         balansblitz_8_2: 'Balans Blitz',
         termtris_8_3: 'Termtris',
+        algebra_arena: 'Algebra Arena',
     };
 
     const gamePromises = boardIds.map(async (boardId) => {

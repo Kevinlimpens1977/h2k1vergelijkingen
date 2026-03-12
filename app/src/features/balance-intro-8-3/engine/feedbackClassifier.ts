@@ -73,6 +73,7 @@ const WRONG_FEEDBACK: Record<ValidationReason, { type: FeedbackType; message: st
     chained_correct: { type: 'correct', message: '' },
     button_match: { type: 'correct', message: '' },
     direct_solution: { type: 'correct', message: '' },
+    operation_description: { type: 'correct', message: '' },
     wrong_value: {
         type: 'wrong_value',
         message: 'Dat klopt niet. Probeer het opnieuw!',
