@@ -22,7 +22,7 @@ import EquationColumn from './components/EquationColumn';
 import type { EquationStep } from './components/EquationColumn';
 
 import { eqToString, applyOperation } from './engine/equationEngine';
-import type { Equation } from './engine/equationEngine';
+import type { Equation, OperationType } from './engine/equationEngine';
 import { computeTiltAngle } from './engine/balancePhysics';
 import { generatePractice } from './engine/practiceGenerator';
 import type { PracticeEquation } from './engine/practiceGenerator';
@@ -34,6 +34,7 @@ import type { ClassifiedFeedback } from './engine/feedbackClassifier';
 
 import './BalanceIntro.css';
 import { shuffleOperations } from '../../utils/shuffleMC';
+import OperationPicker from './components/OperationPicker';
 
 type Phase = 'welcome' | 'example1' | 'example2' | 'example3' | 'practice' | 'done';
 
@@ -283,53 +284,20 @@ export default function BalanceIntroPage() {
     // PRACTICE MODE HANDLERS
     // ═══════════════════════════════════════════════════
 
-    const handlePracticeSubmit = useCallback(() => {
-        if (!practiceState || !typedInput.trim()) return;
+    const handlePracticeSubmit = useCallback((opType: OperationType, opValue: number) => {
+        if (!practiceState) return;
         const { problem, currentStepIdx, currentEquation: curEq } = practiceState;
         const step = problem.steps[currentStepIdx];
 
-        // Build validation context — includes expectedOperation for free-text matching
-        const result = validateAnswer(typedInput, {
-            mode: 'open-practice',
-            currentEquation: curEq,
-            expectedResult: step.result,
-            expectedAnswer: eqToString(step.result),
-            solutionValue: problem.solution,
-            variable: problem.equation.variable,
-            expectedOperation: { type: step.operation.type, value: step.operation.value },
-        });
+        // Direct comparison: does the chosen operation match the expected step?
+        const isCorrect = opType === step.operation.type && opValue === step.operation.value;
 
-        const fb = classifyFeedback(result, eqToString(step.result));
-
-        if (result.isCorrect) {
-            setFeedback(fb);
-
-            // If student jumped directly to solution
-            if (result.reason === 'direct_solution') {
-                // Show full solution in equation column
-                const finalEq: Equation = {
-                    left: { coeff: 1, constant: 0 },
-                    right: { coeff: 0, constant: problem.solution },
-                    variable: problem.equation.variable,
-                };
-                setEquation(finalEq);
-                setEqSteps(prev => [...prev, { equation: `${problem.equation.variable} = ${problem.solution}` }]);
-                setTiltAngle(0);
-
-                // Track and check completion
-                const newConsecutive = practiceConsecutive + 1;
-                setPracticeConsecutive(newConsecutive);
-                setPracticeTotal(t => t + 1);
-
-                if (newConsecutive >= PRACTICE_TARGET) {
-                    setTimeout(() => finishModule(), 1200);
-                }
-                return;
-            }
+        if (isCorrect) {
+            setFeedback({ type: 'correct', message: 'Goed! 🎉', showExpected: false });
 
             // Normal step progression
-            const opSymbol = step.operation.type === 'add' ? '+' : step.operation.type === 'subtract' ? '−' : step.operation.type === 'multiply' ? '×' : '÷';
-            const opStr = `${opSymbol}${step.operation.value}        ${opSymbol}${step.operation.value}`;
+            const opSymbol = opType === 'add' ? '+' : opType === 'subtract' ? '−' : opType === 'multiply' ? '×' : '÷';
+            const opStr = `${opSymbol}${opValue}        ${opSymbol}${opValue}`;
 
             setEqSteps(prev => [
                 ...prev.map((s, i) => i === prev.length - 1 ? { ...s, operation: opStr } : s),
@@ -349,7 +317,6 @@ export default function BalanceIntroPage() {
                 setTypedInput('');
                 setStepWrongCount(0);
                 setHintRevealed(false);
-                setTimeout(() => inputRef.current?.focus(), 100);
             } else {
                 // Problem complete
                 const newConsecutive = practiceConsecutive + 1;
@@ -366,29 +333,32 @@ export default function BalanceIntroPage() {
 
             if (newWrongCount >= MAX_WRONG_BEFORE_HINT) {
                 // Reveal the answer as hint — student can skip this step
-                const opSymbol = step.operation.type === 'add' ? '+' : step.operation.type === 'subtract' ? '−' : step.operation.type === 'multiply' ? '×' : '÷';
-                const hintMsg = `Het antwoord is: ${opSymbol}${step.operation.value} aan beide kanten → ${eqToString(step.result)}`;
+                const correctSymbol = step.operation.type === 'add' ? '+' : step.operation.type === 'subtract' ? '−' : step.operation.type === 'multiply' ? '×' : '÷';
+                const hintMsg = `Het antwoord is: ${correctSymbol}${step.operation.value} aan beide kanten → ${eqToString(step.result)}`;
                 setFeedback({ type: 'wrong_value', message: hintMsg, showExpected: false });
                 setHintRevealed(true);
             } else {
-                setFeedback(fb);
-                setTiltAngle(computeTiltAngle(curEq, problem.solution) || 8);
+                // Show wrong feedback
+                const wrongSymbol = opType === 'add' ? '+' : opType === 'subtract' ? '−' : opType === 'multiply' ? '×' : '÷';
+                const wrongEq = applyOperation(curEq, { type: opType, value: opValue, label: '' });
+                setFeedback({ type: 'wrong_value', message: `${wrongSymbol}${opValue}? Dat klopt niet. De balans slaat door!`, showExpected: false });
+
+                // Show the tilt for wrong answer
+                setTiltAngle(computeTiltAngle(wrongEq, problem.solution) || 8);
                 setWobble(true);
                 setTimeout(() => setWobble(false), 800);
 
-                // Reset after delay
+                // Reset feedback after delay
                 setTimeout(() => {
                     setFeedback(null);
                     setTiltAngle(0);
-                    setTypedInput('');
-                    inputRef.current?.focus();
                 }, 2000);
             }
 
             // Reset consecutive
             setPracticeConsecutive(0);
         }
-    }, [practiceState, typedInput, practiceConsecutive, stepWrongCount, finishModule]);
+    }, [practiceState, practiceConsecutive, stepWrongCount, finishModule]);
 
     const handlePracticeNext = useCallback(() => {
         loadNewPractice();
@@ -439,11 +409,9 @@ export default function BalanceIntroPage() {
             e.preventDefault();
             if (exampleSubStep === 'type-result') {
                 handleTypedResultCheck();
-            } else if (phase === 'practice' && !feedback) {
-                handlePracticeSubmit();
             }
         }
-    }, [exampleSubStep, phase, feedback, handleTypedResultCheck, handlePracticeSubmit]);
+    }, [exampleSubStep, handleTypedResultCheck]);
 
     // Load practice on transition
     useEffect(() => {
@@ -770,55 +738,19 @@ export default function BalanceIntroPage() {
 
                     <EquationColumn steps={eqSteps} currentStepIndex={eqSteps.length - 1} />
 
-                    {/* Input */}
+                    {/* Operation Picker */}
                     {!isComplete && !hintRevealed && step && (
-                        <div className="bi-input-group">
-                            <label className="bi-input-label">
-                                {practiceState?.currentStepIdx === 0
-                                    ? 'Wat is stap 1? (bijv. −4 of "vier eraf")'
+                        <OperationPicker
+                            onSubmit={handlePracticeSubmit}
+                            disabled={!!feedback}
+                            stepLabel={
+                                practiceState?.currentStepIdx === 0
+                                    ? 'Wat is stap 1?'
                                     : `Wat is stap ${(practiceState?.currentStepIdx ?? 0) + 1}?`
-                                }
-                            </label>
-                            <input
-                                ref={inputRef}
-                                className="bi-input"
-                                value={typedInput}
-                                onChange={e => setTypedInput(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Typ je antwoord… bijv. −4 of x = 3"
-                                autoComplete="off"
-                                autoFocus
-                            />
-                            <div className="bi-actions" style={{ marginTop: '0.5rem' }}>
-                                <button className="bi-btn bi-btn--primary" onClick={handlePracticeSubmit} disabled={!typedInput.trim()}>
-                                    Controleer
-                                </button>
-                                {practiceTotal < 3 && (
-                                    <button className="bi-btn bi-btn--hint" onClick={() => setShowHint(!showHint)}>
-                                        💡 Hint
-                                    </button>
-                                )}
-                            </div>
-                            {/* Wrong attempt counter */}
-                            {stepWrongCount > 0 && stepWrongCount < MAX_WRONG_BEFORE_HINT && (
-                                <div style={{
-                                    marginTop: '0.35rem',
-                                    fontSize: '0.72rem',
-                                    color: '#ff9f43',
-                                    fontWeight: 600,
-                                }}>
-                                    Poging {stepWrongCount}/{MAX_WRONG_BEFORE_HINT} — {MAX_WRONG_BEFORE_HINT - stepWrongCount} kans{MAX_WRONG_BEFORE_HINT - stepWrongCount !== 1 ? 'en' : ''} over
-                                </div>
-                            )}
-                            {showHint && step && (
-                                <div className="bi-feedback bi-feedback--hint" style={{ marginTop: '0.5rem' }}>
-                                    Tip: kijk welk getal je moet weghalen om de x alleen te krijgen.
-                                    {step.operation.type === 'divide' && ` Deel beide kanten door ${step.operation.value}.`}
-                                    {step.operation.type === 'subtract' && ` Trek ${step.operation.value} af aan beide kanten.`}
-                                    {step.operation.type === 'add' && ` Tel ${step.operation.value} op aan beide kanten.`}
-                                </div>
-                            )}
-                        </div>
+                            }
+                            wrongCount={stepWrongCount}
+                            maxWrong={MAX_WRONG_BEFORE_HINT}
+                        />
                     )}
 
                     {/* Feedback */}
